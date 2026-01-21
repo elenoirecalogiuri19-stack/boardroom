@@ -17,6 +17,7 @@ import { EventiFormGroup, EventiFormService } from './eventi-form.service';
 @Component({
   selector: 'jhi-eventi-update',
   templateUrl: './eventi-update.component.html',
+  standalone: true,
   imports: [SharedModule, FormsModule, ReactiveFormsModule],
 })
 export class EventiUpdateComponent implements OnInit {
@@ -31,7 +32,6 @@ export class EventiUpdateComponent implements OnInit {
   protected prenotazioniService = inject(PrenotazioniService);
   protected activatedRoute = inject(ActivatedRoute);
 
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   editForm: EventiFormGroup = this.eventiFormService.createEventiFormGroup();
 
   comparePrenotazioni = (o1: IPrenotazioni | null, o2: IPrenotazioni | null): boolean =>
@@ -45,6 +45,17 @@ export class EventiUpdateComponent implements OnInit {
       }
 
       this.loadRelationshipsOptions();
+    });
+
+    // US4: Logica per gestire il prezzo in base al tipo di evento
+    this.editForm.get('tipo')?.valueChanges.subscribe(tipo => {
+      const prezzoControl = this.editForm.get('prezzo');
+      if (tipo === 'PRIVATO') {
+        prezzoControl?.setValue(0);
+        prezzoControl?.disable();
+      } else {
+        prezzoControl?.enable();
+      }
     });
   }
 

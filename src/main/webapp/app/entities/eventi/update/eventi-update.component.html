@@ -44,10 +44,12 @@
           }
         </div>
 
-        <div class="mb-3">
-          <label class="form-label" for="field_prezzo">Prezzo</label>
-          <input type="number" class="form-control" name="prezzo" id="field_prezzo" data-cy="prezzo" formControlName="prezzo" />
-        </div>
+        @if (editForm.get('tipo')?.value !== 'PRIVATO') {
+          <div class="mb-3">
+            <label class="form-label" for="field_prezzo">Prezzo</label>
+            <input type="number" class="form-control" name="prezzo" id="field_prezzo" data-cy="prezzo" formControlName="prezzo" />
+          </div>
+        }
 
         <div class="mb-3">
           <label class="form-label" for="field_prenotazione">Prenotazione</label>
