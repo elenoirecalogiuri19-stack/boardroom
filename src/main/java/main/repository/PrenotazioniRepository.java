@@ -1,5 +1,7 @@
 package main.repository;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -10,11 +12,15 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-/**
- * Spring Data JPA repository for the Prenotazioni entity.
- */
 @Repository
 public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID> {
+    @Query(
+        "select p from Prenotazioni p where p.data = :data " +
+        "and p.stato.codice != 'CANCELLED' " +
+        "and (p.oraInizio < :fine and p.oraFine > :inizio)"
+    )
+    List<Prenotazioni> findOccupiedRooms(@Param("data") LocalDate data, @Param("inizio") LocalTime inizio, @Param("fine") LocalTime fine);
+
     default Optional<Prenotazioni> findOneWithEagerRelationships(UUID id) {
         return this.findOneWithToOneRelationships(id);
     }
