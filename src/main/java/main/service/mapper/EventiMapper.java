@@ -1,5 +1,6 @@
 package main.service.mapper;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import main.domain.Eventi;
@@ -15,6 +16,8 @@ import org.mapstruct.*;
 public interface EventiMapper extends EntityMapper<EventiDTO, Eventi> {
     @Mapping(target = "prenotazione", source = "prenotazione", qualifiedByName = "prenotazioniId")
     EventiDTO toDto(Eventi s);
+
+    List<EventiDTO> toDto(List<Eventi> eventiList);
 
     @Named("prenotazioniId")
     @BeanMapping(ignoreByDefault = true)

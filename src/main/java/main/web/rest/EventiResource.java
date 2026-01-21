@@ -177,4 +177,10 @@ public class EventiResource {
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
             .build();
     }
+
+    @GetMapping("/pubblici")
+    public ResponseEntity<List<EventiDTO>> getPublicEventi() {
+        LOG.debug("REST request to get public Eventi");
+        return ResponseEntity.ok(eventiService.findPublicEventi());
+    }
 }

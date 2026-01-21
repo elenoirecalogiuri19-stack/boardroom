@@ -1,7 +1,10 @@
 package main.repository;
 
+import java.util.List;
 import java.util.UUID;
 import main.domain.Eventi;
+import main.domain.enumeration.TipoEvento;
+import main.service.dto.EventiDTO;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
@@ -10,4 +13,6 @@ import org.springframework.stereotype.Repository;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface EventiRepository extends JpaRepository<Eventi, UUID> {}
+public interface EventiRepository extends JpaRepository<Eventi, UUID> {
+    List<Eventi> findByTipo(TipoEvento tipo);
+}

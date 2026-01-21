@@ -1,8 +1,11 @@
 package main.service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import main.domain.Eventi;
+import main.domain.enumeration.TipoEvento;
 import main.repository.EventiRepository;
 import main.service.dto.EventiDTO;
 import main.service.mapper.EventiMapper;
@@ -109,5 +112,19 @@ public class EventiService {
     public void delete(UUID id) {
         LOG.debug("Request to delete Eventi : {}", id);
         eventiRepository.deleteById(id);
+    }
+
+    /**
+     *
+     * Get all evento publico
+     *
+     * @return lista eventi publici
+     *
+     */
+    @Transactional(readOnly = true)
+    public List<EventiDTO> findPublicEventi() {
+        LOG.debug("Request to get all Eventi");
+        List<Eventi> eventi = eventiRepository.findByTipo(TipoEvento.PUBBLICO);
+        return eventiMapper.toDto(eventi);
     }
 }
