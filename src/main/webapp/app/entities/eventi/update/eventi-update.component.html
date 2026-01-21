@@ -1,0 +1,87 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <form name="editForm" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+      <h2 id="jhi-eventi-heading" data-cy="EventiCreateUpdateHeading">Genera o modifica un Eventi</h2>
+
+      <div>
+        <jhi-alert-error />
+
+        @if (editForm.controls.id.value !== null) {
+          <div class="mb-3">
+            <label class="form-label" for="field_id">Id</label>
+            <input type="text" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" [readonly]="true" />
+          </div>
+        }
+
+        @let titoloRef = editForm.get('titolo')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_titolo">Titolo</label>
+          <input type="text" class="form-control" name="titolo" id="field_titolo" data-cy="titolo" formControlName="titolo" />
+          @if (titoloRef.invalid && (titoloRef.dirty || titoloRef.touched)) {
+            <div>
+              @if (editForm.get('titolo')?.errors?.required) {
+                <small class="form-text text-danger">Questo campo è obbligatorio.</small>
+              }
+            </div>
+          }
+        </div>
+
+        @let tipoRef = editForm.get('tipo')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_tipo">Tipo</label>
+          <select class="form-control" name="tipo" formControlName="tipo" id="field_tipo" data-cy="tipo">
+            <option [ngValue]="null"></option>
+            @for (tipoEvento of tipoEventoValues; track $index) {
+              <option [value]="tipoEvento">{{ { null: '', PRIVATO: 'PRIVATO', PUBBLICO: 'PUBBLICO' }[tipoEvento] }}</option>
+            }
+          </select>
+          @if (tipoRef.invalid && (tipoRef.dirty || tipoRef.touched)) {
+            <div>
+              @if (editForm.get('tipo')?.errors?.required) {
+                <small class="form-text text-danger">Questo campo è obbligatorio.</small>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_prezzo">Prezzo</label>
+          <input type="number" class="form-control" name="prezzo" id="field_prezzo" data-cy="prezzo" formControlName="prezzo" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_prenotazione">Prenotazione</label>
+          <select
+            class="form-control"
+            id="field_prenotazione"
+            data-cy="prenotazione"
+            name="prenotazione"
+            formControlName="prenotazione"
+            [compareWith]="comparePrenotazioni"
+          >
+            <option [ngValue]="null"></option>
+            @for (prenotazioniOption of prenotazionisSharedCollection; track $index) {
+              <option [ngValue]="prenotazioniOption">{{ prenotazioniOption.id }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+          <fa-icon icon="ban"></fa-icon>&nbsp;<span>Annulla</span>
+        </button>
+
+        <button
+          type="submit"
+          id="save-entity"
+          data-cy="entityCreateSaveButton"
+          [disabled]="editForm.invalid || isSaving"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="save"></fa-icon>&nbsp;<span>Salva</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

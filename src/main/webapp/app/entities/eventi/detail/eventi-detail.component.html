@@ -1,0 +1,50 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (eventi(); as eventiRef) {
+      <div>
+        <h2 data-cy="eventiDetailsHeading"><span>Eventi</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span>Id</span></dt>
+          <dd>
+            <span>{{ eventiRef.id }}</span>
+          </dd>
+          <dt><span>Titolo</span></dt>
+          <dd>
+            <span>{{ eventiRef.titolo }}</span>
+          </dd>
+          <dt><span>Tipo</span></dt>
+          <dd>
+            <span>{{ { null: '', PRIVATO: 'PRIVATO', PUBBLICO: 'PUBBLICO' }[eventiRef.tipo ?? 'null'] }}</span>
+          </dd>
+          <dt><span>Prezzo</span></dt>
+          <dd>
+            <span>{{ eventiRef.prezzo }}</span>
+          </dd>
+          <dt><span>Prenotazione</span></dt>
+          <dd>
+            @if (eventi()!.prenotazione) {
+              <div>
+                <a [routerLink]="['/prenotazioni', eventi()!.prenotazione?.id, 'view']">{{ eventiRef.prenotazione?.id }}</a>
+              </div>
+            }
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span>Indietro</span>
+        </button>
+
+        <button type="button" [routerLink]="['/eventi', eventiRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span>Modifica</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>
