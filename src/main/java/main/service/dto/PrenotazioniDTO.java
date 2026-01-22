@@ -26,9 +26,19 @@ public class PrenotazioniDTO implements Serializable {
 
     private StatiPrenotazioneDTO stato;
 
-    private UtentiDTO utente;
+    private UUID utenteId;
 
-    private SaleDTO sala;
+    private UUID salaId;
+
+    private String salaNome;
+
+    public String getSalaNome() {
+        return salaNome;
+    }
+
+    public void setSalaNome(String salaNome) {
+        this.salaNome = salaNome;
+    }
 
     public UUID getId() {
         return id;
@@ -70,20 +80,20 @@ public class PrenotazioniDTO implements Serializable {
         this.stato = stato;
     }
 
-    public UtentiDTO getUtente() {
-        return utente;
+    public UUID getUtenteId() {
+        return utenteId;
     }
 
-    public void setUtente(UtentiDTO utente) {
-        this.utente = utente;
+    public void setUtenteId(UUID utenteId) {
+        this.utenteId = utenteId;
     }
 
-    public SaleDTO getSala() {
-        return sala;
+    public UUID getSalaId() {
+        return salaId;
     }
 
-    public void setSala(SaleDTO sala) {
-        this.sala = sala;
+    public void setSalaId(UUID salaId) {
+        this.salaId = salaId;
     }
 
     @Override
@@ -116,8 +126,8 @@ public class PrenotazioniDTO implements Serializable {
             ", oraInizio='" + getOraInizio() + "'" +
             ", oraFine='" + getOraFine() + "'" +
             ", stato=" + getStato() +
-            ", utente=" + getUtente() +
-            ", sala=" + getSala() +
+            ", utente=" + getUtenteId() +
+            ", sala=" + getSalaId() +
             "}";
     }
 }

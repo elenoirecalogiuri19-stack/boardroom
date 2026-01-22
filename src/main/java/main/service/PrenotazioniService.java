@@ -5,10 +5,14 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 import main.domain.Prenotazioni;
+import main.domain.Sale;
 import main.domain.StatiPrenotazione;
+import main.domain.Utenti;
 import main.domain.enumeration.StatoCodice;
 import main.repository.PrenotazioniRepository;
+import main.repository.SaleRepository;
 import main.repository.StatiPrenotazioneRepository;
+import main.repository.UtentiRepository;
 import main.service.dto.PrenotazioniDTO;
 import main.service.mapper.PrenotazioniMapper;
 import org.slf4j.Logger;
@@ -31,15 +35,23 @@ public class PrenotazioniService {
 
     private final StatiPrenotazioneRepository statiPrenotazioneRepository;
 
+    private final UtentiRepository utentiRepository;
+
+    private final SaleRepository saleRepository;
+
     private final PrenotazioniMapper prenotazioniMapper;
 
     public PrenotazioniService(
         PrenotazioniRepository prenotazioniRepository,
         StatiPrenotazioneRepository statiPrenotazioneRepository,
+        UtentiRepository utentiRepository,
+        SaleRepository saleRepository,
         PrenotazioniMapper prenotazioniMapper
     ) {
         this.prenotazioniRepository = prenotazioniRepository;
         this.statiPrenotazioneRepository = statiPrenotazioneRepository;
+        this.utentiRepository = utentiRepository;
+        this.saleRepository = saleRepository;
         this.prenotazioniMapper = prenotazioniMapper;
     }
 
@@ -143,6 +155,15 @@ public class PrenotazioniService {
         LOG.debug("Request to create Prenotazioni : {}", prenotazioniDTO);
 
         Prenotazioni prenotazioni = prenotazioniMapper.toEntity(prenotazioniDTO);
+
+        Utenti ut = utentiRepository
+            .findById(prenotazioniDTO.getUtenteId())
+            .orElseThrow(() -> new EntityNotFoundException("Utente non trovato"));
+
+        Sale sa = saleRepository.findById(prenotazioniDTO.getSalaId()).orElseThrow(() -> new EntityNotFoundException("Sala non trovato"));
+
+        prenotazioni.setUtente(ut);
+        prenotazioni.setSala(sa);
 
         validaPrenotazione(prenotazioni);
 
