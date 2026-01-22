@@ -1,16 +1,23 @@
 package main.repository;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import main.domain.Sale;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SaleRepository extends JpaRepository<Sale, UUID> {
-    // Questo serve per la US2 (Swagger /api/sales)
-    @Query("select sale from Sale sale where sale.id not in (select p.sala.id from Prenotazioni p)")
-    List<Sale> findAllFreeSales();
-    // Questo (già incluso in JpaRepository) serve per i menu a tendina
-    // List<Sale> findAll();
+    @Query(
+        "SELECT s FROM Sale s WHERE s.id NOT IN (" +
+        "SELECT p.sala.id FROM Prenotazioni p " +
+        "WHERE p.stato IS NOT NULL " +
+        "AND p.data = :data " +
+        "AND p.oraInizio < :fine " +
+        "AND p.oraFine > :inizio)"
+    )
+    List<Sale> findFreeSales(@Param("data") LocalDate data, @Param("inizio") LocalTime inizio, @Param("fine") LocalTime fine);
 }
