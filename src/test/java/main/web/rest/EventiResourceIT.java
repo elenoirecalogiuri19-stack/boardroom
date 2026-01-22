@@ -1,21 +1,26 @@
 package main.web.rest;
 
 import static main.domain.EventiAsserts.*;
+import static main.domain.enumeration.TipoEvento.PUBBLICO;
 import static main.web.rest.TestUtil.createUpdateProxyForBean;
 import static main.web.rest.TestUtil.sameNumber;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 import main.IntegrationTest;
-import main.domain.Eventi;
+import main.domain.*;
+import main.domain.enumeration.StatoCodice;
 import main.domain.enumeration.TipoEvento;
-import main.repository.EventiRepository;
+import main.repository.*;
 import main.service.dto.EventiDTO;
 import main.service.mapper.EventiMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -40,7 +45,7 @@ class EventiResourceIT {
     private static final String UPDATED_TITOLO = "BBBBBBBBBB";
 
     private static final TipoEvento DEFAULT_TIPO = TipoEvento.PRIVATO;
-    private static final TipoEvento UPDATED_TIPO = TipoEvento.PUBBLICO;
+    private static final TipoEvento UPDATED_TIPO = PUBBLICO;
 
     private static final BigDecimal DEFAULT_PREZZO = new BigDecimal(1);
     private static final BigDecimal UPDATED_PREZZO = new BigDecimal(2);
@@ -66,6 +71,18 @@ class EventiResourceIT {
     private Eventi eventi;
 
     private Eventi insertedEventi;
+
+    @Autowired
+    private PrenotazioniRepository prenotazioniRepository;
+
+    @Autowired
+    private SaleRepository saleRepository;
+
+    @Autowired
+    private UtentiRepository utentiRepository;
+
+    @Autowired
+    private StatiPrenotazioneRepository statiPrenotazioneRepository;
 
     /**
      * Create an entity for this test.
@@ -434,6 +451,103 @@ class EventiResourceIT {
 
         // Validate the database contains one less item
         assertDecrementedRepositoryCount(databaseSizeBeforeDelete);
+    }
+
+    @Test
+    @Transactional
+    void testCreaEventoPubblico() throws Exception {
+        initStatiPrenotazione();
+
+        Sale sala = new Sale();
+        sala.setNome("Sala Test");
+        sala.setCapienza(10);
+        sala = saleRepository.saveAndFlush(sala);
+
+        Utenti utente = new Utenti();
+        utente.setNome("Mario");
+        utente.setNumeroDiTelefono("3331234567");
+        utente = utentiRepository.saveAndFlush(utente);
+
+        Prenotazioni p = new Prenotazioni();
+        p.setData(LocalDate.now().plusDays(1));
+        p.setOraInizio(LocalTime.of(10, 0));
+        p.setOraFine(LocalTime.of(11, 0));
+        p.setSala(sala);
+        p.setUtente(utente);
+        p.setStato(statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED).get());
+        p = prenotazioniRepository.saveAndFlush(p);
+
+        EventiDTO dto = new EventiDTO();
+        dto.setPrenotazioneId(p.getId());
+        dto.setTitolo("Concerto");
+        dto.setTipo(PUBBLICO);
+        dto.setPrezzo(BigDecimal.valueOf(20));
+
+        restEventiMockMvc
+            .perform(post("/api/eventis/crea-pubblico").contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(dto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.tipo").value("PUBBLICO"))
+            .andExpect(jsonPath("$.prezzo").value(20));
+    }
+
+    @Test
+    @Transactional
+    void testEventoPubblicoPrenotazioneNonConfermata() throws Exception {
+        initStatiPrenotazione();
+
+        Prenotazioni p = new Prenotazioni();
+        p.setData(LocalDate.now().plusDays(1));
+        p.setOraInizio(LocalTime.of(10, 0));
+        p.setOraFine(LocalTime.of(11, 0));
+        p.setStato(statiPrenotazioneRepository.findByCodice(StatoCodice.WAITING).get());
+        p = prenotazioniRepository.saveAndFlush(p);
+
+        EventiDTO dto = new EventiDTO();
+        dto.setPrenotazioneId(p.getId());
+        dto.setTitolo("Evento");
+        dto.setTipo(PUBBLICO);
+        dto.setPrezzo(BigDecimal.valueOf(10));
+
+        restEventiMockMvc
+            .perform(post("/api/eventis/crea-pubblico").contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(dto)))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Transactional
+    void testGetEventiPubblici() throws Exception {
+        Eventi e1 = new Eventi();
+        e1.setTitolo("Pubblico");
+        e1.setTipo(PUBBLICO);
+        eventiRepository.saveAndFlush(e1);
+
+        Eventi e2 = new Eventi();
+        e2.setTitolo("Privato");
+        e2.setTipo(TipoEvento.PRIVATO);
+        eventiRepository.saveAndFlush(e2);
+
+        restEventiMockMvc
+            .perform(get("/api/eventis/pubblici"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.[*].titolo").value(hasItem("Pubblico")))
+            .andExpect(jsonPath("$.[*].titolo").value(not(hasItem("Privato"))));
+    }
+
+    private void initStatiPrenotazione() {
+        if (statiPrenotazioneRepository.count() == 0) {
+            statiPrenotazioneRepository.saveAndFlush(
+                new StatiPrenotazione().codice(StatoCodice.WAITING).descrizione("In attesa").ordineAzione(1)
+            );
+            statiPrenotazioneRepository.saveAndFlush(
+                new StatiPrenotazione().codice(StatoCodice.CONFIRMED).descrizione("Confermata").ordineAzione(2)
+            );
+            statiPrenotazioneRepository.saveAndFlush(
+                new StatiPrenotazione().codice(StatoCodice.REJECTED).descrizione("Rifiutata").ordineAzione(3)
+            );
+            statiPrenotazioneRepository.saveAndFlush(
+                new StatiPrenotazione().codice(StatoCodice.CANCELLED).descrizione("Annullata").ordineAzione(4)
+            );
+        }
     }
 
     protected long getRepositoryCount() {
