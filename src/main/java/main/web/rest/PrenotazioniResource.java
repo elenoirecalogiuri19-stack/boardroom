@@ -187,4 +187,26 @@ public class PrenotazioniResource {
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
             .build();
     }
+
+    /**
+     *
+     * Endpoint per la prenotazione con validazione
+     *
+     */
+    @PostMapping("/crea")
+    public ResponseEntity<PrenotazioniDTO> creaPrenotazione(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO) {
+        PrenotazioniDTO dto = prenotazioniService.creaPrenotazione(prenotazioniDTO);
+        return ResponseEntity.ok(dto);
+    }
+
+    /**
+     *
+     * Endpoint per  la conferma della prenotazione
+     *
+     */
+    @PostMapping("/{id}/conferma")
+    public ResponseEntity<PrenotazioniDTO> confermaPrenotazioni(@PathVariable UUID id) {
+        PrenotazioniDTO dto = prenotazioniService.confermaPrenotazione(id);
+        return ResponseEntity.ok(dto);
+    }
 }

@@ -1,9 +1,12 @@
 package main.repository;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import main.domain.Prenotazioni;
+import main.domain.Sale;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
@@ -42,4 +45,19 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         "select prenotazioni from Prenotazioni prenotazioni left join fetch prenotazioni.stato left join fetch prenotazioni.utente left join fetch prenotazioni.sala where prenotazioni.id =:id"
     )
     Optional<Prenotazioni> findOneWithToOneRelationships(@Param("id") UUID id);
+
+    // inplementazione metodo per la disponibilita sale
+
+    @Query(
+        "SELECT COUNT(p) > 0 " +
+        "FROM Prenotazioni p WHERE p.sala = :sala AND p.data = :data " +
+        "AND ((p.oraInizio < :oraFine) AND (p.oraFine > :oraInizio)) " +
+        "AND p.stato.codice = 'CONFIRMED'"
+    )
+    boolean existsOverlappingConfirmedPrenotazione(
+        @Param("sala") Sale sala,
+        @Param("data") LocalDate data,
+        @Param("oraInizio") LocalTime oraInizio,
+        @Param("oraFine") LocalTime oraFine
+    );
 }
