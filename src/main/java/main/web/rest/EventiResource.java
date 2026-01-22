@@ -183,4 +183,12 @@ public class EventiResource {
         LOG.debug("REST request to get public Eventi");
         return ResponseEntity.ok(eventiService.findPublicEventi());
     }
+
+    @PostMapping("/crea-pubblico")
+    public ResponseEntity<EventiDTO> creaEventoPubblico(@Valid @RequestBody EventiDTO dto) {
+        LOG.debug("REST request to crea EventoPubblico : {}", dto);
+
+        EventiDTO evento = eventiService.creaEventoPubblico(dto);
+        return ResponseEntity.ok(evento);
+    }
 }

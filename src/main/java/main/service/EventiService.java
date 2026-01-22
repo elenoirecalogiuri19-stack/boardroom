@@ -3,12 +3,15 @@ package main.service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import main.domain.Eventi;
+import main.domain.Prenotazioni;
+import main.domain.enumeration.StatoCodice;
 import main.domain.enumeration.TipoEvento;
 import main.repository.EventiRepository;
+import main.repository.PrenotazioniRepository;
 import main.service.dto.EventiDTO;
 import main.service.mapper.EventiMapper;
+import main.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -29,9 +32,12 @@ public class EventiService {
 
     private final EventiMapper eventiMapper;
 
-    public EventiService(EventiRepository eventiRepository, EventiMapper eventiMapper) {
+    private final PrenotazioniRepository prenotazioniRepository;
+
+    public EventiService(EventiRepository eventiRepository, EventiMapper eventiMapper, PrenotazioniRepository prenotazioniRepository) {
         this.eventiRepository = eventiRepository;
         this.eventiMapper = eventiMapper;
+        this.prenotazioniRepository = prenotazioniRepository;
     }
 
     /**
@@ -125,6 +131,33 @@ public class EventiService {
     public List<EventiDTO> findPublicEventi() {
         LOG.debug("Request to get all Eventi");
         List<Eventi> eventi = eventiRepository.findByTipo(TipoEvento.PUBBLICO);
+        return eventiMapper.toDto(eventi);
+    }
+
+    /**
+     *
+     * Metodo per creare Eventi publici
+     *
+     */
+    @Transactional
+    public EventiDTO creaEventoPubblico(EventiDTO eventiDTO) {
+        LOG.debug("Request to create Eventi : {}", eventiDTO);
+        Prenotazioni pre = prenotazioniRepository
+            .findById(eventiDTO.getPrenotazioneId())
+            .orElseThrow(() -> new BadRequestAlertException("Prenotazione non trvata", "eventi", "prenotazioneNotFound"));
+
+        if (!pre.getStato().getCodice().equals(StatoCodice.CONFIRMED)) {
+            throw new BadRequestAlertException("Prenotazione non confermata", "eventi", "prenotazioneNotFound");
+        }
+
+        Eventi eventi = new Eventi();
+        eventi.setTitolo(eventiDTO.getTitolo());
+        eventi.setTipo(TipoEvento.PUBBLICO);
+        eventi.setPrezzo(eventiDTO.getPrezzo());
+        eventi.setPrenotazione(pre);
+
+        eventi = eventiRepository.save(eventi);
+
         return eventiMapper.toDto(eventi);
     }
 }
