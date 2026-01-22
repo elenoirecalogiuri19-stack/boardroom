@@ -1,5 +1,6 @@
 package main.service;
 
+import java.math.BigDecimal; // Import fondamentale per gestire i prezzi
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,12 +37,10 @@ public class EventiService {
 
     /**
      * Save a eventi.
-     *
-     * @param eventiDTO the entity to save.
-     * @return the persisted entity.
      */
     public EventiDTO save(EventiDTO eventiDTO) {
         LOG.debug("Request to save Eventi : {}", eventiDTO);
+        applicaLogicaPrezzo(eventiDTO); // Applica regola US4 prima del salvataggio
         Eventi eventi = eventiMapper.toEntity(eventiDTO);
         eventi = eventiRepository.save(eventi);
         return eventiMapper.toDto(eventi);
@@ -49,22 +48,27 @@ public class EventiService {
 
     /**
      * Update a eventi.
-     *
-     * @param eventiDTO the entity to save.
-     * @return the persisted entity.
      */
     public EventiDTO update(EventiDTO eventiDTO) {
         LOG.debug("Request to update Eventi : {}", eventiDTO);
+        applicaLogicaPrezzo(eventiDTO); // Applica regola US4 prima dell'aggiornamento
         Eventi eventi = eventiMapper.toEntity(eventiDTO);
         eventi = eventiRepository.save(eventi);
         return eventiMapper.toDto(eventi);
     }
 
     /**
+     * Logica US4: Se l'evento è PRIVATO, il prezzo deve essere forzato a 0.
+     */
+    private void applicaLogicaPrezzo(EventiDTO eventiDTO) {
+        if (eventiDTO.getTipo() != null && eventiDTO.getTipo().equals(TipoEvento.PRIVATO)) {
+            LOG.debug("Evento PRIVATO rilevato: forzo il prezzo a 0.0");
+            eventiDTO.setPrezzo(BigDecimal.ZERO);
+        }
+    }
+
+    /**
      * Partially update a eventi.
-     *
-     * @param eventiDTO the entity to update partially.
-     * @return the persisted entity.
      */
     public Optional<EventiDTO> partialUpdate(EventiDTO eventiDTO) {
         LOG.debug("Request to partially update Eventi : {}", eventiDTO);
@@ -74,6 +78,11 @@ public class EventiService {
             .map(existingEventi -> {
                 eventiMapper.partialUpdate(existingEventi, eventiDTO);
 
+                // Controllo logica US4 anche per aggiornamenti parziali
+                if (existingEventi.getTipo() == TipoEvento.PRIVATO) {
+                    existingEventi.setPrezzo(BigDecimal.ZERO);
+                }
+
                 return existingEventi;
             })
             .map(eventiRepository::save)
@@ -82,9 +91,6 @@ public class EventiService {
 
     /**
      * Get all the eventis.
-     *
-     * @param pageable the pagination information.
-     * @return the list of entities.
      */
     @Transactional(readOnly = true)
     public Page<EventiDTO> findAll(Pageable pageable) {
@@ -94,9 +100,6 @@ public class EventiService {
 
     /**
      * Get one eventi by id.
-     *
-     * @param id the id of the entity.
-     * @return the entity.
      */
     @Transactional(readOnly = true)
     public Optional<EventiDTO> findOne(UUID id) {
@@ -106,8 +109,6 @@ public class EventiService {
 
     /**
      * Delete the eventi by id.
-     *
-     * @param id the id of the entity.
      */
     public void delete(UUID id) {
         LOG.debug("Request to delete Eventi : {}", id);
@@ -115,11 +116,7 @@ public class EventiService {
     }
 
     /**
-     *
      * Get all evento publico
-     *
-     * @return lista eventi publici
-     *
      */
     @Transactional(readOnly = true)
     public List<EventiDTO> findPublicEventi() {
