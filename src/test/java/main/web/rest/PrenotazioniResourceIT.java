@@ -17,7 +17,14 @@ import java.util.ArrayList;
 import java.util.UUID;
 import main.IntegrationTest;
 import main.domain.Prenotazioni;
+import main.domain.Sale;
+import main.domain.StatiPrenotazione;
+import main.domain.Utenti;
+import main.domain.enumeration.StatoCodice;
 import main.repository.PrenotazioniRepository;
+import main.repository.SaleRepository;
+import main.repository.StatiPrenotazioneRepository;
+import main.repository.UtentiRepository;
 import main.service.PrenotazioniService;
 import main.service.dto.PrenotazioniDTO;
 import main.service.mapper.PrenotazioniMapper;
@@ -81,6 +88,15 @@ class PrenotazioniResourceIT {
     private Prenotazioni prenotazioni;
 
     private Prenotazioni insertedPrenotazioni;
+
+    @Autowired
+    private StatiPrenotazioneRepository statiPrenotazioneRepository;
+
+    @Autowired
+    private UtentiRepository utentiRepository;
+
+    @Autowired
+    private SaleRepository saleRepository;
 
     /**
      * Create an entity for this test.
@@ -492,6 +508,84 @@ class PrenotazioniResourceIT {
 
         // Validate the database contains one less item
         assertDecrementedRepositoryCount(databaseSizeBeforeDelete);
+    }
+
+    @Test
+    @Transactional
+    void testCreaPrenotazioniCustom() throws Exception {
+        initStatiPrenotazione();
+
+        Sale sala = new Sale();
+        sala.setNome("Sala Test");
+        sala.setCapienza(10);
+        sala = saleRepository.saveAndFlush(sala);
+
+        Utenti utente = new Utenti();
+        utente.setNome("Utenti Test");
+        utente.setNumeroDiTelefono("12345678");
+        utente = utentiRepository.saveAndFlush(utente);
+
+        PrenotazioniDTO dto = new PrenotazioniDTO();
+        dto.setData(LocalDate.now().plusDays(1));
+        dto.setOraInizio(LocalTime.of(10, 0));
+        dto.setOraFine(LocalTime.of(11, 0));
+        dto.setSalaId(sala.getId());
+        dto.setUtenteId(utente.getId());
+
+        restPrenotazioniMockMvc
+            .perform(post("/api/prenotazionis/crea").contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(dto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").exists())
+            .andExpect(jsonPath("$.stato.codice").value("WAITING"))
+            .andExpect(jsonPath("$.salaId").value(sala.getId().toString()))
+            .andExpect(jsonPath("$.utenteId").value(utente.getId().toString()));
+    }
+
+    @Test
+    @Transactional
+    void testConfermaPrenotazioniCustom() throws Exception {
+        initStatiPrenotazione();
+
+        Sale sala = new Sale();
+        sala.setNome("Sala Test");
+        sala.setCapienza(10);
+        sala = saleRepository.saveAndFlush(sala);
+
+        Utenti utente = new Utenti();
+        utente.setNome("Mario Rossi");
+        utente.setNumeroDiTelefono("12345678");
+        utente = utentiRepository.saveAndFlush(utente);
+
+        Prenotazioni p = new Prenotazioni();
+        p.setData(LocalDate.now().plusDays(1));
+        p.setOraInizio(LocalTime.of(10, 0));
+        p.setOraFine(LocalTime.of(11, 0));
+        p.setSala(sala);
+        p.setUtente(utente);
+        p.setStato(statiPrenotazioneRepository.findByCodice(StatoCodice.WAITING).get());
+        p = prenotazioniRepository.saveAndFlush(p);
+
+        restPrenotazioniMockMvc
+            .perform(post("/api/prenotazionis/" + p.getId() + "/conferma"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.stato.codice").value("CONFIRMED"));
+    }
+
+    private void initStatiPrenotazione() {
+        if (statiPrenotazioneRepository.count() == 0) {
+            statiPrenotazioneRepository.saveAndFlush(
+                new StatiPrenotazione().codice(StatoCodice.WAITING).descrizione("In attesa").ordineAzione(1)
+            );
+            statiPrenotazioneRepository.saveAndFlush(
+                new StatiPrenotazione().codice(StatoCodice.CONFIRMED).descrizione("Confermata").ordineAzione(2)
+            );
+            statiPrenotazioneRepository.saveAndFlush(
+                new StatiPrenotazione().codice(StatoCodice.REJECTED).descrizione("Rifiutata").ordineAzione(3)
+            );
+            statiPrenotazioneRepository.saveAndFlush(
+                new StatiPrenotazione().codice(StatoCodice.CANCELLED).descrizione("Annullata").ordineAzione(4)
+            );
+        }
     }
 
     protected long getRepositoryCount() {

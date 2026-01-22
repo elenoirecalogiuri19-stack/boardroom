@@ -220,8 +220,8 @@ public class PrenotazioniService {
         }
 
         StatiPrenotazione statoC = statiPrenotazioneRepository
-            .findByCodice(StatoCodice.CANCELLED)
-            .orElseThrow(() -> new EntityNotFoundException("Stato CANCELLED non trovato"));
+            .findByCodice(StatoCodice.CONFIRMED)
+            .orElseThrow(() -> new EntityNotFoundException("Stato COFERMED non trovato"));
         prenotazioni.setStato(statoC);
 
         prenotazioni = prenotazioniRepository.save(prenotazioni);
