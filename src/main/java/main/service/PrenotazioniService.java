@@ -152,9 +152,11 @@ public class PrenotazioniService {
         LOG.debug("Request to delete Prenotazioni : {}", id);
 
         Prenotazioni pren = prenotazioniRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Prenotazione non trovata"));
+        boolean isOwner =
+            pren.getUtente() != null && pren.getUtente().getId() != null && pren.getUtente().getId().toString().equals(utenteId);
 
-        if (!pren.getUtente().getId().toString().equals(utenteId) && !tipoUtente()) {
-            throw new AccessDeniedException("Utente non ha i permesi per canelare questa prenotazione");
+        if (!isOwner && !tipoUtente()) {
+            throw new AccessDeniedException("Utente non ha i permessi per cancellare questa prenotazione");
         }
 
         prenotazioniRepository.deleteById(id);

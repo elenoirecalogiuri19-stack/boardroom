@@ -19,6 +19,7 @@ import main.IntegrationTest;
 import main.domain.Prenotazioni;
 import main.domain.Sale;
 import main.domain.StatiPrenotazione;
+import main.domain.User;
 import main.domain.Utenti;
 import main.domain.enumeration.StatoCodice;
 import main.repository.PrenotazioniRepository;
@@ -97,6 +98,9 @@ class PrenotazioniResourceIT {
 
     @Autowired
     private SaleRepository saleRepository;
+
+    @Autowired
+    private main.repository.UserRepository userRepository;
 
     /**
      * Create an entity for this test.
@@ -614,5 +618,72 @@ class PrenotazioniResourceIT {
 
     protected void assertPersistedPrenotazioniToMatchUpdatableProperties(Prenotazioni expectedPrenotazioni) {
         assertPrenotazioniAllUpdatablePropertiesEquals(expectedPrenotazioni, getPersistedPrenotazioni(expectedPrenotazioni));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "owner@example.com", roles = { "USER" })
+    void deletePrenotazione_AsOwner_ShouldReturnNoContent() throws Exception {
+        // crea User e Utenti proprietario
+        User user = new User();
+        user.setLogin("owner@example.com");
+        user = userRepository.saveAndFlush(user);
+
+        Utenti owner = new Utenti();
+        owner.setNome("Owner Test");
+        owner.setUser(user);
+        owner = utentiRepository.saveAndFlush(owner);
+
+        Prenotazioni p = new Prenotazioni();
+        p.setUtente(owner);
+        p = prenotazioniRepository.saveAndFlush(p);
+
+        restPrenotazioniMockMvc
+            .perform(delete(ENTITY_API_URL_ID, p.getId().toString()).accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "other@example.com", roles = { "USER" })
+    void deletePrenotazione_AsNonOwner_ShouldReturnForbidden() throws Exception {
+        User user = new User();
+        user.setLogin("owner@example.com");
+        user = userRepository.saveAndFlush(user);
+
+        Utenti owner = new Utenti();
+        owner.setNome("Owner Test");
+        owner.setUser(user);
+        owner = utentiRepository.saveAndFlush(owner);
+
+        Prenotazioni p = new Prenotazioni();
+        p.setUtente(owner);
+        p = prenotazioniRepository.saveAndFlush(p);
+
+        restPrenotazioniMockMvc
+            .perform(delete(ENTITY_API_URL_ID, p.getId().toString()).accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "admin@example.com", roles = { "ADMIN" })
+    void deletePrenotazione_AsAdmin_ShouldReturnNoContent() throws Exception {
+        User user = new User();
+        user.setLogin("owner@example.com");
+        user = userRepository.saveAndFlush(user);
+
+        Utenti owner = new Utenti();
+        owner.setNome("Owner Test");
+        owner.setUser(user);
+        owner = utentiRepository.saveAndFlush(owner);
+
+        Prenotazioni p = new Prenotazioni();
+        p.setUtente(owner);
+        p = prenotazioniRepository.saveAndFlush(p);
+
+        restPrenotazioniMockMvc
+            .perform(delete(ENTITY_API_URL_ID, p.getId().toString()).accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
     }
 }
