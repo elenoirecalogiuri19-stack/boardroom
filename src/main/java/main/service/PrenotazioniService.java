@@ -1,7 +1,9 @@
 package main.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import main.domain.Prenotazioni;
@@ -13,12 +15,16 @@ import main.repository.PrenotazioniRepository;
 import main.repository.SaleRepository;
 import main.repository.StatiPrenotazioneRepository;
 import main.repository.UtentiRepository;
+import main.security.AuthoritiesConstants;
 import main.service.dto.PrenotazioniDTO;
 import main.service.mapper.PrenotazioniMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,9 +144,19 @@ public class PrenotazioniService {
      * Delete the prenotazioni by id.
      *
      * @param id the id of the entity.
+     *
+     * gestita permessi per eliminazione prenotazione
+     *
      */
-    public void delete(UUID id) {
+    public void delete(UUID id, String utenteId) throws AccessDeniedException {
         LOG.debug("Request to delete Prenotazioni : {}", id);
+
+        Prenotazioni pren = prenotazioniRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Prenotazione non trovata"));
+
+        if (!pren.getUtente().getId().toString().equals(utenteId) && !tipoUtente()) {
+            throw new AccessDeniedException("Utente non ha i permesi per canelare questa prenotazione");
+        }
+
         prenotazioniRepository.deleteById(id);
     }
 
@@ -241,5 +257,25 @@ public class PrenotazioniService {
         if (prenotazioni.getData().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("la data della prenotazione non deve essere nel pasato");
         }
+    }
+
+    /**
+     *
+     * Verifica ruolo Utente della richiesta
+     *
+     */
+    private boolean tipoUtente() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null) {
+            return false;
+        }
+
+        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
+        if (authorities == null) {
+            return false;
+        }
+
+        return authorities.stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(AuthoritiesConstants.ADMIN));
     }
 }

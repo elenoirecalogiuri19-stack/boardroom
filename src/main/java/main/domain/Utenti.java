@@ -34,8 +34,11 @@ public class Utenti implements Serializable {
     @Column(name = "numero_di_telefono", nullable = false)
     private String numeroDiTelefono;
 
+    @Column(name = "user:login", unique = true)
+    private String userLogin;
+
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(unique = true)
+    @JoinColumn(name = "user_id", unique = true)
     private User user;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
@@ -105,6 +108,14 @@ public class Utenti implements Serializable {
         return this;
     }
 
+    public String getUserLogin() {
+        return userLogin;
+    }
+
+    public void setUserLogin(String userLogin) {
+        this.userLogin = userLogin;
+    }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -132,6 +143,7 @@ public class Utenti implements Serializable {
             ", nome='" + getNome() + "'" +
             ", nomeAzienda='" + getNomeAzienda() + "'" +
             ", numeroDiTelefono='" + getNumeroDiTelefono() + "'" +
+            ", userLogin='" + getUserLogin() + "'" +
             "}";
     }
 }
