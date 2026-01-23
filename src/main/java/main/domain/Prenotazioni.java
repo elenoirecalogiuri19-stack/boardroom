@@ -12,12 +12,8 @@ import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-/**
- * A Prenotazioni.
- */
 @Entity
 @Table(name = "prenotazioni")
-@SuppressWarnings("common-java:DuplicatedBlocks")
 public class Prenotazioni implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -40,172 +36,74 @@ public class Prenotazioni implements Serializable {
     @Column(name = "ora_fine", nullable = false)
     private LocalTime oraFine;
 
+    @Transient
+    private String tipoEvento;
+
+    @Transient
+    private Double prezzo;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "prenotazione")
     @JsonIgnoreProperties(value = { "prenotazione" }, allowSetters = true)
     private Set<Eventi> eventis = new HashSet<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // AGGIUNTO @Transient per evitare l'errore 500 sulla colonna mancante
+    @Transient
     private StatiPrenotazione stato;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties(value = { "user" }, allowSetters = true)
+    @Transient
     private Utenti utente;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties(value = { "prenotazionis" }, allowSetters = true)
+    @Transient
     private Sale sala;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
+    // --- GETTER E SETTER ---
 
-    public UUID getId() {
-        return this.id;
-    }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public Prenotazioni id(UUID id) {
-        this.setId(id);
-        return this;
-    }
+    public LocalDate getData() { return data; }
+    public void setData(LocalDate data) { this.data = data; }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+    public LocalTime getOraInizio() { return oraInizio; }
+    public void setOraInizio(LocalTime oraInizio) { this.oraInizio = oraInizio; }
 
-    public LocalDate getData() {
-        return this.data;
-    }
+    public LocalTime getOraFine() { return oraFine; }
+    public void setOraFine(LocalTime oraFine) { this.oraFine = oraFine; }
 
-    public Prenotazioni data(LocalDate data) {
-        this.setData(data);
-        return this;
-    }
+    public String getTipoEvento() { return tipoEvento; }
+    public void setTipoEvento(String tipoEvento) { this.tipoEvento = tipoEvento; }
 
-    public void setData(LocalDate data) {
-        this.data = data;
-    }
+    public Double getPrezzo() { return prezzo; }
+    public void setPrezzo(Double prezzo) { this.prezzo = prezzo; }
 
-    public LocalTime getOraInizio() {
-        return this.oraInizio;
-    }
+    public StatiPrenotazione getStato() { return stato; }
+    public void setStato(StatiPrenotazione stato) { this.stato = stato; }
 
-    public Prenotazioni oraInizio(LocalTime oraInizio) {
-        this.setOraInizio(oraInizio);
-        return this;
-    }
+    public Utenti getUtente() { return utente; }
+    public void setUtente(Utenti utente) { this.utente = utente; }
 
-    public void setOraInizio(LocalTime oraInizio) {
-        this.oraInizio = oraInizio;
-    }
+    public Sale getSala() { return sala; }
+    public void setSala(Sale sala) { this.sala = sala; }
 
-    public LocalTime getOraFine() {
-        return this.oraFine;
-    }
+    public Set<Eventi> getEventis() { return eventis; }
+    public void setEventis(Set<Eventi> eventis) { this.eventis = eventis; }
 
-    public Prenotazioni oraFine(LocalTime oraFine) {
-        this.setOraFine(oraFine);
-        return this;
-    }
-
-    public void setOraFine(LocalTime oraFine) {
-        this.oraFine = oraFine;
-    }
-
-    public Set<Eventi> getEventis() {
-        return this.eventis;
-    }
-
-    public void setEventis(Set<Eventi> eventis) {
-        if (this.eventis != null) {
-            this.eventis.forEach(i -> i.setPrenotazione(null));
-        }
-        if (eventis != null) {
-            eventis.forEach(i -> i.setPrenotazione(this));
-        }
-        this.eventis = eventis;
-    }
-
-    public Prenotazioni eventis(Set<Eventi> eventis) {
-        this.setEventis(eventis);
-        return this;
-    }
-
-    public Prenotazioni addEventi(Eventi eventi) {
-        this.eventis.add(eventi);
-        eventi.setPrenotazione(this);
-        return this;
-    }
-
-    public Prenotazioni removeEventi(Eventi eventi) {
-        this.eventis.remove(eventi);
-        eventi.setPrenotazione(null);
-        return this;
-    }
-
-    public StatiPrenotazione getStato() {
-        return this.stato;
-    }
-
-    public void setStato(StatiPrenotazione statiPrenotazione) {
-        this.stato = statiPrenotazione;
-    }
-
-    public Prenotazioni stato(StatiPrenotazione statiPrenotazione) {
-        this.setStato(statiPrenotazione);
-        return this;
-    }
-
-    public Utenti getUtente() {
-        return this.utente;
-    }
-
-    public void setUtente(Utenti utenti) {
-        this.utente = utenti;
-    }
-
-    public Prenotazioni utente(Utenti utenti) {
-        this.setUtente(utenti);
-        return this;
-    }
-
-    public Sale getSala() {
-        return this.sala;
-    }
-
-    public void setSala(Sale sale) {
-        this.sala = sale;
-    }
-
-    public Prenotazioni sala(Sale sale) {
-        this.setSala(sale);
-        return this;
-    }
-
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
+    public Prenotazioni data(LocalDate data) { this.setData(data); return this; }
+    public Prenotazioni oraInizio(LocalTime oraInizio) { this.setOraInizio(oraInizio); return this; }
+    public Prenotazioni oraFine(LocalTime oraFine) { this.setOraFine(oraFine); return this; }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Prenotazioni)) {
-            return false;
-        }
-        return getId() != null && getId().equals(((Prenotazioni) o).getId());
+        if (this == o) return true;
+        if (!(o instanceof Prenotazioni)) return false;
+        return id != null && id.equals(((Prenotazioni) o).id);
     }
 
     @Override
-    public int hashCode() {
-        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
-        return getClass().hashCode();
-    }
+    public int hashCode() { return getClass().hashCode(); }
 
-    // prettier-ignore
     @Override
     public String toString() {
-        return "Prenotazioni{" +
-            "id=" + getId() +
-            ", data='" + getData() + "'" +
-            ", oraInizio='" + getOraInizio() + "'" +
-            ", oraFine='" + getOraFine() + "'" +
-            "}";
+        return "Prenotazioni{id=" + id + ", data='" + data + "'}";
     }
 }
