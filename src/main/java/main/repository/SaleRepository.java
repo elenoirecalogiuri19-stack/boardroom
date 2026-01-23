@@ -14,10 +14,10 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
     @Query(
         "SELECT s FROM Sale s WHERE s.id NOT IN (" +
         "SELECT p.sala.id FROM Prenotazioni p " +
-        "WHERE p.stato IS NOT NULL " +
-        "AND p.data = :data " +
+        "WHERE p.data = :data " +
         "AND p.oraInizio < :fine " +
-        "AND p.oraFine > :inizio)"
+        "AND p.oraFine > :inizio " +
+        "AND p.stato.codice != 'CANCELLED')"
     )
     List<Sale> findFreeSales(@Param("data") LocalDate data, @Param("inizio") LocalTime inizio, @Param("fine") LocalTime fine);
 }

@@ -20,7 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional; // Import necessario
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -129,13 +129,12 @@ public class PrenotazioniResource {
 
     /**
      * {@code GET  /prenotazionis} : get all the prenotazionis.
-     * US2: Aggiunto filtro per salaId con @Transactional per evitare errori di Proxy.
+     * US2: Semplificato per evitare errori di compilazione con il Service.
      */
     @GetMapping("")
     @Transactional(readOnly = true)
     public ResponseEntity<List<PrenotazioniDTO>> getAllPrenotazionis(
         @org.springdoc.core.annotations.ParameterObject Pageable pageable,
-        @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload,
         @RequestParam(name = "salaId", required = false) UUID salaId
     ) {
         LOG.debug("REST request to get a page of Prenotazionis. Filter salaId: {}", salaId);
@@ -143,9 +142,8 @@ public class PrenotazioniResource {
 
         if (salaId != null) {
             page = prenotazioniRepository.findBySalaId(salaId, pageable).map(prenotazioniMapper::toDto);
-        } else if (eagerload) {
-            page = prenotazioniService.findAllWithEagerRelationships(pageable);
         } else {
+            // Usiamo il metodo findAll che abbiamo nel Service
             page = prenotazioniService.findAll(pageable);
         }
 

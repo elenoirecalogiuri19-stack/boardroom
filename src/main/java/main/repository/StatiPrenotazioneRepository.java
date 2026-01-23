@@ -1,13 +1,12 @@
 package main.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 import main.domain.StatiPrenotazione;
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-/**
- * Spring Data JPA repository for the StatiPrenotazione entity.
- */
-@SuppressWarnings("unused")
 @Repository
-public interface StatiPrenotazioneRepository extends JpaRepository<StatiPrenotazione, UUID> {}
+public interface StatiPrenotazioneRepository extends JpaRepository<StatiPrenotazione, UUID> {
+    Optional<StatiPrenotazione> findByCodice(String codice);
+}
