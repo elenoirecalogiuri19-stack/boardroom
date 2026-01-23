@@ -13,6 +13,7 @@ import java.util.UUID;
 import main.domain.Utenti;
 import main.repository.PrenotazioniRepository;
 import main.repository.UserRepository;
+import main.repository.UtentiRepository;
 import main.service.PrenotazioniService;
 import main.service.dto.PrenotazioniDTO;
 import main.web.rest.errors.BadRequestAlertException;
@@ -49,16 +50,16 @@ public class PrenotazioniResource {
 
     private final PrenotazioniRepository prenotazioniRepository;
 
-    private final UserRepository userRepository;
+    private final UtentiRepository utentiRepository;
 
     public PrenotazioniResource(
         PrenotazioniService prenotazioniService,
         PrenotazioniRepository prenotazioniRepository,
-        UserRepository userRepository
+        UtentiRepository utentiRepository
     ) {
         this.prenotazioniService = prenotazioniService;
         this.prenotazioniRepository = prenotazioniRepository;
-        this.userRepository = userRepository;
+        this.utentiRepository = utentiRepository;
     }
 
     /**
@@ -198,7 +199,7 @@ public class PrenotazioniResource {
         Authentication a = SecurityContextHolder.getContext().getAuthentication();
         String username = a.getName();
 
-        Utenti ute = userRepository.findByUserLogin(username).orElseThrow(() -> new EntityNotFoundException("utente non trovato"));
+        Utenti ute = utentiRepository.findByUser_Login(username).orElseThrow(() -> new EntityNotFoundException("utente non trovato"));
         String utenteId = ute.getId().toString();
 
         prenotazioniService.delete(id, utenteId);
