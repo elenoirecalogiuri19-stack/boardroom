@@ -15,6 +15,9 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID> {
+    // US2: Metodo aggiunto per filtrare le prenotazioni per sala
+    Page<Prenotazioni> findBySalaId(UUID salaId, Pageable pageable);
+
     default Optional<Prenotazioni> findOneWithEagerRelationships(UUID id) {
         return this.findOneWithToOneRelationships(id);
     }

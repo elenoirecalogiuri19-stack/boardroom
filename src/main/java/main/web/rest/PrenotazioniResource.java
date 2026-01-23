@@ -11,6 +11,7 @@ import java.util.UUID;
 import main.repository.PrenotazioniRepository;
 import main.service.PrenotazioniService;
 import main.service.dto.PrenotazioniDTO;
+import main.service.mapper.PrenotazioniMapper;
 import main.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional; // Import necessario
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -43,17 +45,20 @@ public class PrenotazioniResource {
 
     private final PrenotazioniRepository prenotazioniRepository;
 
-    public PrenotazioniResource(PrenotazioniService prenotazioniService, PrenotazioniRepository prenotazioniRepository) {
+    private final PrenotazioniMapper prenotazioniMapper;
+
+    public PrenotazioniResource(
+        PrenotazioniService prenotazioniService,
+        PrenotazioniRepository prenotazioniRepository,
+        PrenotazioniMapper prenotazioniMapper
+    ) {
         this.prenotazioniService = prenotazioniService;
         this.prenotazioniRepository = prenotazioniRepository;
+        this.prenotazioniMapper = prenotazioniMapper;
     }
 
     /**
      * {@code POST  /prenotazionis} : Create a new prenotazioni.
-     *
-     * @param prenotazioniDTO the prenotazioniDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new prenotazioniDTO, or with status {@code 400 (Bad Request)} if the prenotazioni has already an ID.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
     public ResponseEntity<PrenotazioniDTO> createPrenotazioni(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO)
@@ -70,13 +75,6 @@ public class PrenotazioniResource {
 
     /**
      * {@code PUT  /prenotazionis/:id} : Updates an existing prenotazioni.
-     *
-     * @param id the id of the prenotazioniDTO to save.
-     * @param prenotazioniDTO the prenotazioniDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated prenotazioniDTO,
-     * or with status {@code 400 (Bad Request)} if the prenotazioniDTO is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the prenotazioniDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
     public ResponseEntity<PrenotazioniDTO> updatePrenotazioni(
@@ -102,15 +100,7 @@ public class PrenotazioniResource {
     }
 
     /**
-     * {@code PATCH  /prenotazionis/:id} : Partial updates given fields of an existing prenotazioni, field will ignore if it is null
-     *
-     * @param id the id of the prenotazioniDTO to save.
-     * @param prenotazioniDTO the prenotazioniDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated prenotazioniDTO,
-     * or with status {@code 400 (Bad Request)} if the prenotazioniDTO is not valid,
-     * or with status {@code 404 (Not Found)} if the prenotazioniDTO is not found,
-     * or with status {@code 500 (Internal Server Error)} if the prenotazioniDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     * {@code PATCH  /prenotazionis/:id} : Partial updates given fields of an existing prenotazioni.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public ResponseEntity<PrenotazioniDTO> partialUpdatePrenotazioni(
@@ -139,32 +129,32 @@ public class PrenotazioniResource {
 
     /**
      * {@code GET  /prenotazionis} : get all the prenotazionis.
-     *
-     * @param pageable the pagination information.
-     * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of prenotazionis in body.
+     * US2: Aggiunto filtro per salaId con @Transactional per evitare errori di Proxy.
      */
     @GetMapping("")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<PrenotazioniDTO>> getAllPrenotazionis(
         @org.springdoc.core.annotations.ParameterObject Pageable pageable,
-        @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload
+        @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload,
+        @RequestParam(name = "salaId", required = false) UUID salaId
     ) {
-        LOG.debug("REST request to get a page of Prenotazionis");
+        LOG.debug("REST request to get a page of Prenotazionis. Filter salaId: {}", salaId);
         Page<PrenotazioniDTO> page;
-        if (eagerload) {
+
+        if (salaId != null) {
+            page = prenotazioniRepository.findBySalaId(salaId, pageable).map(prenotazioniMapper::toDto);
+        } else if (eagerload) {
             page = prenotazioniService.findAllWithEagerRelationships(pageable);
         } else {
             page = prenotazioniService.findAll(pageable);
         }
+
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
     /**
      * {@code GET  /prenotazionis/:id} : get the "id" prenotazioni.
-     *
-     * @param id the id of the prenotazioniDTO to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the prenotazioniDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id}")
     public ResponseEntity<PrenotazioniDTO> getPrenotazioni(@PathVariable("id") UUID id) {
@@ -175,9 +165,6 @@ public class PrenotazioniResource {
 
     /**
      * {@code DELETE  /prenotazionis/:id} : delete the "id" prenotazioni.
-     *
-     * @param id the id of the prenotazioniDTO to delete.
-     * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePrenotazioni(@PathVariable("id") UUID id) {
