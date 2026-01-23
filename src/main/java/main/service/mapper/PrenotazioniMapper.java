@@ -4,22 +4,15 @@ import main.domain.Prenotazioni;
 import main.service.dto.PrenotazioniDTO;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { StatiPrenotazioneMapper.class, UtentiMapper.class, SaleMapper.class })
 public interface PrenotazioniMapper extends EntityMapper<PrenotazioniDTO, Prenotazioni> {
-
-    @Override
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "data", source = "data")
-    @Mapping(target = "oraInizio", source = "oraInizio")
-    @Mapping(target = "oraFine", source = "oraFine")
+    @Mapping(target = "stato", source = "stato")
+    @Mapping(target = "utente", source = "utente")
+    @Mapping(target = "sala", source = "sala")
     PrenotazioniDTO toDto(Prenotazioni s);
 
-    @Override
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "data", source = "data")
-    @Mapping(target = "oraInizio", source = "oraInizio")
-    @Mapping(target = "oraFine", source = "oraFine")
+    @Mapping(target = "stato", source = "stato")
+    @Mapping(target = "utente", source = "utente")
+    @Mapping(target = "sala", source = "sala")
     Prenotazioni toEntity(PrenotazioniDTO dto);
 }

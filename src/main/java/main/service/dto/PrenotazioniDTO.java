@@ -7,11 +7,6 @@ import java.time.LocalTime;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * A DTO for the {@link main.domain.Prenotazioni} entity.
- * US4: Aggiunto tipoEvento e prezzo per la gestione degli eventi privati.
- */
-@SuppressWarnings("common-java:DuplicatedBlocks")
 public class PrenotazioniDTO implements Serializable {
 
     private UUID id;
@@ -25,23 +20,11 @@ public class PrenotazioniDTO implements Serializable {
     @NotNull
     private LocalTime oraFine;
 
-    private String tipoEvento; // Per US4 (es. "PRIVATO", "PUBBLICO")
-
-    private Double prezzo;      // Per US4 (opzionale se privato)
-
+    private String tipoEvento;
+    private Double prezzo;
     private StatiPrenotazioneDTO stato;
-
     private UtentiDTO utente;
-
-<<<<<<< Updated upstream
     private SaleDTO sala;
-=======
-    private UUID salaId;
-
-    private String salaNome;
-
-    // --- Getter e Setter ---
->>>>>>> Stashed changes
 
     public UUID getId() {
         return id;
@@ -115,16 +98,6 @@ public class PrenotazioniDTO implements Serializable {
         this.sala = sala;
     }
 
-    public String getSalaNome() {
-        return salaNome;
-    }
-
-    public void setSalaNome(String salaNome) {
-        this.salaNome = salaNome;
-    }
-
-    // --- Standard Methods ---
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -140,22 +113,6 @@ public class PrenotazioniDTO implements Serializable {
 
     @Override
     public String toString() {
-        return "PrenotazioniDTO{" +
-            "id='" + getId() + "'" +
-            ", data='" + getData() + "'" +
-            ", oraInizio='" + getOraInizio() + "'" +
-            ", oraFine='" + getOraFine() + "'" +
-            ", tipoEvento='" + getTipoEvento() + "'" +
-            ", prezzo=" + getPrezzo() +
-            ", stato=" + getStato() +
-<<<<<<< Updated upstream
-            ", utente=" + getUtente() +
-            ", sala=" + getSala() +
-=======
-            ", utente=" + getUtenteId() +
-            ", sala=" + getSalaId() +
-            ", salaNome='" + getSalaNome() + "'" +
->>>>>>> Stashed changes
-            "}";
+        return "PrenotazioniDTO{id='" + id + "', data='" + data + "', tipoEvento='" + tipoEvento + "'}";
     }
 }
