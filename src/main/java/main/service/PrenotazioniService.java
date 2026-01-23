@@ -1,15 +1,30 @@
 package main.service;
 
+import jakarta.persistence.EntityNotFoundException;
+import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import main.domain.Prenotazioni;
+import main.domain.Sale;
+import main.domain.StatiPrenotazione;
+import main.domain.Utenti;
+import main.domain.enumeration.StatoCodice;
 import main.repository.PrenotazioniRepository;
+import main.repository.SaleRepository;
+import main.repository.StatiPrenotazioneRepository;
+import main.repository.UtentiRepository;
+import main.security.AuthoritiesConstants;
 import main.service.dto.PrenotazioniDTO;
 import main.service.mapper.PrenotazioniMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +39,25 @@ public class PrenotazioniService {
 
     private final PrenotazioniRepository prenotazioniRepository;
 
+    private final StatiPrenotazioneRepository statiPrenotazioneRepository;
+
+    private final UtentiRepository utentiRepository;
+
+    private final SaleRepository saleRepository;
+
     private final PrenotazioniMapper prenotazioniMapper;
 
-    public PrenotazioniService(PrenotazioniRepository prenotazioniRepository, PrenotazioniMapper prenotazioniMapper) {
+    public PrenotazioniService(
+        PrenotazioniRepository prenotazioniRepository,
+        StatiPrenotazioneRepository statiPrenotazioneRepository,
+        UtentiRepository utentiRepository,
+        SaleRepository saleRepository,
+        PrenotazioniMapper prenotazioniMapper
+    ) {
         this.prenotazioniRepository = prenotazioniRepository;
+        this.statiPrenotazioneRepository = statiPrenotazioneRepository;
+        this.utentiRepository = utentiRepository;
+        this.saleRepository = saleRepository;
         this.prenotazioniMapper = prenotazioniMapper;
     }
 
@@ -114,9 +144,138 @@ public class PrenotazioniService {
      * Delete the prenotazioni by id.
      *
      * @param id the id of the entity.
+     *
+     * gestita permessi per eliminazione prenotazione
+     *
      */
-    public void delete(UUID id) {
+    public void delete(UUID id, String utenteId) throws AccessDeniedException {
         LOG.debug("Request to delete Prenotazioni : {}", id);
+
+        Prenotazioni pren = prenotazioniRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Prenotazione non trovata"));
+
+        if (!pren.getUtente().getId().toString().equals(utenteId) && !tipoUtente()) {
+            throw new AccessDeniedException("Utente non ha i permesi per canelare questa prenotazione");
+        }
+
         prenotazioniRepository.deleteById(id);
+    }
+
+    /**
+     *
+     * Metodo nuova prenotazione che
+     * ne verifica la disponibilita
+     * e gestisce lo stato
+     *
+     */
+    public PrenotazioniDTO creaPrenotazione(PrenotazioniDTO prenotazioniDTO) {
+        LOG.debug("Request to create Prenotazioni : {}", prenotazioniDTO);
+
+        Prenotazioni prenotazioni = prenotazioniMapper.toEntity(prenotazioniDTO);
+
+        Utenti ut = utentiRepository
+            .findById(prenotazioniDTO.getUtenteId())
+            .orElseThrow(() -> new EntityNotFoundException("Utente non trovato"));
+
+        Sale sa = saleRepository.findById(prenotazioniDTO.getSalaId()).orElseThrow(() -> new EntityNotFoundException("Sala non trovato"));
+
+        prenotazioni.setUtente(ut);
+        prenotazioni.setSala(sa);
+
+        validaPrenotazione(prenotazioni);
+
+        StatiPrenotazione statoW = statiPrenotazioneRepository
+            .findByCodice(StatoCodice.WAITING)
+            .orElseThrow(() -> new EntityNotFoundException("Stato WAITING non trovato"));
+        prenotazioni.setStato(statoW);
+
+        boolean sovraposizione = prenotazioniRepository.existsOverlappingConfirmedPrenotazione(
+            prenotazioni.getSala(),
+            prenotazioni.getData(),
+            prenotazioni.getOraInizio(),
+            prenotazioni.getOraFine()
+        );
+
+        if (sovraposizione) {
+            StatiPrenotazione statoR = statiPrenotazioneRepository
+                .findByCodice(StatoCodice.REJECTED)
+                .orElseThrow(() -> new EntityNotFoundException("Stato REJECTED non trovato"));
+            prenotazioni.setStato(statoR);
+        }
+
+        prenotazioni = prenotazioniRepository.save(prenotazioni);
+
+        return prenotazioniMapper.toDto(prenotazioni);
+    }
+
+    /**
+     *
+     * Metodo per confermare la prenotazione
+     *
+     */
+
+    public PrenotazioniDTO confermaPrenotazione(UUID prenotazioneId) {
+        LOG.debug("Request to create Prenotazioni : {}", prenotazioneId);
+
+        Prenotazioni prenotazioni = prenotazioniRepository
+            .findById(prenotazioneId)
+            .orElseThrow(() -> new EntityNotFoundException("Prenotazione non trovato"));
+
+        if (prenotazioni.getStato().getCodice() != StatoCodice.WAITING) {
+            throw new IllegalStateException("la Prenotazione non e in stato WAITING");
+        }
+
+        boolean sovrapposizione = prenotazioniRepository.existsOverlappingConfirmedPrenotazione(
+            prenotazioni.getSala(),
+            prenotazioni.getData(),
+            prenotazioni.getOraInizio(),
+            prenotazioni.getOraFine()
+        );
+
+        if (sovrapposizione) {
+            throw new IllegalStateException("non e posibile confermare la prenotazione: conflito con prenotazione gia esistente");
+        }
+
+        StatiPrenotazione statoC = statiPrenotazioneRepository
+            .findByCodice(StatoCodice.CONFIRMED)
+            .orElseThrow(() -> new EntityNotFoundException("Stato COFERMED non trovato"));
+        prenotazioni.setStato(statoC);
+
+        prenotazioni = prenotazioniRepository.save(prenotazioni);
+
+        return prenotazioniMapper.toDto(prenotazioni);
+    }
+
+    /**
+     * Metodo per la validazione dei dati
+     *
+     */
+
+    public void validaPrenotazione(Prenotazioni prenotazioni) {
+        if (prenotazioni.getOraInizio().isAfter(prenotazioni.getOraFine())) {
+            throw new IllegalArgumentException("l'ora di inizie deve esere inferiore dello ora fine");
+        }
+        if (prenotazioni.getData().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("la data della prenotazione non deve essere nel pasato");
+        }
+    }
+
+    /**
+     *
+     * Verifica ruolo Utente della richiesta
+     *
+     */
+    private boolean tipoUtente() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null) {
+            return false;
+        }
+
+        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
+        if (authorities == null) {
+            return false;
+        }
+
+        return authorities.stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(AuthoritiesConstants.ADMIN));
     }
 }
