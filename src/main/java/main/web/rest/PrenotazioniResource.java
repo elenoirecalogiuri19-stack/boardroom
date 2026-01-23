@@ -1,14 +1,18 @@
 package main.web.rest;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import main.domain.Utenti;
 import main.repository.PrenotazioniRepository;
+import main.repository.UserRepository;
 import main.service.PrenotazioniService;
 import main.service.dto.PrenotazioniDTO;
 import main.web.rest.errors.BadRequestAlertException;
@@ -19,6 +23,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -43,9 +49,16 @@ public class PrenotazioniResource {
 
     private final PrenotazioniRepository prenotazioniRepository;
 
-    public PrenotazioniResource(PrenotazioniService prenotazioniService, PrenotazioniRepository prenotazioniRepository) {
+    private final UserRepository userRepository;
+
+    public PrenotazioniResource(
+        PrenotazioniService prenotazioniService,
+        PrenotazioniRepository prenotazioniRepository,
+        UserRepository userRepository
+    ) {
         this.prenotazioniService = prenotazioniService;
         this.prenotazioniRepository = prenotazioniRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -180,12 +193,39 @@ public class PrenotazioniResource {
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePrenotazioni(@PathVariable UUID id) {
+    public ResponseEntity<Void> deletePrenotazioni(@PathVariable UUID id) throws AccessDeniedException {
         LOG.debug("REST request to delete Prenotazioni : {}", id);
+        Authentication a = SecurityContextHolder.getContext().getAuthentication();
+        String username = a.getName();
 
-        prenotazioniService.delete(id);
+        Utenti ute = userRepository.findByUserLogin(username).orElseThrow(() -> new EntityNotFoundException("utente non trovato"));
+        String utenteId = ute.getId().toString();
+
+        prenotazioniService.delete(id, utenteId);
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    /**
+     *
+     * Endpoint per la prenotazione con validazione
+     *
+     */
+    @PostMapping("/crea")
+    public ResponseEntity<PrenotazioniDTO> creaPrenotazione(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO) {
+        PrenotazioniDTO dto = prenotazioniService.creaPrenotazione(prenotazioniDTO);
+        return ResponseEntity.ok(dto);
+    }
+
+    /**
+     *
+     * Endpoint per  la conferma della prenotazione
+     *
+     */
+    @PostMapping("/{id}/conferma")
+    public ResponseEntity<PrenotazioniDTO> confermaPrenotazioni(@PathVariable UUID id) {
+        PrenotazioniDTO dto = prenotazioniService.confermaPrenotazione(id);
+        return ResponseEntity.ok(dto);
     }
 }
