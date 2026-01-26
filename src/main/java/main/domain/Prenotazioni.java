@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import main.domain.enumeration.TipoEvento;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -37,10 +39,10 @@ public class Prenotazioni implements Serializable {
     private LocalTime oraFine;
 
     @Column(name = "tipo_evento")
-    private String tipoEvento;
+    private TipoEvento tipoEvento;
 
     @Column(name = "prezzo")
-    private Double prezzo;
+    private BigDecimal prezzo;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "prenotazione")
     @JsonIgnoreProperties(value = { "prenotazione" }, allowSetters = true)
@@ -91,19 +93,19 @@ public class Prenotazioni implements Serializable {
         this.oraFine = oraFine;
     }
 
-    public String getTipoEvento() {
+    public TipoEvento getTipoEvento() {
         return tipoEvento;
     }
 
-    public void setTipoEvento(String tipoEvento) {
+    public void setTipoEvento(TipoEvento tipoEvento) {
         this.tipoEvento = tipoEvento;
     }
 
-    public Double getPrezzo() {
+    public BigDecimal getPrezzo() {
         return prezzo;
     }
 
-    public void setPrezzo(Double prezzo) {
+    public void setPrezzo(BigDecimal prezzo) {
         this.prezzo = prezzo;
     }
 
@@ -172,12 +174,12 @@ public class Prenotazioni implements Serializable {
         return this;
     }
 
-    public Prenotazioni tipoEvento(String tipoEvento) {
+    public Prenotazioni tipoEvento(TipoEvento tipoEvento) {
         this.setTipoEvento(tipoEvento);
         return this;
     }
 
-    public Prenotazioni prezzo(Double prezzo) {
+    public Prenotazioni prezzo(BigDecimal prezzo) {
         this.setPrezzo(prezzo);
         return this;
     }

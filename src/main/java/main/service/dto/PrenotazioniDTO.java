@@ -2,6 +2,7 @@ package main.service.dto;
 
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
@@ -25,7 +26,7 @@ public class PrenotazioniDTO implements Serializable {
     private LocalTime oraFine;
 
     private String tipoEvento;
-    private Double prezzo;
+    private BigDecimal prezzo;
     private StatiPrenotazioneDTO stato;
 
     private UtentiDTO utente;
@@ -72,11 +73,11 @@ public class PrenotazioniDTO implements Serializable {
         this.tipoEvento = tipoEvento;
     }
 
-    public Double getPrezzo() {
+    public BigDecimal getPrezzo() {
         return prezzo;
     }
 
-    public void setPrezzo(Double prezzo) {
+    public void setPrezzo(BigDecimal prezzo) {
         this.prezzo = prezzo;
     }
 
@@ -130,8 +131,4 @@ public class PrenotazioniDTO implements Serializable {
     public String toString() {
         return "PrenotazioniDTO{id='" + id + "', data='" + data + "', tipoEvento='" + tipoEvento + "'}";
     }
-
-    public void setSalaId(UUID id) {}
-
-    public void setUtenteId(UUID id) {}
 }

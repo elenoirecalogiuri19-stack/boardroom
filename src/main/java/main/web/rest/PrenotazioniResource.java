@@ -71,13 +71,18 @@ public class PrenotazioniResource {
     public ResponseEntity<PrenotazioniDTO> createPrenotazioni(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO)
         throws URISyntaxException {
         LOG.debug("REST request to save Prenotazioni : {}", prenotazioniDTO);
-        if (prenotazioniDTO.getId() != null) {
-            throw new BadRequestAlertException("A new prenotazioni cannot already have an ID", ENTITY_NAME, "idexists");
-        }
-        prenotazioniDTO = prenotazioniService.save(prenotazioniDTO);
+        validaNewPerenotazione(prenotazioniDTO);
+        PrenotazioniDTO saved = prenotazioniService.save(prenotazioniDTO);
+
         return ResponseEntity.created(new URI("/api/prenotazionis/" + prenotazioniDTO.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, prenotazioniDTO.getId().toString()))
             .body(prenotazioniDTO);
+    }
+
+    private void validaNewPerenotazione(PrenotazioniDTO dto) {
+        if (dto.getId() != null) {
+            throw new BadRequestAlertException("A new prenotazioni cannot already have an ID", ENTITY_NAME, "idexists");
+        }
     }
 
     /**
@@ -96,21 +101,24 @@ public class PrenotazioniResource {
         @Valid @RequestBody PrenotazioniDTO prenotazioniDTO
     ) throws URISyntaxException {
         LOG.debug("REST request to update Prenotazioni : {}, {}", id, prenotazioniDTO);
-        if (prenotazioniDTO.getId() == null) {
+        validaPrenoUpdate(id, prenotazioniDTO);
+
+        PrenotazioniDTO result = prenotazioniService.save(prenotazioniDTO);
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, prenotazioniDTO.getId().toString()))
+            .body(result);
+    }
+
+    private void validaPrenoUpdate(UUID id, PrenotazioniDTO dto) {
+        if (dto.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, prenotazioniDTO.getId())) {
+        if (!Objects.equals(id, dto.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
-
         if (!prenotazioniRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
-
-        prenotazioniDTO = prenotazioniService.update(prenotazioniDTO);
-        return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, prenotazioniDTO.getId().toString()))
-            .body(prenotazioniDTO);
     }
 
     /**
@@ -130,16 +138,7 @@ public class PrenotazioniResource {
         @NotNull @RequestBody PrenotazioniDTO prenotazioniDTO
     ) throws URISyntaxException {
         LOG.debug("REST request to partial update Prenotazioni partially : {}, {}", id, prenotazioniDTO);
-        if (prenotazioniDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, prenotazioniDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!prenotazioniRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
+        validaPrenoUpdate(id, prenotazioniDTO);
 
         Optional<PrenotazioniDTO> result = prenotazioniService.partialUpdate(prenotazioniDTO);
 
@@ -165,15 +164,7 @@ public class PrenotazioniResource {
         @RequestParam(name = "salaId", required = false) UUID salaId
     ) {
         LOG.debug("REST request to get a page of Prenotazionis. Filter salaId: {}", salaId);
-        Page<PrenotazioniDTO> page;
-
-        if (salaId != null) {
-            page = prenotazioniRepository.findBySalaId(salaId, pageable).map(prenotazioniMapper::toDto);
-        } else if (eagerload) {
-            page = prenotazioniService.findAllWithEagerRelationships(pageable);
-        } else {
-            page = prenotazioniService.findAll(pageable);
-        }
+        Page<PrenotazioniDTO> page = prenotazioniService.getAll(pageable, eagerload, salaId);
 
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
