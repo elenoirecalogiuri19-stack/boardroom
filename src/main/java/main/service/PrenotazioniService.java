@@ -148,18 +148,33 @@ public class PrenotazioniService {
      * gestita permessi per eliminazione prenotazione
      *
      */
-    public void delete(UUID id, String utenteId) throws AccessDeniedException {
+    public void delete(UUID id) throws AccessDeniedException {
         LOG.debug("Request to delete Prenotazioni : {}", id);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) {
+            throw new AccessDeniedException("Utente non autenticto");
+        }
+
+        String user = auth.getName();
 
         Prenotazioni pren = prenotazioniRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Prenotazione non trovata"));
         boolean isOwner =
-            pren.getUtente() != null && pren.getUtente().getId() != null && pren.getUtente().getId().toString().equals(utenteId);
+            pren.getUtente() != null && pren.getUtente().getUser() != null && pren.getUtente().getUser().getLogin().equals(user);
 
         if (!isOwner && !tipoUtente()) {
             throw new AccessDeniedException("Utente non ha i permessi per cancellare questa prenotazione");
         }
 
-        prenotazioniRepository.deleteById(id);
+        StatiPrenotazione statoCod = statiPrenotazioneRepository
+            .findByCodice(StatoCodice.CANCELLED)
+            .orElseThrow(() -> new AccessDeniedException("Stato non trovata"));
+
+        pren.setStato(statoCod);
+
+        prenotazioniRepository.save(pren);
+
+        LOG.debug("Prenotazione {} annulaa con sucesso");
     }
 
     /**
@@ -174,11 +189,20 @@ public class PrenotazioniService {
 
         Prenotazioni prenotazioni = prenotazioniMapper.toEntity(prenotazioniDTO);
 
-        Utenti ut = utentiRepository
-            .findById(prenotazioniDTO.getUtenteId())
-            .orElseThrow(() -> new EntityNotFoundException("Utente non trovato"));
+        if (prenotazioniDTO.getUtente() == null || prenotazioniDTO.getUtente().getId() == null) {
+            throw new IllegalArgumentException("Utente non e valido: ID mancante");
+        }
+        if (prenotazioniDTO.getStato() == null || prenotazioniDTO.getStato().getId() == null) {
+            throw new IllegalArgumentException("Stato non e valido: ID mancante");
+        }
 
-        Sale sa = saleRepository.findById(prenotazioniDTO.getSalaId()).orElseThrow(() -> new EntityNotFoundException("Sala non trovato"));
+        UUID utenteId = prenotazioni.getUtente().getId();
+
+        UUID salaId = prenotazioni.getSala().getId();
+
+        Utenti ut = utentiRepository.findById(utenteId).orElseThrow(() -> new EntityNotFoundException("Utente non trovato"));
+
+        Sale sa = saleRepository.findById(salaId).orElseThrow(() -> new EntityNotFoundException("Sala non trovato"));
 
         prenotazioni.setUtente(ut);
         prenotazioni.setSala(sa);

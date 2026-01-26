@@ -26,19 +26,10 @@ public class PrenotazioniDTO implements Serializable {
 
     private StatiPrenotazioneDTO stato;
 
-    private UUID utenteId;
-
-    private UUID salaId;
-
-    private String salaNome;
-
-    public String getSalaNome() {
-        return salaNome;
-    }
-
-    public void setSalaNome(String salaNome) {
-        this.salaNome = salaNome;
-    }
+    private String tipoEvento;
+    private Double prezzo;
+    private UtentiDTO utente;
+    private SaleDTO sala;
 
     public UUID getId() {
         return id;
@@ -80,20 +71,36 @@ public class PrenotazioniDTO implements Serializable {
         this.stato = stato;
     }
 
-    public UUID getUtenteId() {
-        return utenteId;
+    public String getTipoEvento() {
+        return tipoEvento;
     }
 
-    public void setUtenteId(UUID utenteId) {
-        this.utenteId = utenteId;
+    public void setTipoEvento(String tipoEvento) {
+        this.tipoEvento = tipoEvento;
     }
 
-    public UUID getSalaId() {
-        return salaId;
+    public Double getPrezzo() {
+        return prezzo;
     }
 
-    public void setSalaId(UUID salaId) {
-        this.salaId = salaId;
+    public void setPrezzo(Double prezzo) {
+        this.prezzo = prezzo;
+    }
+
+    public SaleDTO getSala() {
+        return sala;
+    }
+
+    public void setSala(SaleDTO sala) {
+        this.sala = sala;
+    }
+
+    public UtentiDTO getUtente() {
+        return utente;
+    }
+
+    public void setUtente(UtentiDTO utente) {
+        this.utente = utente;
     }
 
     @Override
@@ -118,16 +125,19 @@ public class PrenotazioniDTO implements Serializable {
     }
 
     // prettier-ignore
+
     @Override
     public String toString() {
         return "PrenotazioniDTO{" +
-            "id='" + getId() + "'" +
-            ", data='" + getData() + "'" +
-            ", oraInizio='" + getOraInizio() + "'" +
-            ", oraFine='" + getOraFine() + "'" +
-            ", stato=" + getStato() +
-            ", utente=" + getUtenteId() +
-            ", sala=" + getSalaId() +
-            "}";
+            "id=" + id +
+            ", data=" + data +
+            ", oraInizio=" + oraInizio +
+            ", oraFine=" + oraFine +
+            ", stato=" + stato +
+            ", tipoEvento='" + tipoEvento + '\'' +
+            ", prezzo=" + prezzo +
+            ", utente=" + utente +
+            ", sala=" + sala +
+            '}';
     }
 }

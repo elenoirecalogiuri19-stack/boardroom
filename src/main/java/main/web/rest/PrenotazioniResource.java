@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -196,16 +197,17 @@ public class PrenotazioniResource {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePrenotazioni(@PathVariable UUID id) throws AccessDeniedException {
         LOG.debug("REST request to delete Prenotazioni : {}", id);
-        Authentication a = SecurityContextHolder.getContext().getAuthentication();
-        String username = a.getName();
 
-        Utenti ute = utentiRepository.findByUser_Login(username).orElseThrow(() -> new EntityNotFoundException("utente non trovato"));
-        String utenteId = ute.getId().toString();
-
-        prenotazioniService.delete(id, utenteId);
-        return ResponseEntity.noContent()
-            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
-            .build();
+        try {
+            prenotazioniService.delete(id);
+            return ResponseEntity.noContent()
+                .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
+                .build();
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**
