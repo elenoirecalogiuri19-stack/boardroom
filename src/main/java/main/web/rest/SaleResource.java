@@ -9,6 +9,7 @@ import main.service.dto.SaleDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,12 +26,14 @@ public class SaleResource {
 
     @PostMapping("")
     public ResponseEntity<SaleDTO> createSale(@RequestBody SaleDTO saleDTO) {
+        LOG.debug("REST request to save Sale : {}", saleDTO);
         SaleDTO result = saleService.save(saleDTO);
         return ResponseEntity.ok().body(result);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<SaleDTO> updateSale(@PathVariable(value = "id") final UUID id, @RequestBody SaleDTO saleDTO) {
+        LOG.debug("REST request to update Sale : {}, {}", id, saleDTO);
         saleDTO.setId(id);
         SaleDTO result = saleService.update(saleDTO);
         return ResponseEntity.ok().body(result);
@@ -38,21 +41,24 @@ public class SaleResource {
 
     @GetMapping("")
     public ResponseEntity<List<SaleDTO>> getAllSales() {
+        LOG.debug("REST request to get all Sales");
         return ResponseEntity.ok().body(saleService.findAll(Pageable.unpaged()).getContent());
     }
 
     @GetMapping("/disponibili")
     public ResponseEntity<List<SaleDTO>> getAllFreeSales(
-        @RequestParam LocalDate data,
-        @RequestParam LocalTime inizio,
-        @RequestParam LocalTime fine
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime inizio,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime fine
     ) {
+        LOG.debug("REST request to get free Sale for date: {}, from: {} to: {}", data, inizio, fine);
         List<SaleDTO> result = saleService.findAllFreeSales(data, inizio, fine);
         return ResponseEntity.ok().body(result);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSale(@PathVariable("id") UUID id) {
+        LOG.debug("REST request to delete Sale : {}", id);
         saleService.delete(id);
         return ResponseEntity.noContent().build();
     }

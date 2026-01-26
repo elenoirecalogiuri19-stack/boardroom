@@ -109,7 +109,11 @@ class PrenotazioniResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Prenotazioni createEntity() {
-        return new Prenotazioni().data(DEFAULT_DATA).oraInizio(DEFAULT_ORA_INIZIO).oraFine(DEFAULT_ORA_FINE);
+        Prenotazioni prenotazioni = new Prenotazioni();
+        prenotazioni.setData(DEFAULT_DATA);
+        prenotazioni.setOraInizio(DEFAULT_ORA_INIZIO);
+        prenotazioni.setOraFine(DEFAULT_ORA_FINE);
+        return prenotazioni;
     }
 
     /**
@@ -119,7 +123,11 @@ class PrenotazioniResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Prenotazioni createUpdatedEntity() {
-        return new Prenotazioni().data(UPDATED_DATA).oraInizio(UPDATED_ORA_INIZIO).oraFine(UPDATED_ORA_FINE);
+        Prenotazioni prenotazioni = new Prenotazioni();
+        prenotazioni.setData(UPDATED_DATA);
+        prenotazioni.setOraInizio(UPDATED_ORA_INIZIO);
+        prenotazioni.setOraFine(UPDATED_ORA_FINE);
+        return prenotazioni;
     }
 
     @BeforeEach
@@ -298,7 +306,10 @@ class PrenotazioniResourceIT {
         Prenotazioni updatedPrenotazioni = prenotazioniRepository.findById(prenotazioni.getId()).orElseThrow();
         // Disconnect from session so that the updates on updatedPrenotazioni are not directly saved in db
         em.detach(updatedPrenotazioni);
-        updatedPrenotazioni.data(UPDATED_DATA).oraInizio(UPDATED_ORA_INIZIO).oraFine(UPDATED_ORA_FINE);
+        updatedPrenotazioni.setData(UPDATED_DATA);
+        updatedPrenotazioni.setOraInizio(UPDATED_ORA_INIZIO);
+        updatedPrenotazioni.setOraFine(UPDATED_ORA_FINE);
+
         PrenotazioniDTO prenotazioniDTO = prenotazioniMapper.toDto(updatedPrenotazioni);
 
         restPrenotazioniMockMvc
@@ -387,8 +398,8 @@ class PrenotazioniResourceIT {
         // Update the prenotazioni using partial update
         Prenotazioni partialUpdatedPrenotazioni = new Prenotazioni();
         partialUpdatedPrenotazioni.setId(prenotazioni.getId());
-
-        partialUpdatedPrenotazioni.oraInizio(UPDATED_ORA_INIZIO).oraFine(UPDATED_ORA_FINE);
+        partialUpdatedPrenotazioni.setOraInizio(UPDATED_ORA_INIZIO);
+        partialUpdatedPrenotazioni.setOraFine(UPDATED_ORA_FINE);
 
         restPrenotazioniMockMvc
             .perform(
@@ -418,8 +429,9 @@ class PrenotazioniResourceIT {
         // Update the prenotazioni using partial update
         Prenotazioni partialUpdatedPrenotazioni = new Prenotazioni();
         partialUpdatedPrenotazioni.setId(prenotazioni.getId());
-
-        partialUpdatedPrenotazioni.data(UPDATED_DATA).oraInizio(UPDATED_ORA_INIZIO).oraFine(UPDATED_ORA_FINE);
+        partialUpdatedPrenotazioni.setData(UPDATED_DATA);
+        partialUpdatedPrenotazioni.setOraInizio(UPDATED_ORA_INIZIO);
+        partialUpdatedPrenotazioni.setOraFine(UPDATED_ORA_FINE);
 
         restPrenotazioniMockMvc
             .perform(

@@ -30,8 +30,12 @@ public class SaleService {
         this.saleMapper = saleMapper;
     }
 
+    /**
+     * US2 – Visualizza sale disponibili in una data e fascia oraria.
+     */
     @Transactional(readOnly = true)
     public List<SaleDTO> findAllFreeSales(LocalDate data, LocalTime inizio, LocalTime fine) {
+        LOG.debug("Request to get free sales for {} from {} to {}", data, inizio, fine);
         return saleRepository.findFreeSales(data, inizio, fine).stream().map(saleMapper::toDto).collect(Collectors.toList());
     }
 

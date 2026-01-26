@@ -24,11 +24,12 @@ public class PrenotazioniDTO implements Serializable {
     @NotNull
     private LocalTime oraFine;
 
-    private StatiPrenotazioneDTO stato;
-
     private String tipoEvento;
     private Double prezzo;
+    private StatiPrenotazioneDTO stato;
+
     private UtentiDTO utente;
+
     private SaleDTO sala;
 
     public UUID getId() {
@@ -63,14 +64,6 @@ public class PrenotazioniDTO implements Serializable {
         this.oraFine = oraFine;
     }
 
-    public StatiPrenotazioneDTO getStato() {
-        return stato;
-    }
-
-    public void setStato(StatiPrenotazioneDTO stato) {
-        this.stato = stato;
-    }
-
     public String getTipoEvento() {
         return tipoEvento;
     }
@@ -87,12 +80,12 @@ public class PrenotazioniDTO implements Serializable {
         this.prezzo = prezzo;
     }
 
-    public SaleDTO getSala() {
-        return sala;
+    public StatiPrenotazioneDTO getStato() {
+        return stato;
     }
 
-    public void setSala(SaleDTO sala) {
-        this.sala = sala;
+    public void setStato(StatiPrenotazioneDTO stato) {
+        this.stato = stato;
     }
 
     public UtentiDTO getUtente() {
@@ -101,6 +94,14 @@ public class PrenotazioniDTO implements Serializable {
 
     public void setUtente(UtentiDTO utente) {
         this.utente = utente;
+    }
+
+    public SaleDTO getSala() {
+        return sala;
+    }
+
+    public void setSala(SaleDTO sala) {
+        this.sala = sala;
     }
 
     @Override
@@ -125,19 +126,12 @@ public class PrenotazioniDTO implements Serializable {
     }
 
     // prettier-ignore
-
     @Override
     public String toString() {
-        return "PrenotazioniDTO{" +
-            "id=" + id +
-            ", data=" + data +
-            ", oraInizio=" + oraInizio +
-            ", oraFine=" + oraFine +
-            ", stato=" + stato +
-            ", tipoEvento='" + tipoEvento + '\'' +
-            ", prezzo=" + prezzo +
-            ", utente=" + utente +
-            ", sala=" + sala +
-            '}';
+        return "PrenotazioniDTO{id='" + id + "', data='" + data + "', tipoEvento='" + tipoEvento + "'}";
     }
+
+    public void setSalaId(UUID id) {}
+
+    public void setUtenteId(UUID id) {}
 }

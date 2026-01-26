@@ -15,11 +15,9 @@ import org.mapstruct.*;
  */
 @Mapper(componentModel = "spring")
 public interface PrenotazioniMapper extends EntityMapper<PrenotazioniDTO, Prenotazioni> {
-    @Override
-    @Mapping(target = "stato", source = "stato", qualifiedByName = "statiPrenotazioneCodice")
-    @Mapping(target = "utenteId", source = "utente.id")
-    @Mapping(target = "salaId", source = "sala.id")
-    @Mapping(target = "salaNome", source = "sala.nome")
+    @Mapping(target = "stato", source = "stato")
+    @Mapping(target = "utente", source = "utente")
+    @Mapping(target = "sala", source = "sala")
     PrenotazioniDTO toDto(Prenotazioni s);
 
     @Override

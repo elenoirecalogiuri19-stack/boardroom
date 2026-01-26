@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.UUID;
 import main.domain.Prenotazioni;
 import main.domain.Sale;
+import main.domain.Utenti;
+import main.domain.enumeration.StatoCodice;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
@@ -49,13 +51,10 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
     )
     Optional<Prenotazioni> findOneWithToOneRelationships(@Param("id") UUID id);
 
-    // inplementazione metodo per la disponibilita sale
-
     @Query(
-        "SELECT COUNT(p) > 0 " +
-        "FROM Prenotazioni p WHERE p.sala = :sala AND p.data = :data " +
+        "SELECT COUNT(p) > 0 FROM Prenotazioni p WHERE p.sala = :sala AND p.data = :data " +
         "AND ((p.oraInizio < :oraFine) AND (p.oraFine > :oraInizio)) " +
-        "AND p.stato.codice = 'CONFIRMED'"
+        "AND p.stato.codice = main.domain.enumeration.StatoCodice.CONFIRMED"
     )
     boolean existsOverlappingConfirmedPrenotazione(
         @Param("sala") Sale sala,

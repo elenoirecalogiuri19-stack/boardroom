@@ -11,8 +11,11 @@ import main.domain.Sale;
 import main.domain.StatiPrenotazione;
 import main.domain.Utenti;
 import main.domain.enumeration.StatoCodice;
+import main.domain.enumeration.StatoCodice;
 import main.repository.PrenotazioniRepository;
 import main.repository.SaleRepository;
+import main.repository.SaleRepository;
+import main.repository.StatiPrenotazioneRepository;
 import main.repository.StatiPrenotazioneRepository;
 import main.repository.UtentiRepository;
 import main.security.AuthoritiesConstants;
@@ -69,7 +72,22 @@ public class PrenotazioniService {
      */
     public PrenotazioniDTO save(PrenotazioniDTO prenotazioniDTO) {
         LOG.debug("Request to save Prenotazioni : {}", prenotazioniDTO);
+
+        // US4: Gestione prezzo per evento PRIVATO
+        if ("PRIVATO".equalsIgnoreCase(prenotazioniDTO.getTipoEvento())) {
+            prenotazioniDTO.setPrezzo(null);
+        }
+
         Prenotazioni prenotazioni = prenotazioniMapper.toEntity(prenotazioniDTO);
+
+        // US4: Impostazione automatica stato CONFIRMED
+        statiPrenotazioneRepository
+            .findAll()
+            .stream()
+            .filter(s -> s.getCodice() == StatoCodice.CONFIRMED)
+            .findFirst()
+            .ifPresent(prenotazioni::setStato);
+
         prenotazioni = prenotazioniRepository.save(prenotazioni);
         return prenotazioniMapper.toDto(prenotazioni);
     }

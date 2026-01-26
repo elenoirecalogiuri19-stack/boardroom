@@ -16,6 +16,7 @@ import main.repository.UserRepository;
 import main.repository.UtentiRepository;
 import main.service.PrenotazioniService;
 import main.service.dto.PrenotazioniDTO;
+import main.service.mapper.PrenotazioniMapper;
 import main.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,16 +52,16 @@ public class PrenotazioniResource {
 
     private final PrenotazioniRepository prenotazioniRepository;
 
-    private final UtentiRepository utentiRepository;
+    private final PrenotazioniMapper prenotazioniMapper;
 
     public PrenotazioniResource(
         PrenotazioniService prenotazioniService,
         PrenotazioniRepository prenotazioniRepository,
-        UtentiRepository utentiRepository
+        PrenotazioniMapper prenotazioniMapper
     ) {
         this.prenotazioniService = prenotazioniService;
         this.prenotazioniRepository = prenotazioniRepository;
-        this.utentiRepository = utentiRepository;
+        this.prenotazioniMapper = prenotazioniMapper;
     }
 
     /**
@@ -158,28 +159,32 @@ public class PrenotazioniResource {
      * @param pageable the pagination information.
      * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of prenotazionis in body.
+     * US2: Semplificato per evitare errori di compilazione con il Service.
      */
     @GetMapping("")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<PrenotazioniDTO>> getAllPrenotazionis(
         @org.springdoc.core.annotations.ParameterObject Pageable pageable,
-        @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload
+        @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload,
+        @RequestParam(name = "salaId", required = false) UUID salaId
     ) {
-        LOG.debug("REST request to get a page of Prenotazionis");
+        LOG.debug("REST request to get a page of Prenotazionis. Filter salaId: {}", salaId);
         Page<PrenotazioniDTO> page;
-        if (eagerload) {
+
+        if (salaId != null) {
+            page = prenotazioniRepository.findBySalaId(salaId, pageable).map(prenotazioniMapper::toDto);
+        } else if (eagerload) {
             page = prenotazioniService.findAllWithEagerRelationships(pageable);
         } else {
             page = prenotazioniService.findAll(pageable);
         }
+
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
     /**
      * {@code GET  /prenotazionis/:id} : get the "id" prenotazioni.
-     *
-     * @param id the id of the prenotazioniDTO to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the prenotazioniDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id}")
     public ResponseEntity<PrenotazioniDTO> getPrenotazioni(@PathVariable("id") UUID id) {
@@ -190,12 +195,9 @@ public class PrenotazioniResource {
 
     /**
      * {@code DELETE  /prenotazionis/:id} : delete the "id" prenotazioni.
-     *
-     * @param id the id of the prenotazioniDTO to delete.
-     * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePrenotazioni(@PathVariable UUID id) throws AccessDeniedException {
+    public ResponseEntity<Void> deletePrenotazioni(@PathVariable("id") UUID id) {
         LOG.debug("REST request to delete Prenotazioni : {}", id);
 
         try {
