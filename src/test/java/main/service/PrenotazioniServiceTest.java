@@ -61,7 +61,7 @@ class PrenotazioniServiceTest {
 
         String callerUtenteId = UUID.randomUUID().toString();
 
-        assertThrows(AccessDeniedException.class, () -> prenotazioniService.delete(prenId, callerUtenteId));
+        assertThrows(AccessDeniedException.class, () -> prenotazioniService.delete(prenId));
         verify(prenotazioniRepository, never()).deleteById(prenId);
     }
 
@@ -87,7 +87,7 @@ class PrenotazioniServiceTest {
 
         String callerUtenteId = ownerId.toString();
 
-        assertDoesNotThrow(() -> prenotazioniService.delete(prenId, callerUtenteId));
+        assertDoesNotThrow(() -> prenotazioniService.delete(prenId));
         verify(prenotazioniRepository, times(1)).deleteById(prenId);
     }
 
@@ -114,7 +114,7 @@ class PrenotazioniServiceTest {
 
         String callerUtenteId = UUID.randomUUID().toString();
 
-        assertDoesNotThrow(() -> prenotazioniService.delete(prenId, callerUtenteId));
+        assertDoesNotThrow(() -> prenotazioniService.delete(prenId));
         verify(prenotazioniRepository, times(1)).deleteById(prenId);
     }
 }

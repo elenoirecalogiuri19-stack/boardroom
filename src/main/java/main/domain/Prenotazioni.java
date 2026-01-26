@@ -150,4 +150,67 @@ public class Prenotazioni implements Serializable {
     public int hashCode() {
         return getClass().hashCode();
     }
+
+    // --- METODI FLUENT (Necessari per i Test) ---
+    public Prenotazioni id(UUID id) {
+        this.setId(id);
+        return this;
+    }
+
+    public Prenotazioni data(LocalDate data) {
+        this.setData(data);
+        return this;
+    }
+
+    public Prenotazioni oraInizio(LocalTime oraInizio) {
+        this.setOraInizio(oraInizio);
+        return this;
+    }
+
+    public Prenotazioni oraFine(LocalTime oraFine) {
+        this.setOraFine(oraFine);
+        return this;
+    }
+
+    public Prenotazioni tipoEvento(String tipoEvento) {
+        this.setTipoEvento(tipoEvento);
+        return this;
+    }
+
+    public Prenotazioni prezzo(Double prezzo) {
+        this.setPrezzo(prezzo);
+        return this;
+    }
+
+    public Prenotazioni eventis(Set<Eventi> eventis) {
+        this.setEventis(eventis);
+        return this;
+    }
+
+    public Prenotazioni addEventi(Eventi eventi) {
+        this.eventis.add(eventi);
+        eventi.setPrenotazione(this);
+        return this;
+    }
+
+    public Prenotazioni removeEventi(Eventi eventi) {
+        this.eventis.remove(eventi);
+        eventi.setPrenotazione(null);
+        return this;
+    }
+
+    public Prenotazioni stato(StatiPrenotazione statiPrenotazione) {
+        this.setStato(statiPrenotazione);
+        return this;
+    }
+
+    public Prenotazioni utente(Utenti utenti) {
+        this.setUtente(utenti);
+        return this;
+    }
+
+    public Prenotazioni sala(Sale sale) {
+        this.setSala(sale);
+        return this;
+    }
 }
