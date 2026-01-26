@@ -2,14 +2,12 @@ package main.web.rest;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import main.domain.enumeration.TipoEvento;
 import main.repository.EventiRepository;
 import main.service.EventiService;
 import main.service.dto.EventiDTO;
@@ -56,29 +54,20 @@ public class EventiResource {
     @PostMapping("")
     public ResponseEntity<EventiDTO> createEventi(@Valid @RequestBody EventiDTO eventiDTO) throws URISyntaxException {
         LOG.debug("REST request to save Eventi : {}", eventiDTO);
-        if (eventiDTO.getId() != null) {
-            throw new BadRequestAlertException("A new eventi cannot already have an ID", ENTITY_NAME, "idexists");
+
+        validaNewEvento(eventiDTO);
+
+        EventiDTO saved = eventiService.createEvento(eventiDTO);
+
+        return ResponseEntity.created(new URI("/api/eventis/" + saved.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, saved.getId().toString()))
+            .body(saved);
+    }
+
+    private void validaNewEvento(EventiDTO dto) {
+        if (dto.getId() != null) {
+            throw new BadRequestAlertException("Un nuovo evento non puo gia avere ID", ENTITY_NAME, "idexists");
         }
-
-        // --- LOGICA US4: Gestione Evento Privato (Pre-salvataggio) ---
-        if (eventiDTO.getTipo() != null && TipoEvento.PRIVATO.equals(eventiDTO.getTipo())) {
-            eventiDTO.setPrezzo(BigDecimal.ZERO);
-            LOG.debug("US4: Forzo prezzo a 0 prima del salvataggio");
-        }
-
-        // Salvataggio tramite Service
-        eventiDTO = eventiService.save(eventiDTO);
-
-        // --- LOGICA US4: Verifica Post-salvataggio ---
-        // Se il service ha ricaricato il prezzo dal DB o lo ha resettato, lo forziamo di nuovo a 0
-        // per la risposta che l'utente vede a schermo.
-        if (eventiDTO.getTipo() != null && TipoEvento.PRIVATO.equals(eventiDTO.getTipo())) {
-            eventiDTO.setPrezzo(BigDecimal.ZERO);
-        }
-
-        return ResponseEntity.created(new URI("/api/eventis/" + eventiDTO.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, eventiDTO.getId().toString()))
-            .body(eventiDTO);
     }
 
     /**
@@ -86,36 +75,28 @@ public class EventiResource {
      */
     @PutMapping("/{id}")
     public ResponseEntity<EventiDTO> updateEventi(
-        @PathVariable(value = "id", required = false) final UUID id,
+        @PathVariable(value = "id", required = false) UUID id,
         @Valid @RequestBody EventiDTO eventiDTO
     ) throws URISyntaxException {
         LOG.debug("REST request to update Eventi : {}, {}", id, eventiDTO);
+        validaIdPerUpdate(id, eventiDTO);
+
+        EventiDTO result = eventiService.update(eventiDTO);
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+
+    private void validaIdPerUpdate(UUID id, EventiDTO eventiDTO) {
         if (eventiDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
         if (!Objects.equals(id, eventiDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
-
         if (!eventiRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
-
-        // Applichiamo la logica US4 anche in fase di modifica (Update)
-        if (eventiDTO.getTipo() != null && TipoEvento.PRIVATO.equals(eventiDTO.getTipo())) {
-            eventiDTO.setPrezzo(BigDecimal.ZERO);
-        }
-
-        eventiDTO = eventiService.update(eventiDTO);
-
-        // Forziamo il prezzo a 0 anche dopo l'update
-        if (eventiDTO.getTipo() != null && TipoEvento.PRIVATO.equals(eventiDTO.getTipo())) {
-            eventiDTO.setPrezzo(BigDecimal.ZERO);
-        }
-
-        return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, eventiDTO.getId().toString()))
-            .body(eventiDTO);
     }
 
     /**
@@ -123,29 +104,14 @@ public class EventiResource {
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public ResponseEntity<EventiDTO> partialUpdateEventi(
-        @PathVariable(value = "id", required = false) final UUID id,
+        @PathVariable(value = "id", required = false) UUID id,
         @NotNull @RequestBody EventiDTO eventiDTO
     ) throws URISyntaxException {
         LOG.debug("REST request to partial update Eventi partially : {}, {}", id, eventiDTO);
-        if (eventiDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, eventiDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
 
-        if (!eventiRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
+        validaIdPerUpdate(id, eventiDTO);
 
         Optional<EventiDTO> result = eventiService.partialUpdate(eventiDTO);
-
-        // Gestione US4 per il partial update
-        result.ifPresent(dto -> {
-            if (dto.getTipo() != null && TipoEvento.PRIVATO.equals(dto.getTipo())) {
-                dto.setPrezzo(BigDecimal.ZERO);
-            }
-        });
 
         return ResponseUtil.wrapOrNotFound(
             result,
@@ -160,16 +126,6 @@ public class EventiResource {
     public ResponseEntity<List<EventiDTO>> getAllEventis(@org.springdoc.core.annotations.ParameterObject Pageable pageable) {
         LOG.debug("REST request to get a page of Eventis");
         Page<EventiDTO> page = eventiService.findAll(pageable);
-
-        // Applichiamo la logica US4 a tutta la lista: ogni evento privato mostrato deve avere prezzo 0
-        page
-            .getContent()
-            .forEach(dto -> {
-                if (dto.getTipo() != null && TipoEvento.PRIVATO.equals(dto.getTipo())) {
-                    dto.setPrezzo(BigDecimal.ZERO);
-                }
-            });
-
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -181,13 +137,6 @@ public class EventiResource {
     public ResponseEntity<EventiDTO> getEventi(@PathVariable("id") UUID id) {
         LOG.debug("REST request to get Eventi : {}", id);
         Optional<EventiDTO> eventiDTO = eventiService.findOne(id);
-
-        // Logica US4 per il singolo evento
-        eventiDTO.ifPresent(dto -> {
-            if (dto.getTipo() != null && TipoEvento.PRIVATO.equals(dto.getTipo())) {
-                dto.setPrezzo(BigDecimal.ZERO);
-            }
-        });
 
         return ResponseUtil.wrapOrNotFound(eventiDTO);
     }
@@ -213,7 +162,6 @@ public class EventiResource {
     @PostMapping("/crea-pubblico")
     public ResponseEntity<EventiDTO> creaEventoPubblico(@Valid @RequestBody EventiDTO dto) {
         LOG.debug("REST request to crea EventoPubblico : {}", dto);
-
         EventiDTO evento = eventiService.creaEventoPubblico(dto);
         return ResponseEntity.ok(evento);
     }
