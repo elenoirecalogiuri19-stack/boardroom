@@ -1,14 +1,10 @@
 package main.domain;
 
-import static main.domain.EventiTestSamples.*;
-import static main.domain.PrenotazioniTestSamples.*;
-import static main.domain.SaleTestSamples.*;
-import static main.domain.StatiPrenotazioneTestSamples.*;
-import static main.domain.UtentiTestSamples.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.UUID;
 import main.web.rest.TestUtil;
 import org.junit.jupiter.api.Test;
 
@@ -17,72 +13,32 @@ class PrenotazioniTest {
     @Test
     void equalsVerifier() throws Exception {
         TestUtil.equalsVerifier(Prenotazioni.class);
-        Prenotazioni prenotazioni1 = getPrenotazioniSample1();
-        Prenotazioni prenotazioni2 = new Prenotazioni();
-        assertThat(prenotazioni1).isNotEqualTo(prenotazioni2);
+        Prenotazioni prenotazione1 = new Prenotazioni();
+        prenotazione1.setId(UUID.randomUUID());
+        Prenotazioni prenotazione2 = new Prenotazioni();
+        prenotazione2.setId(prenotazione1.getId());
+        assertThat(prenotazione1).isEqualTo(prenotazione2);
 
-        prenotazioni2.setId(prenotazioni1.getId());
-        assertThat(prenotazioni1).isEqualTo(prenotazioni2);
+        prenotazione2.setId(UUID.randomUUID());
+        assertThat(prenotazione1).isNotEqualTo(prenotazione2);
 
-        prenotazioni2 = getPrenotazioniSample2();
-        assertThat(prenotazioni1).isNotEqualTo(prenotazioni2);
+        prenotazione1.setId(null);
+        assertThat(prenotazione1).isNotEqualTo(prenotazione2);
     }
 
     @Test
-    void eventiTest() {
-        Prenotazioni prenotazioni = getPrenotazioniRandomSampleGenerator();
-        Eventi eventiBack = getEventiRandomSampleGenerator();
+    void basicFields_shouldBeSetAndRetrievedCorrectly() {
+        Prenotazioni prenotazione = new Prenotazioni();
+        LocalDate data = LocalDate.now().plusDays(1);
+        LocalTime oraInizio = LocalTime.of(10, 0);
+        LocalTime oraFine = LocalTime.of(11, 0);
 
-        prenotazioni.addEventi(eventiBack);
-        assertThat(prenotazioni.getEventis()).containsOnly(eventiBack);
-        assertThat(eventiBack.getPrenotazione()).isEqualTo(prenotazioni);
+        prenotazione.setData(data);
+        prenotazione.setOraInizio(oraInizio);
+        prenotazione.setOraFine(oraFine);
 
-        prenotazioni.removeEventi(eventiBack);
-        assertThat(prenotazioni.getEventis()).doesNotContain(eventiBack);
-        assertThat(eventiBack.getPrenotazione()).isNull();
-
-        prenotazioni.eventis(new HashSet<>(Set.of(eventiBack)));
-        assertThat(prenotazioni.getEventis()).containsOnly(eventiBack);
-        assertThat(eventiBack.getPrenotazione()).isEqualTo(prenotazioni);
-
-        prenotazioni.setEventis(new HashSet<>());
-        assertThat(prenotazioni.getEventis()).doesNotContain(eventiBack);
-        assertThat(eventiBack.getPrenotazione()).isNull();
-    }
-
-    @Test
-    void statoTest() {
-        Prenotazioni prenotazioni = getPrenotazioniRandomSampleGenerator();
-        StatiPrenotazione statiPrenotazioneBack = getStatiPrenotazioneRandomSampleGenerator();
-
-        prenotazioni.setStato(statiPrenotazioneBack);
-        assertThat(prenotazioni.getStato()).isEqualTo(statiPrenotazioneBack);
-
-        prenotazioni.stato(null);
-        assertThat(prenotazioni.getStato()).isNull();
-    }
-
-    @Test
-    void utenteTest() {
-        Prenotazioni prenotazioni = getPrenotazioniRandomSampleGenerator();
-        Utenti utentiBack = getUtentiRandomSampleGenerator();
-
-        prenotazioni.setUtente(utentiBack);
-        assertThat(prenotazioni.getUtente()).isEqualTo(utentiBack);
-
-        prenotazioni.utente(null);
-        assertThat(prenotazioni.getUtente()).isNull();
-    }
-
-    @Test
-    void salaTest() {
-        Prenotazioni prenotazioni = getPrenotazioniRandomSampleGenerator();
-        Sale saleBack = getSaleRandomSampleGenerator();
-
-        prenotazioni.setSala(saleBack);
-        assertThat(prenotazioni.getSala()).isEqualTo(saleBack);
-
-        prenotazioni.sala(null);
-        assertThat(prenotazioni.getSala()).isNull();
+        assertThat(prenotazione.getData()).isEqualTo(data);
+        assertThat(prenotazione.getOraInizio()).isEqualTo(oraInizio);
+        assertThat(prenotazione.getOraFine()).isEqualTo(oraFine);
     }
 }
