@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SaleService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SaleService.class);
+
     private final SaleRepository saleRepository;
     private final SaleMapper saleMapper;
 
@@ -30,25 +31,20 @@ public class SaleService {
         this.saleMapper = saleMapper;
     }
 
-    /**
-     * US2 – Visualizza sale disponibili in una data e fascia oraria.
-     */
     @Transactional(readOnly = true)
     public List<SaleDTO> findAllFreeSales(LocalDate data, LocalTime inizio, LocalTime fine) {
-        LOG.debug("Request to get free sales for {} from {} to {}", data, inizio, fine);
+        LOG.debug("US2 - Ricerca sale libere");
         return saleRepository.findFreeSales(data, inizio, fine).stream().map(saleMapper::toDto).collect(Collectors.toList());
     }
 
     public SaleDTO save(SaleDTO saleDTO) {
         Sale sale = saleMapper.toEntity(saleDTO);
-        sale = saleRepository.save(sale);
-        return saleMapper.toDto(sale);
+        return saleMapper.toDto(saleRepository.save(sale));
     }
 
     public SaleDTO update(SaleDTO saleDTO) {
         Sale sale = saleMapper.toEntity(saleDTO);
-        sale = saleRepository.save(sale);
-        return saleMapper.toDto(sale);
+        return saleMapper.toDto(saleRepository.save(sale));
     }
 
     @Transactional(readOnly = true)
@@ -56,12 +52,12 @@ public class SaleService {
         return saleRepository.findAll(pageable).map(saleMapper::toDto);
     }
 
-    public void delete(UUID id) {
-        saleRepository.deleteById(id);
-    }
-
     @Transactional(readOnly = true)
     public Optional<SaleDTO> findOne(UUID id) {
         return saleRepository.findById(id).map(saleMapper::toDto);
+    }
+
+    public void delete(UUID id) {
+        saleRepository.deleteById(id);
     }
 }

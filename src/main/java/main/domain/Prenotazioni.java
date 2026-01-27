@@ -2,7 +2,7 @@ package main.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,6 +14,9 @@ import main.domain.enumeration.TipoEvento;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+/**
+ * Entity class for Prenotazioni
+ */
 @Entity
 @Table(name = "prenotazioni")
 public class Prenotazioni implements Serializable {
@@ -141,19 +144,7 @@ public class Prenotazioni implements Serializable {
         this.sala = sala;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Prenotazioni)) return false;
-        return id != null && id.equals(((Prenotazioni) o).id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
-
-    // --- METODI FLUENT (Necessari per i Test) ---
+    // --- METODI FLUENTI ---
     public Prenotazioni id(UUID id) {
         this.setId(id);
         return this;
@@ -201,18 +192,31 @@ public class Prenotazioni implements Serializable {
         return this;
     }
 
-    public Prenotazioni stato(StatiPrenotazione statiPrenotazione) {
-        this.setStato(statiPrenotazione);
+    public Prenotazioni stato(StatiPrenotazione stato) {
+        this.setStato(stato);
         return this;
     }
 
-    public Prenotazioni utente(Utenti utenti) {
-        this.setUtente(utenti);
+    public Prenotazioni utente(Utenti utente) {
+        this.setUtente(utente);
         return this;
     }
 
-    public Prenotazioni sala(Sale sale) {
-        this.setSala(sale);
+    public Prenotazioni sala(Sale sala) {
+        this.setSala(sala);
         return this;
+    }
+
+    // --- equals & hashCode ---
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Prenotazioni)) return false;
+        return id != null && id.equals(((Prenotazioni) o).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import main.domain.Sale;
+import main.domain.enumeration.StatoCodice;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -17,7 +18,7 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
         "WHERE p.data = :data " +
         "AND p.oraInizio < :fine " +
         "AND p.oraFine > :inizio " +
-        "AND p.stato.codice != 'CANCELLED')"
+        "AND p.stato.codice = main.domain.enumeration.StatoCodice.CONFIRMED)"
     )
     List<Sale> findFreeSales(@Param("data") LocalDate data, @Param("inizio") LocalTime inizio, @Param("fine") LocalTime fine);
 }
