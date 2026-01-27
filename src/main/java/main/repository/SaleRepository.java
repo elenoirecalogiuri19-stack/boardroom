@@ -9,29 +9,18 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Spring Data JPA repository for the Sale entity.
+ */
+@SuppressWarnings("unused")
 @Repository
 public interface SaleRepository extends JpaRepository<Sale, UUID> {
-
-    // US2 – Sale libere: solo prenotazioni CONFIRMED bloccano la sala
+    // Questo è il metodo che mancava e che ha bloccato il build!
     @Query(
-        "SELECT s FROM Sale s WHERE s.id NOT IN (" +
-<<<<<<< Updated upstream
-        "SELECT p.sala.id FROM Prenotazioni p " +
-        "WHERE p.data = :data " +
-        "AND p.oraInizio < :fine " +
-        "AND p.oraFine > :inizio " +
-        "AND p.stato.codice != 'CANCELLED')"
-=======
-            "SELECT p.sala.id FROM Prenotazioni p " +
-            "WHERE p.stato.codice = 'CONFIRMED' " +
-            "AND p.data = :data " +
-            "AND p.oraInizio < :fine " +
-            "AND p.oraFine > :inizio)"
->>>>>>> Stashed changes
+        "select s from Sale s where s.id not in (select p.sala.id from Prenotazioni p where p.data = :data and " +
+        "((p.oraInizio <= :oraInizio and p.oraFine > :oraInizio) or " +
+        "(p.oraInizio < :oraFine and p.oraFine >= :oraFine) or " +
+        "(p.oraInizio >= :oraInizio and p.oraFine <= :oraFine)))"
     )
-    List<Sale> findFreeSales(
-        @Param("data") LocalDate data,
-        @Param("inizio") LocalTime inizio,
-        @Param("fine") LocalTime fine
-    );
+    List<Sale> findFreeSales(@Param("data") LocalDate data, @Param("oraInizio") LocalTime oraInizio, @Param("oraFine") LocalTime oraFine);
 }

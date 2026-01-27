@@ -98,12 +98,34 @@ public class PrenotazioniDTO implements Serializable {
         this.sala = sala;
     }
 
+    // --- METODI BRIDGE CON UUID ---
+    public UUID getUtenteId() {
+        return (utente != null) ? utente.getId() : null;
+    }
+
+    public void setUtenteId(UUID id) {
+        if (this.utente == null) {
+            this.utente = new UtentiDTO();
+        }
+        this.utente.setId(id);
+    }
+
+    public UUID getSalaId() {
+        return (sala != null) ? sala.getId() : null;
+    }
+
+    public void setSalaId(UUID id) {
+        if (this.sala == null) {
+            this.sala = new SaleDTO();
+        }
+        this.sala.setId(id);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PrenotazioniDTO)) return false;
-        PrenotazioniDTO that = (PrenotazioniDTO) o;
-        return Objects.equals(id, that.id);
+        return id != null && id.equals(((PrenotazioniDTO) o).id);
     }
 
     @Override
@@ -113,6 +135,6 @@ public class PrenotazioniDTO implements Serializable {
 
     @Override
     public String toString() {
-        return "PrenotazioniDTO{id='" + id + "', data='" + data + "', tipoEvento='" + tipoEvento + "'}";
+        return "PrenotazioniDTO{id='" + id + "'}";
     }
 }
