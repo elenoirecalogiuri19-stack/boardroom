@@ -5,13 +5,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Objects;
 import java.util.UUID;
+import main.domain.enumeration.TipoEvento;
 
-/**
- * A DTO for the {@link main.domain.Prenotazioni} entity.
- */
-@SuppressWarnings("common-java:DuplicatedBlocks")
 public class PrenotazioniDTO implements Serializable {
 
     private UUID id;
@@ -25,12 +21,10 @@ public class PrenotazioniDTO implements Serializable {
     @NotNull
     private LocalTime oraFine;
 
-    private String tipoEvento;
+    private TipoEvento tipoEvento;
     private BigDecimal prezzo;
     private StatiPrenotazioneDTO stato;
-
     private UtentiDTO utente;
-
     private SaleDTO sala;
 
     public UUID getId() {
@@ -65,11 +59,11 @@ public class PrenotazioniDTO implements Serializable {
         this.oraFine = oraFine;
     }
 
-    public String getTipoEvento() {
+    public TipoEvento getTipoEvento() {
         return tipoEvento;
     }
 
-    public void setTipoEvento(String tipoEvento) {
+    public void setTipoEvento(TipoEvento tipoEvento) {
         this.tipoEvento = tipoEvento;
     }
 
@@ -103,32 +97,5 @@ public class PrenotazioniDTO implements Serializable {
 
     public void setSala(SaleDTO sala) {
         this.sala = sala;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof PrenotazioniDTO)) {
-            return false;
-        }
-
-        PrenotazioniDTO prenotazioniDTO = (PrenotazioniDTO) o;
-        if (this.id == null) {
-            return false;
-        }
-        return Objects.equals(this.id, prenotazioniDTO.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.id);
-    }
-
-    // prettier-ignore
-    @Override
-    public String toString() {
-        return "PrenotazioniDTO{id='" + id + "', data='" + data + "', tipoEvento='" + tipoEvento + "'}";
     }
 }

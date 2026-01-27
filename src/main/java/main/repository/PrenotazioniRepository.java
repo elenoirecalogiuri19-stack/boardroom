@@ -3,58 +3,28 @@ package main.repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import main.domain.Prenotazioni;
 import main.domain.Sale;
-import main.domain.Utenti;
-import main.domain.enumeration.StatoCodice;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-/**
- * Spring Data JPA repository for the Prenotazioni entity.
- */
 @Repository
 public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID> {
-    // US2: Metodo aggiunto per filtrare le prenotazioni per sala
-    Page<Prenotazioni> findBySalaId(UUID salaId, Pageable pageable);
-
-    default Optional<Prenotazioni> findOneWithEagerRelationships(UUID id) {
-        return this.findOneWithToOneRelationships(id);
-    }
-
-    default List<Prenotazioni> findAllWithEagerRelationships() {
-        return this.findAllWithToOneRelationships();
-    }
-
-    default Page<Prenotazioni> findAllWithEagerRelationships(Pageable pageable) {
-        return this.findAllWithToOneRelationships(pageable);
-    }
-
+    /**
+     * Controlla se esiste una prenotazione confermata che si sovrappone
+     * a una data/ora per una specifica sala.
+     */
     @Query(
-        value = "select prenotazioni from Prenotazioni prenotazioni left join fetch prenotazioni.stato left join fetch prenotazioni.utente left join fetch prenotazioni.sala",
-        countQuery = "select count(prenotazioni) from Prenotazioni prenotazioni"
-    )
-    Page<Prenotazioni> findAllWithToOneRelationships(Pageable pageable);
-
-    @Query(
-        "select prenotazioni from Prenotazioni prenotazioni left join fetch prenotazioni.stato left join fetch prenotazioni.utente left join fetch prenotazioni.sala"
-    )
-    List<Prenotazioni> findAllWithToOneRelationships();
-
-    @Query(
-        "select prenotazioni from Prenotazioni prenotazioni left join fetch prenotazioni.stato left join fetch prenotazioni.utente left join fetch prenotazioni.sala where prenotazioni.id =:id"
-    )
-    Optional<Prenotazioni> findOneWithToOneRelationships(@Param("id") UUID id);
-
-    @Query(
-        "SELECT COUNT(p) > 0 FROM Prenotazioni p WHERE p.sala = :sala AND p.data = :data " +
-        "AND ((p.oraInizio < :oraFine) AND (p.oraFine > :oraInizio)) " +
-        "AND p.stato.codice = main.domain.enumeration.StatoCodice.CONFIRMED"
+        "SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Prenotazioni p " +
+        "WHERE p.sala = :sala " +
+        "AND p.data = :data " +
+        "AND p.oraInizio < :oraFine " +
+        "AND p.oraFine > :oraInizio " +
+        "AND p.stato.codice = 'CONFIRMED'"
     )
     boolean existsOverlappingConfirmedPrenotazione(
         @Param("sala") Sale sala,
@@ -62,4 +32,10 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         @Param("oraInizio") LocalTime oraInizio,
         @Param("oraFine") LocalTime oraFine
     );
+
+    /**
+     * Trova tutte le prenotazioni di una sala specifica con paginazione.
+     */
+    @Query("SELECT p FROM Prenotazioni p WHERE p.sala.id = :salaId")
+    Page<Prenotazioni> findBySalaId(@Param("salaId") UUID salaId, Pageable pageable);
 }

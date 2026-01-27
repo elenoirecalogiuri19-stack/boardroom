@@ -10,10 +10,7 @@ import main.service.dto.StatiPrenotazioneDTO;
 import main.service.dto.UtentiDTO;
 import org.mapstruct.*;
 
-/**
- * Mapper for the entity {@link Prenotazioni} and its DTO {@link PrenotazioniDTO}.
- */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { UtentiMapper.class, SaleMapper.class, StatiPrenotazioneMapper.class })
 public interface PrenotazioniMapper extends EntityMapper<PrenotazioniDTO, Prenotazioni> {
     @Mapping(target = "stato", source = "stato")
     @Mapping(target = "utente", source = "utente")
@@ -21,16 +18,15 @@ public interface PrenotazioniMapper extends EntityMapper<PrenotazioniDTO, Prenot
     PrenotazioniDTO toDto(Prenotazioni s);
 
     @Override
-    @Mapping(target = "utente", ignore = true)
-    @Mapping(target = "sala", ignore = true)
+    @Mapping(target = "utente", source = "utente")
+    @Mapping(target = "sala", source = "sala")
     Prenotazioni toEntity(PrenotazioniDTO dto);
 
+    // I Named methods rimangono per la gestione specifica dei campi
     @Named("statiPrenotazioneCodice")
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")
     @Mapping(target = "codice", source = "codice")
-    @Mapping(target = "descrizione", source = "descrizione")
-    @Mapping(target = "ordineAzione", source = "ordineAzione")
     StatiPrenotazioneDTO toDtoStatiPrenotazioneCodice(StatiPrenotazione statiPrenotazione);
 
     @Named("utentiNome")
@@ -38,10 +34,4 @@ public interface PrenotazioniMapper extends EntityMapper<PrenotazioniDTO, Prenot
     @Mapping(target = "id", source = "id")
     @Mapping(target = "nome", source = "nome")
     UtentiDTO toDtoUtentiNome(Utenti utenti);
-
-    @Named("saleNome")
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "nome", source = "nome")
-    SaleDTO toDtoSaleNome(Sale sale);
 }
