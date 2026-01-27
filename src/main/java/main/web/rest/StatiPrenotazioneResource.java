@@ -49,28 +49,35 @@ public class StatiPrenotazioneResource {
     /**
      * {@code POST  /stati-prenotaziones} : Create a new statiPrenotazione.
      *
-     * @param statiPrenotazioneDTO the statiPrenotazioneDTO to create.
+     * @param dto the statiPrenotazioneDTO to create.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new statiPrenotazioneDTO, or with status {@code 400 (Bad Request)} if the statiPrenotazione has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
-    public ResponseEntity<StatiPrenotazioneDTO> createStatiPrenotazione(@Valid @RequestBody StatiPrenotazioneDTO statiPrenotazioneDTO)
+    public ResponseEntity<StatiPrenotazioneDTO> createStatiPrenotazione(@Valid @RequestBody StatiPrenotazioneDTO dto)
         throws URISyntaxException {
-        LOG.debug("REST request to save StatiPrenotazione : {}", statiPrenotazioneDTO);
-        if (statiPrenotazioneDTO.getId() != null) {
-            throw new BadRequestAlertException("A new statiPrenotazione cannot already have an ID", ENTITY_NAME, "idexists");
+        LOG.debug("REST request to save StatiPrenotazione : {}", dto);
+
+        validaNewStato(dto);
+
+        StatiPrenotazioneDTO saved = statiPrenotazioneService.save(dto);
+
+        return ResponseEntity.created(new URI("/api/stati-prenotaziones/" + saved.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, saved.getId().toString()))
+            .body(saved);
+    }
+
+    private void validaNewStato(StatiPrenotazioneDTO dto) {
+        if (dto.getId() != null) {
+            throw new BadRequestAlertException("lo stato Prenotazione non puo acere gia un ID", ENTITY_NAME, "idexists");
         }
-        statiPrenotazioneDTO = statiPrenotazioneService.save(statiPrenotazioneDTO);
-        return ResponseEntity.created(new URI("/api/stati-prenotaziones/" + statiPrenotazioneDTO.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, statiPrenotazioneDTO.getId().toString()))
-            .body(statiPrenotazioneDTO);
     }
 
     /**
      * {@code PUT  /stati-prenotaziones/:id} : Updates an existing statiPrenotazione.
      *
      * @param id the id of the statiPrenotazioneDTO to save.
-     * @param statiPrenotazioneDTO the statiPrenotazioneDTO to update.
+     * @param dto the statiPrenotazioneDTO to update.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated statiPrenotazioneDTO,
      * or with status {@code 400 (Bad Request)} if the statiPrenotazioneDTO is not valid,
      * or with status {@code 500 (Internal Server Error)} if the statiPrenotazioneDTO couldn't be updated.
@@ -79,31 +86,35 @@ public class StatiPrenotazioneResource {
     @PutMapping("/{id}")
     public ResponseEntity<StatiPrenotazioneDTO> updateStatiPrenotazione(
         @PathVariable(value = "id", required = false) final UUID id,
-        @Valid @RequestBody StatiPrenotazioneDTO statiPrenotazioneDTO
+        @Valid @RequestBody StatiPrenotazioneDTO dto
     ) throws URISyntaxException {
-        LOG.debug("REST request to update StatiPrenotazione : {}, {}", id, statiPrenotazioneDTO);
-        if (statiPrenotazioneDTO.getId() == null) {
+        LOG.debug("REST request to update StatiPrenotazione : {}, {}", id, dto);
+        validaIdPerUpdata(id, dto);
+
+        StatiPrenotazioneDTO result = statiPrenotazioneService.update(dto);
+
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+
+    private void validaIdPerUpdata(UUID id, StatiPrenotazioneDTO dto) {
+        if (dto.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, statiPrenotazioneDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
+        if (!Objects.equals(id, dto.getId())) {
+            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idinvalid");
         }
-
         if (!statiPrenotazioneRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
+            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idinvalid");
         }
-
-        statiPrenotazioneDTO = statiPrenotazioneService.update(statiPrenotazioneDTO);
-        return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, statiPrenotazioneDTO.getId().toString()))
-            .body(statiPrenotazioneDTO);
     }
 
     /**
      * {@code PATCH  /stati-prenotaziones/:id} : Partial updates given fields of an existing statiPrenotazione, field will ignore if it is null
      *
      * @param id the id of the statiPrenotazioneDTO to save.
-     * @param statiPrenotazioneDTO the statiPrenotazioneDTO to update.
+     * @param dto the statiPrenotazioneDTO to update.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated statiPrenotazioneDTO,
      * or with status {@code 400 (Bad Request)} if the statiPrenotazioneDTO is not valid,
      * or with status {@code 404 (Not Found)} if the statiPrenotazioneDTO is not found,
@@ -113,25 +124,17 @@ public class StatiPrenotazioneResource {
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public ResponseEntity<StatiPrenotazioneDTO> partialUpdateStatiPrenotazione(
         @PathVariable(value = "id", required = false) final UUID id,
-        @NotNull @RequestBody StatiPrenotazioneDTO statiPrenotazioneDTO
+        @NotNull @RequestBody StatiPrenotazioneDTO dto
     ) throws URISyntaxException {
-        LOG.debug("REST request to partial update StatiPrenotazione partially : {}, {}", id, statiPrenotazioneDTO);
-        if (statiPrenotazioneDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, statiPrenotazioneDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
+        LOG.debug("REST request to partial update StatiPrenotazione partially : {}, {}", id, dto);
 
-        if (!statiPrenotazioneRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
+        validaIdPerUpdata(id, dto);
 
-        Optional<StatiPrenotazioneDTO> result = statiPrenotazioneService.partialUpdate(statiPrenotazioneDTO);
+        Optional<StatiPrenotazioneDTO> result = statiPrenotazioneService.partialUpdate(dto);
 
         return ResponseUtil.wrapOrNotFound(
             result,
-            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, statiPrenotazioneDTO.getId().toString())
+            HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, dto.getId().toString())
         );
     }
 

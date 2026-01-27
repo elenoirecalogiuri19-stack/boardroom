@@ -41,39 +41,39 @@ public class StatiPrenotazioneService {
      * @param statiPrenotazioneDTO the entity to save.
      * @return the persisted entity.
      */
-    public StatiPrenotazioneDTO save(StatiPrenotazioneDTO statiPrenotazioneDTO) {
-        LOG.debug("Request to save StatiPrenotazione : {}", statiPrenotazioneDTO);
-        StatiPrenotazione statiPrenotazione = statiPrenotazioneMapper.toEntity(statiPrenotazioneDTO);
-        statiPrenotazione = statiPrenotazioneRepository.save(statiPrenotazione);
-        return statiPrenotazioneMapper.toDto(statiPrenotazione);
+    public StatiPrenotazioneDTO save(StatiPrenotazioneDTO dto) {
+        LOG.debug("Request to save StatiPrenotazione : {}", dto);
+        StatiPrenotazione entity = statiPrenotazioneMapper.toEntity(dto);
+        entity = statiPrenotazioneRepository.save(entity);
+        return statiPrenotazioneMapper.toDto(entity);
     }
 
     /**
      * Update a statiPrenotazione.
      *
-     * @param statiPrenotazioneDTO the entity to save.
+     * @param dto the entity to save.
      * @return the persisted entity.
      */
-    public StatiPrenotazioneDTO update(StatiPrenotazioneDTO statiPrenotazioneDTO) {
-        LOG.debug("Request to update StatiPrenotazione : {}", statiPrenotazioneDTO);
-        StatiPrenotazione statiPrenotazione = statiPrenotazioneMapper.toEntity(statiPrenotazioneDTO);
-        statiPrenotazione = statiPrenotazioneRepository.save(statiPrenotazione);
-        return statiPrenotazioneMapper.toDto(statiPrenotazione);
+    public StatiPrenotazioneDTO update(StatiPrenotazioneDTO dto) {
+        LOG.debug("Request to update StatiPrenotazione : {}", dto);
+        StatiPrenotazione entity = statiPrenotazioneMapper.toEntity(dto);
+        entity = statiPrenotazioneRepository.save(entity);
+        return statiPrenotazioneMapper.toDto(entity);
     }
 
     /**
      * Partially update a statiPrenotazione.
      *
-     * @param statiPrenotazioneDTO the entity to update partially.
+     * @param dto the entity to update partially.
      * @return the persisted entity.
      */
-    public Optional<StatiPrenotazioneDTO> partialUpdate(StatiPrenotazioneDTO statiPrenotazioneDTO) {
-        LOG.debug("Request to partially update StatiPrenotazione : {}", statiPrenotazioneDTO);
+    public Optional<StatiPrenotazioneDTO> partialUpdate(StatiPrenotazioneDTO dto) {
+        LOG.debug("Request to partially update StatiPrenotazione : {}", dto);
 
         return statiPrenotazioneRepository
-            .findById(statiPrenotazioneDTO.getId())
+            .findById(dto.getId())
             .map(existingStatiPrenotazione -> {
-                statiPrenotazioneMapper.partialUpdate(existingStatiPrenotazione, statiPrenotazioneDTO);
+                statiPrenotazioneMapper.partialUpdate(existingStatiPrenotazione, dto);
 
                 return existingStatiPrenotazione;
             })
@@ -89,11 +89,7 @@ public class StatiPrenotazioneService {
     @Transactional(readOnly = true)
     public List<StatiPrenotazioneDTO> findAll() {
         LOG.debug("Request to get all StatiPrenotaziones");
-        return statiPrenotazioneRepository
-            .findAll()
-            .stream()
-            .map(statiPrenotazioneMapper::toDto)
-            .collect(Collectors.toCollection(LinkedList::new));
+        return statiPrenotazioneRepository.findAll().stream().map(statiPrenotazioneMapper::toDto).toList();
     }
 
     /**
