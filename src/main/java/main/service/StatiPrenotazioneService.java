@@ -38,7 +38,7 @@ public class StatiPrenotazioneService {
     /**
      * Save a statiPrenotazione.
      *
-     * @param statiPrenotazioneDTO the entity to save.
+     * @param dto the entity to save.
      * @return the persisted entity.
      */
     public StatiPrenotazioneDTO save(StatiPrenotazioneDTO dto) {
