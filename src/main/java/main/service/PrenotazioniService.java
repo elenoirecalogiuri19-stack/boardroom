@@ -84,12 +84,12 @@ public class PrenotazioniService {
         // Imposta tipo evento e stato iniziale
         pren.setTipoEvento(TipoEvento.PRIVATO);
 
-        StatiPrenotazione confirmed = statiPrenotazioneRepository
-            .findByCodice(StatoCodice.CONFIRMED)
+        StatiPrenotazione waiting = statiPrenotazioneRepository
+            .findByCodice(StatoCodice.WAITING)
             .stream()
             .findFirst()
             .orElseThrow(() -> new EntityNotFoundException("Stato CONFIRMED non configurato"));
-        pren.setStato(confirmed);
+        pren.setStato(waiting);
 
         return prenotazioniMapper.toDto(prenotazioniRepository.save(pren));
     }

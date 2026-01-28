@@ -101,9 +101,8 @@ public class PrenotazioniResource {
         return ResponseUtil.wrapOrNotFound(dto);
     }
 
-    // --- DELETE ---
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePrenotazioni(@PathVariable UUID id) {
+    public ResponseEntity<Void> annullPrenotazione(@PathVariable UUID id) {
         log.debug("REST request to delete Prenotazioni : {}", id);
         prenotazioniService.delete(id);
         return ResponseEntity.noContent()
