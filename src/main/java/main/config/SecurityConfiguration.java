@@ -85,6 +85,7 @@ public class SecurityConfiguration {
                     .requestMatchers(mvc.pattern("/management/info")).permitAll()
                     .requestMatchers(mvc.pattern("/management/prometheus")).permitAll()
 
+
                     //Endpoint solo per Utenti
 
                     .requestMatchers(mvc.pattern("/api/**")).authenticated()
@@ -96,6 +97,7 @@ public class SecurityConfiguration {
                     .requestMatchers(mvc.pattern(HttpMethod.POST,"/api/eventis")).authenticated()
                     .requestMatchers(mvc.pattern(HttpMethod.PUT,"/api/eventis/**")).authenticated()
                     .requestMatchers(mvc.pattern(HttpMethod.PATCH,"/api/eventis/**")).authenticated()
+                    .requestMatchers(mvc.pattern("/api/sales/disponibili")).authenticated()
 
                     //Endpoint per admin
                     .requestMatchers(mvc.pattern("/api/admin/**")).hasAuthority(AuthoritiesConstants.ADMIN)
