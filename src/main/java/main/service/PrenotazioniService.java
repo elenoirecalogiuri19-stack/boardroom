@@ -3,8 +3,10 @@ package main.service;
 import jakarta.persistence.EntityNotFoundException;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import main.domain.Prenotazioni;
 import main.domain.Sale;
 import main.domain.StatiPrenotazione;
@@ -227,6 +229,18 @@ public class PrenotazioniService {
         pren = prenotazioniRepository.save(pren);
 
         return prenotazioniMapper.toDto(pren);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PrenotazioniDTO> getStoricoPrenotazioni() {
+        LocalDate oggi = LocalDate.now();
+        return prenotazioniRepository.findStorico(oggi).stream().map(prenotazioniMapper::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PrenotazioniDTO> getPrenotazioniOdierne() {
+        LocalDate oggi = LocalDate.now();
+        return prenotazioniRepository.findOggiEFutre(oggi).stream().map(prenotazioniMapper::toDto).toList();
     }
 
     /**

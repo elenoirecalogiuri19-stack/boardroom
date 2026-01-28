@@ -180,6 +180,18 @@ public class PrenotazioniResource {
         return ResponseUtil.wrapOrNotFound(prenotazioniDTO);
     }
 
+    @GetMapping("/storico")
+    public ResponseEntity<List<PrenotazioniDTO>> getStoricoPrenotazioni() {
+        LOG.debug("REST request to get storico prenotazioni");
+        return ResponseEntity.ok(prenotazioniService.getStoricoPrenotazioni());
+    }
+
+    @GetMapping("/odierne")
+    public ResponseEntity<List<PrenotazioniDTO>> getPrenotazioniOdierne() {
+        LOG.debug("REST request to get odierne prenotazioni");
+        return ResponseEntity.ok(prenotazioniService.getPrenotazioniOdierne());
+    }
+
     /**
      * {@code DELETE  /prenotazionis/:id} : delete the "id" prenotazioni.
      */

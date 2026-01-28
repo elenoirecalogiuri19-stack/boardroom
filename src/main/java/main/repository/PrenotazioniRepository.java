@@ -62,4 +62,10 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         @Param("oraInizio") LocalTime oraInizio,
         @Param("oraFine") LocalTime oraFine
     );
+
+    @Query("SELECT p FROM Prenotazioni p WHERE p.data < :oggi ORDER BY p.data DESC, p.oraInizio DESC ")
+    List<Prenotazioni> findStorico(@Param("oggi") LocalDate oggi);
+
+    @Query("SELECT p FROM Prenotazioni p WHERE p.data >= :oggi ORDER BY p.data DESC, p.oraInizio DESC ")
+    List<Prenotazioni> findOggiEFutre(@Param("oggi") LocalDate oggi);
 }
