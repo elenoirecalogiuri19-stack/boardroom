@@ -1,6 +1,8 @@
 package main.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import main.domain.Prenotazioni;
@@ -46,6 +48,18 @@ public class PrenotazioniService {
         Prenotazioni pren = prenotazioniMapper.toEntity(dto);
         pren = prenotazioniRepository.save(pren);
         return prenotazioniMapper.toDto(pren);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PrenotazioniDTO> getStoricoPrenotazioni() {
+        LocalDate oggi = LocalDate.now();
+        return prenotazioniRepository.findStorico(oggi).stream().map(prenotazioniMapper::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PrenotazioniDTO> getPrenotazioniOdierne() {
+        LocalDate oggi = LocalDate.now();
+        return prenotazioniRepository.findOdierneEFuture(oggi).stream().map(prenotazioniMapper::toDto).toList();
     }
 
     // --- PARTIAL UPDATE ---

@@ -132,4 +132,16 @@ public class PrenotazioniResource {
         Optional<PrenotazioniDTO> result = prenotazioniService.confermaPrenotazione(id);
         return ResponseUtil.wrapOrNotFound(result);
     }
+
+    @GetMapping("/storico")
+    public ResponseEntity<List<PrenotazioniDTO>> getStoricoPrenotazioni() {
+        log.debug("REST request to get storico prenotazioni");
+        return ResponseEntity.ok(prenotazioniService.getStoricoPrenotazioni());
+    }
+
+    @GetMapping("/odierne")
+    public ResponseEntity<List<PrenotazioniDTO>> getPrenotazioniOdierne() {
+        log.debug("REST request to get prenotazioni odierne e future");
+        return ResponseEntity.ok(prenotazioniService.getPrenotazioniOdierne());
+    }
 }

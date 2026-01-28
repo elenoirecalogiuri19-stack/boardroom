@@ -98,6 +98,10 @@ public class SecurityConfiguration {
                     .requestMatchers(mvc.pattern(HttpMethod.PUT,"/api/eventis/**")).authenticated()
                     .requestMatchers(mvc.pattern(HttpMethod.PATCH,"/api/eventis/**")).authenticated()
                     .requestMatchers(mvc.pattern("/api/sales/disponibili")).authenticated()
+                    .requestMatchers(mvc.pattern("/api/prenotazionis/storico")).authenticated()
+                    .requestMatchers(mvc.pattern("/api/prenotazionis/odierne")).authenticated()
+
+
 
                     //Endpoint per admin
                     .requestMatchers(mvc.pattern("/api/admin/**")).hasAuthority(AuthoritiesConstants.ADMIN)

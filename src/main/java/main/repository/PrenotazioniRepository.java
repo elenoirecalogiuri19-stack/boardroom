@@ -38,4 +38,24 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
      */
     @Query("SELECT p FROM Prenotazioni p WHERE p.sala.id = :salaId")
     Page<Prenotazioni> findBySalaId(@Param("salaId") UUID salaId, Pageable pageable);
+
+    @Query(
+        """
+            SELECT p
+            FROM Prenotazioni p
+            WHERE p.data < :oggi
+            ORDER BY p.data DESC, p.oraInizio DESC
+        """
+    )
+    List<Prenotazioni> findStorico(@Param("oggi") LocalDate oggi);
+
+    @Query(
+        """
+            SELECT p
+            FROM Prenotazioni p
+            WHERE p.data >= :oggi
+            ORDER BY p.data ASC, p.oraInizio ASC
+        """
+    )
+    List<Prenotazioni> findOdierneEFuture(@Param("oggi") LocalDate oggi);
 }
