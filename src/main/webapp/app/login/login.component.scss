@@ -1,101 +1,82 @@
+$boardroom-green: #4a8c40;
+
 :host {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f5f5f5;
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  display: block;
+  background-color: #ffffff;
+  min-height: calc(100vh - 120px);
 }
 
 .login-wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
+  margin-top: 80px;
+  margin-bottom: 80px;
 }
 
 .login-card {
   background: #ffffff;
   width: 100%;
   max-width: 380px;
-  padding: 60px 35px;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  padding: 50px 40px;
+  border-radius: 24px;
+
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+
   text-align: center;
+  border: 1px solid #f2f2f2;
 }
 
 .input-group {
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .figma-input {
   width: 100%;
-  padding: 14px;
-  border: 1px solid #e8e8e8;
-  border-radius: 10px;
-  font-size: 14px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 15px;
   text-align: center;
   background-color: #ffffff;
-  color: #333;
-  box-sizing: border-box;
-
-  // L'OMBRA CHE VOLEVI TU
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease;
 
   &:focus {
     outline: none;
-    border-color: #21a366;
-    box-shadow: 0 4px 10px rgba(33, 163, 102, 0.1);
-    transform: translateY(-1px);
-  }
-
-  &::placeholder {
-    color: #b0b0b0;
+    border-color: $boardroom-green !important;
+    box-shadow: 0 0 0 4px rgba(74, 140, 64, 0.1) !important;
   }
 }
 
 .figma-btn {
-  background-color: #21a366;
-  color: white;
-  border: none;
-  border-radius: 30px;
-  padding: 12px 50px;
-  font-size: 14px;
+  background-color: $boardroom-green !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50px;
+  padding: 14px 60px;
+  font-size: 15px;
   font-weight: 600;
   margin-top: 25px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(33, 163, 102, 0.2);
-  transition: all 0.2s;
+  box-shadow: 0 8px 20px rgba(74, 140, 64, 0.25) !important;
+  transition: all 0.3s;
 
   &:hover {
-    background-color: #1a8a54;
-    transform: scale(1.02);
+    background-color: darken($boardroom-green, 5%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(74, 140, 64, 0.3) !important;
   }
 }
 
 .figma-footer {
   margin-top: 35px;
-
   .green-link {
-    color: #21a366;
+    color: $boardroom-green !important;
+    font-weight: 500;
+    font-size: 13px;
     text-decoration: none;
-    font-size: 12px;
-    display: block;
-    margin-bottom: 8px;
-
     &:hover {
       text-decoration: underline;
-    }
-  }
-
-  .small-text {
-    font-size: 12px;
-    color: #888;
-    margin-top: 15px;
-
-    strong {
-      color: #21a366;
     }
   }
 }
