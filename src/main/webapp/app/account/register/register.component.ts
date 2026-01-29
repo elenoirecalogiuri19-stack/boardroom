@@ -10,8 +10,10 @@ import { RegisterService } from './register.service';
 
 @Component({
   selector: 'jhi-register',
+  standalone: true,
   imports: [SharedModule, RouterModule, FormsModule, ReactiveFormsModule, PasswordStrengthBarComponent],
   templateUrl: './register.component.html',
+  styleUrl: './register.component.scss',
 })
 export default class RegisterComponent implements AfterViewInit {
   login = viewChild.required<ElementRef>('login');
@@ -32,24 +34,23 @@ export default class RegisterComponent implements AfterViewInit {
         Validators.pattern('^[a-zA-Z0-9!$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$|^[_.@A-Za-z0-9-]+$'),
       ],
     }),
-    email: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.minLength(5), Validators.maxLength(254), Validators.email],
-    }),
-    password: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.minLength(4), Validators.maxLength(50)],
-    }),
-    confirmPassword: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.minLength(4), Validators.maxLength(50)],
-    }),
+    firstName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    lastName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    numeroDiTelefono: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    nomeAzienda: new FormControl('', { nonNullable: true }),
+    password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(4)] }),
+    confirmPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
 
   private readonly registerService = inject(RegisterService);
 
   ngAfterViewInit(): void {
-    this.login().nativeElement.focus();
+    // Il focus automatico a volte attiva la validazione visiva verde.
+    // Usiamo un timeout minimo per separarlo dal rendering iniziale.
+    setTimeout(() => {
+      this.login().nativeElement.focus();
+    }, 0);
   }
 
   register(): void {
@@ -62,10 +63,11 @@ export default class RegisterComponent implements AfterViewInit {
     if (password !== confirmPassword) {
       this.doNotMatch.set(true);
     } else {
-      const { login, email } = this.registerForm.getRawValue();
-      this.registerService
-        .save({ login, email, password, langKey: 'it' })
-        .subscribe({ next: () => this.success.set(true), error: response => this.processError(response) });
+      const { login, firstName, lastName, email, numeroDiTelefono, nomeAzienda } = this.registerForm.getRawValue();
+      this.registerService.save({ login, firstName, lastName, numeroDiTelefono, nomeAzienda, email, password, langKey: 'it' }).subscribe({
+        next: () => this.success.set(true),
+        error: response => this.processError(response),
+      });
     }
   }
 

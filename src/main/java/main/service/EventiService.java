@@ -1,5 +1,6 @@
 package main.service;
 
+import java.math.BigDecimal; // Import fondamentale per gestire i prezzi
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,79 +42,94 @@ public class EventiService {
     }
 
     /**
+     * logica di bisnes creaEvento
+     */
+    public EventiDTO createEvento(EventiDTO dto) {
+        LOG.debug("REST request to save Eventi : {}", dto);
+        return save(dto);
+    }
+
+    /**
      * Save a eventi.
-     *
-     * @param eventiDTO the entity to save.
-     * @return the persisted entity.
      */
     public EventiDTO save(EventiDTO eventiDTO) {
         LOG.debug("Request to save Eventi : {}", eventiDTO);
         Eventi eventi = eventiMapper.toEntity(eventiDTO);
+        applyPrivateEventRulesEntity(eventi); // logica US4 sul dominio
         eventi = eventiRepository.save(eventi);
-        return eventiMapper.toDto(eventi);
+        EventiDTO result = eventiMapper.toDto(eventi);
+        applyPrivateEventRulesDTO(result);
+        return result;
     }
 
     /**
      * Update a eventi.
-     *
-     * @param eventiDTO the entity to save.
-     * @return the persisted entity.
      */
     public EventiDTO update(EventiDTO eventiDTO) {
         LOG.debug("Request to update Eventi : {}", eventiDTO);
         Eventi eventi = eventiMapper.toEntity(eventiDTO);
+        applyPrivateEventRulesEntity(eventi);
         eventi = eventiRepository.save(eventi);
-        return eventiMapper.toDto(eventi);
+        EventiDTO result = eventiMapper.toDto(eventi);
+        applyPrivateEventRulesDTO(result);
+        return result;
     }
 
     /**
      * Partially update a eventi.
-     *
-     * @param eventiDTO the entity to update partially.
-     * @return the persisted entity.
      */
     public Optional<EventiDTO> partialUpdate(EventiDTO eventiDTO) {
         LOG.debug("Request to partially update Eventi : {}", eventiDTO);
 
         return eventiRepository
             .findById(eventiDTO.getId())
-            .map(existingEventi -> {
-                eventiMapper.partialUpdate(existingEventi, eventiDTO);
-
-                return existingEventi;
+            .map(existingEvent -> {
+                eventiMapper.partialUpdate(existingEvent, eventiDTO);
+                applyPrivateEventRulesEntity(existingEvent);
+                return existingEvent;
             })
             .map(eventiRepository::save)
-            .map(eventiMapper::toDto);
+            .map(eventiMapper::toDto)
+            .map(dto -> {
+                applyPrivateEventRulesDTO(dto);
+                return dto;
+            });
     }
 
     /**
      * Get all the eventis.
-     *
-     * @param pageable the pagination information.
-     * @return the list of entities.
      */
     @Transactional(readOnly = true)
     public Page<EventiDTO> findAll(Pageable pageable) {
         LOG.debug("Request to get all Eventis");
-        return eventiRepository.findAll(pageable).map(eventiMapper::toDto);
+        return eventiRepository
+            .findAll(pageable)
+            .map(eventi -> {
+                applyPrivateEventRulesEntity(eventi);
+                EventiDTO dto = eventiMapper.toDto(eventi);
+                applyPrivateEventRulesDTO(dto);
+                return dto;
+            });
     }
 
     /**
      * Get one eventi by id.
-     *
-     * @param id the id of the entity.
-     * @return the entity.
      */
     @Transactional(readOnly = true)
     public Optional<EventiDTO> findOne(UUID id) {
         LOG.debug("Request to get Eventi : {}", id);
-        return eventiRepository.findById(id).map(eventiMapper::toDto);
+        return eventiRepository
+            .findById(id)
+            .map(eventi -> {
+                applyPrivateEventRulesEntity(eventi);
+                EventiDTO dto = eventiMapper.toDto(eventi);
+                applyPrivateEventRulesDTO(dto);
+                return dto;
+            });
     }
 
     /**
      * Delete the eventi by id.
-     *
-     * @param id the id of the entity.
      */
     public void delete(UUID id) {
         LOG.debug("Request to delete Eventi : {}", id);
@@ -121,11 +137,7 @@ public class EventiService {
     }
 
     /**
-     *
      * Get all evento publico
-     *
-     * @return lista eventi publici
-     *
      */
     @Transactional(readOnly = true)
     public List<EventiDTO> findPublicEventi() {
@@ -159,5 +171,18 @@ public class EventiService {
         eventi = eventiRepository.save(eventi);
 
         return eventiMapper.toDto(eventi);
+    }
+
+    //campo prezzo di entita e dto evento inpostato a zero
+    private void applyPrivateEventRulesDTO(EventiDTO dto) {
+        if (TipoEvento.PRIVATO.equals(dto.getTipo())) {
+            dto.setPrezzo(BigDecimal.ZERO);
+        }
+    }
+
+    private void applyPrivateEventRulesEntity(Eventi eventi) {
+        if (eventi != null && eventi.getTipo() == TipoEvento.PRIVATO) {
+            eventi.setPrezzo(BigDecimal.ZERO);
+        }
     }
 }
