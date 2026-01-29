@@ -259,7 +259,7 @@ public class PrenotazioniService {
     }
 
     private void applyPrivateEventRules(PrenotazioniDTO dto) {
-        if ("PRIVATO".equalsIgnoreCase(dto.getTipoEvento())) {
+        if (TipoEvento.PRIVATO.equals(dto.getTipoEvento())) {
             dto.setPrezzo(null);
         }
     }

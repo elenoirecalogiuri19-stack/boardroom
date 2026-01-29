@@ -64,7 +64,7 @@ public class PrenotazioniResource {
     // --- CREATE GENERICO ---
     @PostMapping
     public ResponseEntity<PrenotazioniDTO> createPrenotazioni(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO) {
-        log.debug("REST request to save Prenotazioni : {}", prenotazioniDTO);
+        LOG.debug("REST request to save Prenotazioni : {}", prenotazioniDTO);
         if (prenotazioniDTO.getId() != null) {
             throw new BadRequestAlertException("A new prenotazioni cannot already have an ID", ENTITY_NAME, "idexists");
         }
