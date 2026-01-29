@@ -10,8 +10,10 @@ import { RegisterService } from './register.service';
 
 @Component({
   selector: 'jhi-register',
+  standalone: true,
   imports: [SharedModule, RouterModule, FormsModule, ReactiveFormsModule, PasswordStrengthBarComponent],
   templateUrl: './register.component.html',
+  styleUrl: './register.component.scss',
 })
 export default class RegisterComponent implements AfterViewInit {
   login = viewChild.required<ElementRef>('login');
@@ -41,10 +43,14 @@ export default class RegisterComponent implements AfterViewInit {
     confirmPassword: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
 
-  public readonly registerService = inject(RegisterService);
+  private readonly registerService = inject(RegisterService);
 
   ngAfterViewInit(): void {
-    this.login().nativeElement.focus();
+    // Il focus automatico a volte attiva la validazione visiva verde.
+    // Usiamo un timeout minimo per separarlo dal rendering iniziale.
+    setTimeout(() => {
+      this.login().nativeElement.focus();
+    }, 0);
   }
 
   register(): void {
@@ -58,13 +64,14 @@ export default class RegisterComponent implements AfterViewInit {
       this.doNotMatch.set(true);
     } else {
       const { login, firstName, lastName, email, numeroDiTelefono, nomeAzienda } = this.registerForm.getRawValue();
-      this.registerService
-        .save({ login, firstName, lastName, numeroDiTelefono, nomeAzienda, email, password, langKey: 'it' })
-        .subscribe({ next: () => this.success.set(true), error: response => this.processError(response) });
+      this.registerService.save({ login, firstName, lastName, numeroDiTelefono, nomeAzienda, email, password, langKey: 'it' }).subscribe({
+        next: () => this.success.set(true),
+        error: response => this.processError(response),
+      });
     }
   }
 
-  public processError(response: HttpErrorResponse): void {
+  private processError(response: HttpErrorResponse): void {
     if (response.status === 400 && response.error.type === LOGIN_ALREADY_USED_TYPE) {
       this.errorUserExists.set(true);
     } else if (response.status === 400 && response.error.type === EMAIL_ALREADY_USED_TYPE) {

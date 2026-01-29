@@ -1,0 +1,99 @@
+$br-primary: #4a8c40;
+$br-dark: #2c3e50;
+
+.text-muted,
+p.text-center {
+  color: $br-primary !important;
+  font-weight: 600;
+}
+
+::ng-deep {
+  .form-control,
+  #login,
+  input.form-control,
+  input.form-control.ng-valid,
+  input.form-control.is-valid {
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border: 1.5px solid #f0f0f0 !important;
+    color: #333 !important;
+    box-shadow: none !important;
+
+    &:hover {
+      background-color: #ffffff !important;
+      border-color: #dcdcdc !important;
+    }
+  }
+
+  .form-control:focus,
+  #login:focus,
+  input.form-control:focus:valid,
+  .form-control.is-valid:focus,
+  .form-control.ng-valid:focus {
+    background-color: #ffffff !important;
+    border-color: $br-primary !important;
+    box-shadow: 0 8px 20px rgba(74, 140, 64, 0.12) !important;
+    outline: none !important;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+    -webkit-text-fill-color: #333 !important;
+  }
+}
+
+.register-container {
+  padding: 60px 0;
+  background-color: #f4f7f6;
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+}
+
+.register-card {
+  background: #ffffff;
+  padding: 60px;
+  border-radius: 25px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06);
+  border: none;
+
+  h1 {
+    color: $br-dark;
+    font-weight: 800;
+    font-size: 2.2rem;
+  }
+
+  .form-label {
+    font-weight: 700;
+    color: $br-dark;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .form-control {
+    border-radius: 12px !important;
+    padding: 14px 18px !important;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
+    background-color: $br-primary !important;
+    border: none !important;
+    font-weight: 800;
+    border-radius: 12px;
+    padding: 14px;
+    text-transform: uppercase;
+    &:disabled {
+      background-color: #d1e2cf !important;
+    }
+  }
+
+  .login-footer .login-link {
+    color: $br-primary;
+    font-weight: 800;
+    text-decoration: none;
+  }
+}
