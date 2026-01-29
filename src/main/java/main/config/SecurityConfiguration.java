@@ -64,26 +64,48 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(authz ->
                 // prettier-ignore
                 authz
+                    //Risorse statice
                     .requestMatchers(mvc.pattern("/index.html"), mvc.pattern("/*.js"), mvc.pattern("/*.txt"), mvc.pattern("/*.json"), mvc.pattern("/*.map"), mvc.pattern("/*.css")).permitAll()
                     .requestMatchers(mvc.pattern("/*.ico"), mvc.pattern("/*.png"), mvc.pattern("/*.svg"), mvc.pattern("/*.webapp")).permitAll()
                     .requestMatchers(mvc.pattern("/app/**")).permitAll()
                     .requestMatchers(mvc.pattern("/i18n/**")).permitAll()
                     .requestMatchers(mvc.pattern("/content/**")).permitAll()
                     .requestMatchers(mvc.pattern("/swagger-ui/**")).permitAll()
+
+                    //Endpoint publici
                     .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/authenticate")).permitAll()
                     .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/authenticate")).permitAll()
                     .requestMatchers(mvc.pattern("/api/register")).permitAll()
                     .requestMatchers(mvc.pattern("/api/activate")).permitAll()
                     .requestMatchers(mvc.pattern("/api/account/reset-password/init")).permitAll()
                     .requestMatchers(mvc.pattern("/api/account/reset-password/finish")).permitAll()
-                    .requestMatchers(mvc.pattern("/api/admin/**")).hasAuthority(AuthoritiesConstants.ADMIN)
-                    .requestMatchers(mvc.pattern("/api/eventis/pubblici")).permitAll()
-                    .requestMatchers(mvc.pattern("/api/**")).authenticated()
-                    .requestMatchers(mvc.pattern("/v3/api-docs/**")).hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern(HttpMethod.GET,"/api/eventis/pubblici")).permitAll()
                     .requestMatchers(mvc.pattern("/management/health")).permitAll()
                     .requestMatchers(mvc.pattern("/management/health/**")).permitAll()
                     .requestMatchers(mvc.pattern("/management/info")).permitAll()
                     .requestMatchers(mvc.pattern("/management/prometheus")).permitAll()
+
+
+                    //Endpoint solo per Utenti
+
+                    .requestMatchers(mvc.pattern("/api/**")).authenticated()
+                    .requestMatchers(mvc.pattern("/api/prenotazionis/crea")).authenticated()
+                    .requestMatchers(mvc.pattern("/api/prenotazionis/*/conferma")).authenticated()
+                    .requestMatchers(mvc.pattern(HttpMethod.GET,"/api/prenotazionis")).authenticated()
+                    .requestMatchers(mvc.pattern(HttpMethod.GET,"/api/prenotazionis/**")).authenticated()
+                    .requestMatchers(mvc.pattern("/api/eventis/crea-pubblico")).authenticated()
+                    .requestMatchers(mvc.pattern(HttpMethod.POST,"/api/eventis")).authenticated()
+                    .requestMatchers(mvc.pattern(HttpMethod.PUT,"/api/eventis/**")).authenticated()
+                    .requestMatchers(mvc.pattern(HttpMethod.PATCH,"/api/eventis/**")).authenticated()
+                    .requestMatchers(mvc.pattern("/api/sales/disponibili")).authenticated()
+                    .requestMatchers(mvc.pattern("/api/prenotazionis/storico")).authenticated()
+                    .requestMatchers(mvc.pattern("/api/prenotazionis/odierne")).authenticated()
+
+
+
+                    //Endpoint per admin
+                    .requestMatchers(mvc.pattern("/api/admin/**")).hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern("/v3/api-docs/**")).hasAuthority(AuthoritiesConstants.ADMIN)
                     .requestMatchers(mvc.pattern("/management/**")).hasAuthority(AuthoritiesConstants.ADMIN)
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

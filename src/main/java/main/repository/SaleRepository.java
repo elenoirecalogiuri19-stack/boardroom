@@ -9,18 +9,25 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-/**
- * Spring Data JPA repository for the Sale entity.
- */
-@SuppressWarnings("unused")
 @Repository
 public interface SaleRepository extends JpaRepository<Sale, UUID> {
-    // Questo è il metodo che mancava e che ha bloccato il build!
     @Query(
-        "select s from Sale s where s.id not in (select p.sala.id from Prenotazioni p where p.data = :data and " +
-        "((p.oraInizio <= :oraInizio and p.oraFine > :oraInizio) or " +
-        "(p.oraInizio < :oraFine and p.oraFine >= :oraFine) or " +
-        "(p.oraInizio >= :oraInizio and p.oraFine <= :oraFine)))"
+        "SELECT s " +
+        "FROM Sale s " +
+        "WHERE s.capienza >= :capienza " +
+        "AND s.id NOT IN (" +
+        "SELECT p.sala.id " +
+        "FROM Prenotazioni p " +
+        "WHERE p.data = :data " +
+        "AND p.oraInizio < :fine " +
+        "AND p.oraFine > :inizio " +
+        "AND p.stato.codice = main.domain.enumeration.StatoCodice.CONFIRMED)" +
+        "ORDER BY s.capienza ASC"
     )
-    List<Sale> findFreeSales(@Param("data") LocalDate data, @Param("oraInizio") LocalTime oraInizio, @Param("oraFine") LocalTime oraFine);
+    List<Sale> findFreeSales(
+        @Param("data") LocalDate data,
+        @Param("inizio") LocalTime c,
+        @Param("fine") LocalTime fine,
+        @Param("capienza") Integer capienza
+    );
 }

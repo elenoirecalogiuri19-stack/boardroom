@@ -2,16 +2,21 @@ package main.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import main.domain.enumeration.TipoEvento;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+/**
+ * Entity class for Prenotazioni
+ */
 @Entity
 @Table(name = "prenotazioni")
 public class Prenotazioni implements Serializable {
@@ -37,10 +42,10 @@ public class Prenotazioni implements Serializable {
     private LocalTime oraFine;
 
     @Column(name = "tipo_evento")
-    private String tipoEvento;
+    private TipoEvento tipoEvento;
 
     @Column(name = "prezzo")
-    private Double prezzo;
+    private BigDecimal prezzo;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "prenotazione")
     @JsonIgnoreProperties(value = { "prenotazione" }, allowSetters = true)
@@ -91,19 +96,19 @@ public class Prenotazioni implements Serializable {
         this.oraFine = oraFine;
     }
 
-    public String getTipoEvento() {
+    public TipoEvento getTipoEvento() {
         return tipoEvento;
     }
 
-    public void setTipoEvento(String tipoEvento) {
+    public void setTipoEvento(TipoEvento tipoEvento) {
         this.tipoEvento = tipoEvento;
     }
 
-    public Double getPrezzo() {
+    public BigDecimal getPrezzo() {
         return prezzo;
     }
 
-    public void setPrezzo(Double prezzo) {
+    public void setPrezzo(BigDecimal prezzo) {
         this.prezzo = prezzo;
     }
 
@@ -139,6 +144,70 @@ public class Prenotazioni implements Serializable {
         this.sala = sala;
     }
 
+    // --- METODI FLUENTI ---
+    public Prenotazioni id(UUID id) {
+        this.setId(id);
+        return this;
+    }
+
+    public Prenotazioni data(LocalDate data) {
+        this.setData(data);
+        return this;
+    }
+
+    public Prenotazioni oraInizio(LocalTime oraInizio) {
+        this.setOraInizio(oraInizio);
+        return this;
+    }
+
+    public Prenotazioni oraFine(LocalTime oraFine) {
+        this.setOraFine(oraFine);
+        return this;
+    }
+
+    public Prenotazioni tipoEvento(TipoEvento tipoEvento) {
+        this.setTipoEvento(tipoEvento);
+        return this;
+    }
+
+    public Prenotazioni prezzo(BigDecimal prezzo) {
+        this.setPrezzo(prezzo);
+        return this;
+    }
+
+    public Prenotazioni eventis(Set<Eventi> eventis) {
+        this.setEventis(eventis);
+        return this;
+    }
+
+    public Prenotazioni addEventi(Eventi eventi) {
+        this.eventis.add(eventi);
+        eventi.setPrenotazione(this);
+        return this;
+    }
+
+    public Prenotazioni removeEventi(Eventi eventi) {
+        this.eventis.remove(eventi);
+        eventi.setPrenotazione(null);
+        return this;
+    }
+
+    public Prenotazioni stato(StatiPrenotazione stato) {
+        this.setStato(stato);
+        return this;
+    }
+
+    public Prenotazioni utente(Utenti utente) {
+        this.setUtente(utente);
+        return this;
+    }
+
+    public Prenotazioni sala(Sale sala) {
+        this.setSala(sala);
+        return this;
+    }
+
+    // --- equals & hashCode ---
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

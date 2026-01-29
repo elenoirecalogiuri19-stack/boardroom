@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SaleService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SaleService.class);
+
     private final SaleRepository saleRepository;
     private final SaleMapper saleMapper;
 
@@ -34,12 +35,10 @@ public class SaleService {
      * US2 – Visualizza sale disponibili in una data e fascia oraria.
      */
     @Transactional(readOnly = true)
-    public List<SaleDTO> findAllFreeSales(LocalDate data, LocalTime inizio, LocalTime fine) {
-        LOG.debug("Request to get free sales for {} from {} to {}", data, inizio, fine);
-        return saleRepository.findFreeSales(data, inizio, fine)
-            .stream()
-            .map(saleMapper::toDto)
-            .collect(Collectors.toList());
+    public List<SaleDTO> findAllFreeSales(LocalDate data, LocalTime inizio, LocalTime fine, Integer capienza) {
+        LOG.debug("Request to get free sales for {} from {} to {}", data, inizio, fine, capienza);
+
+        return saleRepository.findFreeSales(data, inizio, fine, capienza).stream().map(saleMapper::toDto).toList();
     }
 
     public SaleDTO save(SaleDTO saleDTO) {

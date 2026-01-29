@@ -119,4 +119,16 @@ public final class SecurityUtils {
     private static Stream<String> getAuthorities(Authentication authentication) {
         return authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority);
     }
+
+    /**
+     * Checks if the current user has the given role/authority.
+     *
+     * Kept for compatibility with tests that call isCurrentUserInRole.
+     *
+     * @param authority the authority to check (e.g. AuthoritiesConstants.ADMIN)
+     * @return true if the current user has the authority, false otherwise.
+     */
+    public static boolean isCurrentUserInRole(String authority) {
+        return hasCurrentUserThisAuthority(authority);
+    }
 }

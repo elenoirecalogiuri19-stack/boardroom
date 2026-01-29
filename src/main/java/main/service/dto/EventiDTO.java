@@ -23,7 +23,7 @@ public class EventiDTO implements Serializable {
 
     private BigDecimal prezzo;
 
-    private PrenotazioniDTO prenotazione;
+    private UUID prenotazioneId;
 
     public UUID getId() {
         return id;
@@ -57,12 +57,12 @@ public class EventiDTO implements Serializable {
         this.prezzo = prezzo;
     }
 
-    public PrenotazioniDTO getPrenotazione() {
-        return prenotazione;
+    public UUID getPrenotazioneId() {
+        return prenotazioneId;
     }
 
-    public void setPrenotazione(PrenotazioniDTO prenotazione) {
-        this.prenotazione = prenotazione;
+    public void setPrenotazioneId(UUID prenotazioneId) {
+        this.prenotazioneId = prenotazioneId;
     }
 
     @Override
@@ -94,7 +94,7 @@ public class EventiDTO implements Serializable {
             ", titolo='" + getTitolo() + "'" +
             ", tipo='" + getTipo() + "'" +
             ", prezzo=" + getPrezzo() +
-            ", prenotazione=" + getPrenotazione() +
+            ", prenotazione=" + getPrenotazioneId() +
             "}";
     }
 }

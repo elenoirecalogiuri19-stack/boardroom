@@ -2,10 +2,11 @@ package main.service.dto;
 
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Objects;
 import java.util.UUID;
+import main.domain.enumeration.TipoEvento;
 
 public class PrenotazioniDTO implements Serializable {
 
@@ -20,8 +21,8 @@ public class PrenotazioniDTO implements Serializable {
     @NotNull
     private LocalTime oraFine;
 
-    private String tipoEvento;
-    private Double prezzo;
+    private TipoEvento tipoEvento;
+    private BigDecimal prezzo;
     private StatiPrenotazioneDTO stato;
     private UtentiDTO utente;
     private SaleDTO sala;
@@ -58,19 +59,19 @@ public class PrenotazioniDTO implements Serializable {
         this.oraFine = oraFine;
     }
 
-    public String getTipoEvento() {
+    public TipoEvento getTipoEvento() {
         return tipoEvento;
     }
 
-    public void setTipoEvento(String tipoEvento) {
+    public void setTipoEvento(TipoEvento tipoEvento) {
         this.tipoEvento = tipoEvento;
     }
 
-    public Double getPrezzo() {
+    public BigDecimal getPrezzo() {
         return prezzo;
     }
 
-    public void setPrezzo(Double prezzo) {
+    public void setPrezzo(BigDecimal prezzo) {
         this.prezzo = prezzo;
     }
 
@@ -96,45 +97,5 @@ public class PrenotazioniDTO implements Serializable {
 
     public void setSala(SaleDTO sala) {
         this.sala = sala;
-    }
-
-    // --- METODI BRIDGE CON UUID ---
-    public UUID getUtenteId() {
-        return (utente != null) ? utente.getId() : null;
-    }
-
-    public void setUtenteId(UUID id) {
-        if (this.utente == null) {
-            this.utente = new UtentiDTO();
-        }
-        this.utente.setId(id);
-    }
-
-    public UUID getSalaId() {
-        return (sala != null) ? sala.getId() : null;
-    }
-
-    public void setSalaId(UUID id) {
-        if (this.sala == null) {
-            this.sala = new SaleDTO();
-        }
-        this.sala.setId(id);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PrenotazioniDTO)) return false;
-        return id != null && id.equals(((PrenotazioniDTO) o).id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "PrenotazioniDTO{id='" + id + "'}";
     }
 }

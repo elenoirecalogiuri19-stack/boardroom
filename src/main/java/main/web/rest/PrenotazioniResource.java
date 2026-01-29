@@ -1,9 +1,11 @@
 package main.web.rest;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +35,7 @@ import tech.jhipster.web.util.ResponseUtil;
  */
 @RestController
 @RequestMapping("/api/prenotazionis")
+@Transactional
 public class PrenotazioniResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(PrenotazioniResource.class);
@@ -57,24 +61,29 @@ public class PrenotazioniResource {
         this.prenotazioniMapper = prenotazioniMapper;
     }
 
-    /**
-     * {@code POST  /prenotazionis} : Create a new prenotazioni.
-     */
-    @PostMapping("")
-    public ResponseEntity<PrenotazioniDTO> createPrenotazioni(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO)
-        throws URISyntaxException {
-        LOG.debug("REST request to save Prenotazioni : {}", prenotazioniDTO);
+    // --- CREATE GENERICO ---
+    @PostMapping
+    public ResponseEntity<PrenotazioniDTO> createPrenotazioni(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO) {
+        log.debug("REST request to save Prenotazioni : {}", prenotazioniDTO);
         if (prenotazioniDTO.getId() != null) {
             throw new BadRequestAlertException("A new prenotazioni cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        prenotazioniDTO = prenotazioniService.save(prenotazioniDTO);
-        return ResponseEntity.created(new URI("/api/prenotazionis/" + prenotazioniDTO.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, prenotazioniDTO.getId().toString()))
-            .body(prenotazioniDTO);
+
+        PrenotazioniDTO result = prenotazioniService.save(prenotazioniDTO);
+        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result.getId()).toUri())
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
     }
 
     /**
      * {@code PUT  /prenotazionis/:id} : Updates an existing prenotazioni.
+     *
+     * @param id the id of the prenotazioniDTO to save.
+     * @param prenotazioniDTO the prenotazioniDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated prenotazioniDTO,
+     * or with status {@code 400 (Bad Request)} if the prenotazioniDTO is not valid,
+     * or with status {@code 500 (Internal Server Error)} if the prenotazioniDTO couldn't be updated.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
     public ResponseEntity<PrenotazioniDTO> updatePrenotazioni(
@@ -82,25 +91,36 @@ public class PrenotazioniResource {
         @Valid @RequestBody PrenotazioniDTO prenotazioniDTO
     ) throws URISyntaxException {
         LOG.debug("REST request to update Prenotazioni : {}, {}", id, prenotazioniDTO);
-        if (prenotazioniDTO.getId() == null) {
+        validaPrenoUpdate(id, prenotazioniDTO);
+
+        PrenotazioniDTO result = prenotazioniService.save(prenotazioniDTO);
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, prenotazioniDTO.getId().toString()))
+            .body(result);
+    }
+
+    private void validaPrenoUpdate(UUID id, PrenotazioniDTO dto) {
+        if (dto.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, prenotazioniDTO.getId())) {
+        if (!Objects.equals(id, dto.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
-
         if (!prenotazioniRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
-
-        prenotazioniDTO = prenotazioniService.update(prenotazioniDTO);
-        return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, prenotazioniDTO.getId().toString()))
-            .body(prenotazioniDTO);
     }
 
     /**
-     * {@code PATCH  /prenotazionis/:id} : Partial updates given fields of an existing prenotazioni.
+     * {@code PATCH  /prenotazionis/:id} : Partial updates given fields of an existing prenotazioni, field will ignore if it is null
+     *
+     * @param id the id of the prenotazioniDTO to save.
+     * @param prenotazioniDTO the prenotazioniDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated prenotazioniDTO,
+     * or with status {@code 400 (Bad Request)} if the prenotazioniDTO is not valid,
+     * or with status {@code 404 (Not Found)} if the prenotazioniDTO is not found,
+     * or with status {@code 500 (Internal Server Error)} if the prenotazioniDTO couldn't be updated.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public ResponseEntity<PrenotazioniDTO> partialUpdatePrenotazioni(
@@ -108,16 +128,7 @@ public class PrenotazioniResource {
         @NotNull @RequestBody PrenotazioniDTO prenotazioniDTO
     ) throws URISyntaxException {
         LOG.debug("REST request to partial update Prenotazioni partially : {}, {}", id, prenotazioniDTO);
-        if (prenotazioniDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, prenotazioniDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!prenotazioniRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
+        validaPrenoUpdate(id, prenotazioniDTO);
 
         Optional<PrenotazioniDTO> result = prenotazioniService.partialUpdate(prenotazioniDTO);
 
@@ -129,23 +140,21 @@ public class PrenotazioniResource {
 
     /**
      * {@code GET  /prenotazionis} : get all the prenotazionis.
+     *
+     * @param pageable the pagination information.
+     * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of prenotazionis in body.
      * US2: Semplificato per evitare errori di compilazione con il Service.
      */
     @GetMapping("")
     @Transactional(readOnly = true)
     public ResponseEntity<List<PrenotazioniDTO>> getAllPrenotazionis(
         @org.springdoc.core.annotations.ParameterObject Pageable pageable,
+        @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload,
         @RequestParam(name = "salaId", required = false) UUID salaId
     ) {
         LOG.debug("REST request to get a page of Prenotazionis. Filter salaId: {}", salaId);
-        Page<PrenotazioniDTO> page;
-
-        if (salaId != null) {
-            page = prenotazioniRepository.findBySalaId(salaId, pageable).map(prenotazioniMapper::toDto);
-        } else {
-            // Usiamo il metodo findAll che abbiamo nel Service
-            page = prenotazioniService.findAll(pageable);
-        }
+        Page<PrenotazioniDTO> page = prenotazioniService.getAll(pageable, eagerload, salaId);
 
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
@@ -161,15 +170,56 @@ public class PrenotazioniResource {
         return ResponseUtil.wrapOrNotFound(prenotazioniDTO);
     }
 
+    @GetMapping("/storico")
+    public ResponseEntity<List<PrenotazioniDTO>> getStoricoPrenotazioni() {
+        LOG.debug("REST request to get storico prenotazioni");
+        return ResponseEntity.ok(prenotazioniService.getStoricoPrenotazioni());
+    }
+
+    @GetMapping("/odierne")
+    public ResponseEntity<List<PrenotazioniDTO>> getPrenotazioniOdierne() {
+        LOG.debug("REST request to get odierne prenotazioni");
+        return ResponseEntity.ok(prenotazioniService.getPrenotazioniOdierne());
+    }
+
     /**
      * {@code DELETE  /prenotazionis/:id} : delete the "id" prenotazioni.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePrenotazioni(@PathVariable("id") UUID id) {
         LOG.debug("REST request to delete Prenotazioni : {}", id);
-        prenotazioniService.delete(id);
-        return ResponseEntity.noContent()
-            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
-            .build();
+
+        try {
+            prenotazioniService.delete(id);
+            return ResponseEntity.noContent()
+                .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
+                .build();
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     *
+     * Endpoint per la prenotazione con validazione
+     *
+     */
+    @PostMapping("/crea")
+    public ResponseEntity<PrenotazioniDTO> creaPrenotazione(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO) {
+        PrenotazioniDTO dto = prenotazioniService.creaPrenotazione(prenotazioniDTO);
+        return ResponseEntity.ok(dto);
+    }
+
+    /**
+     *
+     * Endpoint per  la conferma della prenotazione
+     *
+     */
+    @PostMapping("/{id}/conferma")
+    public ResponseEntity<PrenotazioniDTO> confermaPrenotazioni(@PathVariable UUID id) {
+        PrenotazioniDTO dto = prenotazioniService.confermaPrenotazione(id);
+        return ResponseEntity.ok(dto);
     }
 }

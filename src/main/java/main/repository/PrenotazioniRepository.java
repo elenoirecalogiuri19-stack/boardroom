@@ -15,8 +15,14 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Spring Data JPA repository for the Prenotazioni entity.
+ */
 @Repository
 public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID> {
+    // US2: Metodo aggiunto per filtrare le prenotazioni per sala
+    Page<Prenotazioni> findBySalaId(UUID salaId, Pageable pageable);
+
     default Optional<Prenotazioni> findOneWithEagerRelationships(UUID id) {
         return this.findOneWithToOneRelationships(id);
     }
@@ -29,18 +35,20 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         return this.findAllWithToOneRelationships(pageable);
     }
 
-    Page<Prenotazioni> findBySalaId(UUID salaId, Pageable pageable);
-
     @Query(
-        value = "select p from Prenotazioni p left join fetch p.stato left join fetch p.utente left join fetch p.sala",
-        countQuery = "select count(p) from Prenotazioni p"
+        value = "select prenotazioni from Prenotazioni prenotazioni left join fetch prenotazioni.stato left join fetch prenotazioni.utente left join fetch prenotazioni.sala",
+        countQuery = "select count(prenotazioni) from Prenotazioni prenotazioni"
     )
     Page<Prenotazioni> findAllWithToOneRelationships(Pageable pageable);
 
-    @Query("select p from Prenotazioni p left join fetch p.stato left join fetch p.utente left join fetch p.sala")
+    @Query(
+        "select prenotazioni from Prenotazioni prenotazioni left join fetch prenotazioni.stato left join fetch prenotazioni.utente left join fetch prenotazioni.sala"
+    )
     List<Prenotazioni> findAllWithToOneRelationships();
 
-    @Query("select p from Prenotazioni p left join fetch p.stato left join fetch p.utente left join fetch p.sala where p.id =:id")
+    @Query(
+        "select prenotazioni from Prenotazioni prenotazioni left join fetch prenotazioni.stato left join fetch prenotazioni.utente left join fetch prenotazioni.sala where prenotazioni.id =:id"
+    )
     Optional<Prenotazioni> findOneWithToOneRelationships(@Param("id") UUID id);
 
     @Query(
@@ -54,4 +62,10 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         @Param("oraInizio") LocalTime oraInizio,
         @Param("oraFine") LocalTime oraFine
     );
+
+    @Query("SELECT p FROM Prenotazioni p WHERE p.data < :oggi ORDER BY p.data DESC, p.oraInizio DESC ")
+    List<Prenotazioni> findStorico(@Param("oggi") LocalDate oggi);
+
+    @Query("SELECT p FROM Prenotazioni p WHERE p.data >= :oggi ORDER BY p.data DESC, p.oraInizio DESC ")
+    List<Prenotazioni> findOggiEFutre(@Param("oggi") LocalDate oggi);
 }

@@ -35,7 +35,7 @@ public class Utenti implements Serializable {
     private String numeroDiTelefono;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(unique = true)
+    @JoinColumn(name = "user_id", unique = true)
     private User user;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
