@@ -8,8 +8,10 @@ import { AccountService } from 'app/core/auth/account.service';
 
 @Component({
   selector: 'jhi-login',
+  standalone: true, // Assicurati che ci sia se non c'è già
   imports: [SharedModule, FormsModule, ReactiveFormsModule, RouterModule],
   templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'], // <--- AGGIUNGI QUESTA RIGA QUI
 })
 export default class LoginComponent implements OnInit, AfterViewInit {
   username = viewChild.required<ElementRef>('username');
