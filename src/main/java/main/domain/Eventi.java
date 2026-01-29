@@ -38,6 +38,9 @@ public class Eventi implements Serializable {
     @Column(name = "prezzo", precision = 21, scale = 2)
     private BigDecimal prezzo;
 
+    @Column(name = "descrizione", length = 500)
+    private String descrizione;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = { "eventis", "stato", "utente", "sala" }, allowSetters = true)
     private Prenotazioni prenotazione;
@@ -107,6 +110,14 @@ public class Eventi implements Serializable {
     public Eventi prenotazione(Prenotazioni prenotazioni) {
         this.setPrenotazione(prenotazioni);
         return this;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
+
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here

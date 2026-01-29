@@ -84,6 +84,8 @@ public class SecurityConfiguration {
                     .requestMatchers(mvc.pattern("/management/health/**")).permitAll()
                     .requestMatchers(mvc.pattern("/management/info")).permitAll()
                     .requestMatchers(mvc.pattern("/management/prometheus")).permitAll()
+                    .requestMatchers(mvc.pattern(HttpMethod.PUT,"/api/eventis/**")).permitAll()
+
 
 
                     //Endpoint solo per Utenti
@@ -94,9 +96,9 @@ public class SecurityConfiguration {
                     .requestMatchers(mvc.pattern(HttpMethod.GET,"/api/prenotazionis")).authenticated()
                     .requestMatchers(mvc.pattern(HttpMethod.GET,"/api/prenotazionis/**")).authenticated()
                     .requestMatchers(mvc.pattern("/api/eventis/crea-pubblico")).authenticated()
-                    .requestMatchers(mvc.pattern(HttpMethod.POST,"/api/eventis")).authenticated()
-                    .requestMatchers(mvc.pattern(HttpMethod.PUT,"/api/eventis/**")).authenticated()
-                    .requestMatchers(mvc.pattern(HttpMethod.PATCH,"/api/eventis/**")).authenticated()
+                    //.requestMatchers(mvc.pattern(HttpMethod.POST,"/api/eventis")).authenticated()
+                    //.requestMatchers(mvc.pattern(HttpMethod.PUT,"/api/eventis/**")).authenticated()
+                    //.requestMatchers(mvc.pattern(HttpMethod.PATCH,"/api/eventis/**")).authenticated()
                     .requestMatchers(mvc.pattern("/api/sales/disponibili")).authenticated()
 
                     //Endpoint per admin
