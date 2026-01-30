@@ -32,6 +32,13 @@ const routes: Routes = [
   },
 
   {
+    path: 'prenota-sala/crea-evento',
+    loadComponent: () => import('./prenota-sala/crea-evento/crea-evento.component').then(m => m.CreaEventoComponent),
+    title: 'Dettagli Evento',
+    canActivate: [UserRouteAccessService],
+  },
+
+  {
     path: 'admin',
     data: {
       authorities: [Authority.ADMIN],

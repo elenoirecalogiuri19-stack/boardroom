@@ -9,6 +9,7 @@ import { IEventi } from 'app/entities/eventi/eventi.model';
 import SharedModule from 'app/shared/shared.module';
 import { AccountService } from 'app/core/auth/account.service';
 import { Account } from 'app/core/auth/account.model';
+import { NotificationService } from 'app/shared/notification/notification.service';
 
 @Component({
   selector: 'jhi-home',
@@ -27,6 +28,7 @@ export default class HomeComponent implements OnInit, OnDestroy {
   private readonly accountService = inject(AccountService);
   private readonly router = inject(Router);
   private readonly eventiService = inject(EventiService);
+  private readonly notificationService = inject(NotificationService);
 
   ngOnInit(): void {
     this.accountService
@@ -34,18 +36,22 @@ export default class HomeComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(account => this.account.set(account));
 
+    this.caricaEventi();
+  }
+
+  caricaEventi(): void {
     this.eventiService.getEventiPubblici().subscribe({
       next: data => {
-        console.warn('EVENTI PUBBLICI:', data);
         this.eventi.set(data);
       },
-      error: err => console.error('Errore caricamento eventi pubblici', err),
+      error: () => {
+        this.notificationService.show('Errore nel caricamento degli eventi pubblici', 'error');
+      },
     });
   }
 
   vaiADettagli(evento: IEventi): void {
     this.caricamento = true;
-
     this.router.navigate(['/eventi', evento.id, 'view']).then(() => {
       this.caricamento = false;
     });

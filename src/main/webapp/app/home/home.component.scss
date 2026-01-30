@@ -64,7 +64,7 @@ $br-dark: #2c3e50;
 
   &:hover {
     transform: translateY(-8px) scale(1.03);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 12px 24px rgba(44, 62, 80, 0.08) !important;
     z-index: 10;
   }
 
@@ -110,6 +110,7 @@ $br-dark: #2c3e50;
 .card-footer-custom {
   display: flex;
   gap: 8px;
+  min-height: 40px;
 }
 
 .btn-price {
@@ -121,6 +122,9 @@ $br-dark: #2c3e50;
   padding: 8px !important;
   border: none;
   flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .btn-details {
@@ -132,6 +136,14 @@ $br-dark: #2c3e50;
   padding: 8px !important;
   flex: 1.2;
   color: $br-dark;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 }
 
 .fake-arrow {
@@ -145,5 +157,25 @@ $br-dark: #2c3e50;
   }
   &.right {
     right: 10px;
+  }
+}
+
+.minimal-loader {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(44, 62, 80, 0.2);
+  border-top-color: $br-dark;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.btn-price .minimal-loader {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }

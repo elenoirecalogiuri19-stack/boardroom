@@ -30,8 +30,9 @@ export class RisultatiSalaComponent implements OnInit {
   capienzaRicerca = 0;
   sale: Sala[] = [];
 
-  // Il tuo loader indispensabile!
   isLoading = false;
+  showPrivacyModal = false;
+  salaSelezionata: Sala | null = null;
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -40,26 +41,58 @@ export class RisultatiSalaComponent implements OnInit {
       this.capienzaRicerca = params['persone'] ? Number(params['persone']) : 0;
 
       this.caricaSaleDisponibili();
+
+      if (params['apriModal'] === 'true' && params['salaId']) {
+        this.gestisciRiaperturaModal(params['salaId']);
+      }
     });
   }
 
   tornaIndietro(): void {
-    this.isLoading = true; // Attiva loader
+    this.isLoading = true;
     this.router.navigate(['/prenota-sala']).then(() => {
       this.isLoading = false;
     });
   }
 
-  selezionaSala(sala: Sala): void {
-    this.isLoading = true; // Attiva loader
-    console.warn('Hai scelto per il tuo evento:', sala.nome);
+  apriSceltaPrivacy(sala: Sala): void {
+    this.salaSelezionata = sala;
+    this.showPrivacyModal = true;
+  }
 
-    // Simulo un'operazione o navigazione
+  confermaEProcedi(isPubblico: boolean): void {
+    this.isLoading = true;
+
     setTimeout(() => {
-      this.ricercaService.resetRicerca();
-      this.isLoading = false;
-      // Qui aggiungerai la navigazione al form di creazione evento
-    }, 1000);
+      this.showPrivacyModal = false;
+      this.router
+        .navigate(['/prenota-sala/crea-evento'], {
+          queryParams: {
+            salaId: this.salaSelezionata?.id,
+            nomeSala: this.salaSelezionata?.nome,
+            data: this.dataRicerca,
+            ora: this.oraRicerca,
+            pubblico: isPubblico,
+          },
+        })
+        .then(() => {
+          this.isLoading = false;
+        });
+    }, 800);
+  }
+
+  private gestisciRiaperturaModal(idSala: string): void {
+    const checkSale = setInterval(() => {
+      if (!this.isLoading && this.sale.length > 0) {
+        const sala = this.sale.find(s => s.id === idSala);
+        if (sala) {
+          this.apriSceltaPrivacy(sala);
+        }
+        clearInterval(checkSale);
+      }
+    }, 100);
+
+    setTimeout(() => clearInterval(checkSale), 3000);
   }
 
   private caricaSaleDisponibili(): void {
@@ -82,7 +115,7 @@ export class RisultatiSalaComponent implements OnInit {
         this.isLoading = false;
       },
       error: err => {
-        console.error('Errore nel caricamento sale', err);
+        console.error('Errore nel caricamento sale:', err);
         this.isLoading = false;
       },
     });
