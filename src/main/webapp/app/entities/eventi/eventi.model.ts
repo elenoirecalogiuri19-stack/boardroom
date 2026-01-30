@@ -6,6 +6,11 @@ export interface IEventi {
   titolo?: string | null;
   tipo?: keyof typeof TipoEvento | null;
   prezzo?: number | null;
+  descrizione?: string | null;
+  data?: string | null;
+  oraInizio?: string | null;
+  oraFine?: string | null;
+  salaNome?: string | null;
   prenotazione?: Pick<IPrenotazioni, 'id'> | null;
 }
 

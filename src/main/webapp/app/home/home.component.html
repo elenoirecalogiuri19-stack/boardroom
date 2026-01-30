@@ -9,15 +9,16 @@
     <div class="fake-arrow right"><i class="bi bi-chevron-right"></i></div>
 
     <div class="event-scroll-container">
-      @for (evento of eventiFinti; track evento.titolo) {
+      @for (evento of eventi(); track evento.titolo) {
         <div class="event-card-item">
           <div class="card event-card shadow-sm">
             <div class="card-body">
               <h5 class="card-title">{{ evento.titolo }}</h5>
-              <p class="sala-text">{{ evento.sala }}</p>
+
+              <p class="sala-text">{{ evento.salaNome }}</p>
               <div class="date-badge">
-                <span class="event-date">20 Febbraio 2026</span>
-                <p class="event-time">{{ evento.ora }}</p>
+                <span class="event-date">{{ evento.data }}</span>
+                <p class="event-time">{{ evento.oraInizio }} - {{ evento.oraFine }}</p>
               </div>
               <div class="card-footer-custom">
                 <button class="btn btn-price">€ {{ evento.prezzo }}</button>

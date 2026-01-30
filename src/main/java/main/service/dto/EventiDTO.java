@@ -3,6 +3,8 @@ package main.service.dto;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Objects;
 import java.util.UUID;
 import main.domain.enumeration.TipoEvento;
@@ -22,6 +24,11 @@ public class EventiDTO implements Serializable {
     private TipoEvento tipo;
 
     private BigDecimal prezzo;
+
+    private LocalDate data;
+    private LocalTime oraInizio;
+    private LocalTime oraFine;
+    private String salaNome;
 
     private UUID prenotazioneId;
 
@@ -63,6 +70,38 @@ public class EventiDTO implements Serializable {
 
     public void setPrenotazioneId(UUID prenotazioneId) {
         this.prenotazioneId = prenotazioneId;
+    }
+
+    public LocalDate getData() {
+        return data;
+    }
+
+    public void setData(LocalDate data) {
+        this.data = data;
+    }
+
+    public LocalTime getOraInizio() {
+        return oraInizio;
+    }
+
+    public void setOraInizio(LocalTime oraInizio) {
+        this.oraInizio = oraInizio;
+    }
+
+    public LocalTime getOraFine() {
+        return oraFine;
+    }
+
+    public void setOraFine(LocalTime oraFine) {
+        this.oraFine = oraFine;
+    }
+
+    public String getSalaNome() {
+        return salaNome;
+    }
+
+    public void setSalaNome(String salaNome) {
+        this.salaNome = salaNome;
     }
 
     @Override
