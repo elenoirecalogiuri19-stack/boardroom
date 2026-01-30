@@ -50,10 +50,11 @@ public class SaleResource {
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime inizio,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime fine,
-        @RequestParam(required = false, defaultValue = "0") Integer capienza
+        @RequestParam(required = false, defaultValue = "0") Integer capienzaMin,
+        @RequestParam(required = false) Integer capienzaMax
     ) {
-        LOG.debug("REST request to get free Sale for date: {}, from: {} to: {}", data, inizio, fine, capienza);
-        List<SaleDTO> result = saleService.findAllFreeSales(data, inizio, fine, capienza);
+        LOG.debug("REST request to get free Sale for date: {}, from: {} to: {}", data, inizio, fine, capienzaMin, capienzaMax);
+        List<SaleDTO> result = saleService.findAllFreeSales(data, inizio, fine, capienzaMin, capienzaMax);
         return ResponseEntity.ok().body(result);
     }
 

@@ -1,32 +1,39 @@
 import { Injectable } from '@angular/core';
 
+export interface IRicercaSale {
+  data: string;
+  ora: string;
+  capienzaMin: number;
+  capienzaMax?: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class RicercaService {
-  private datiRicerca = {
+  private datiRicerca: IRicercaSale = {
     data: '',
     ora: '',
-    capienza: 1,
+    capienzaMin: 1,
+    capienzaMax: undefined,
   };
 
-  constructor() {}
-
-  salvaRicerca(nuoviDati: any) {
-    console.log('Service: Salvataggio dati...', nuoviDati);
-    this.datiRicerca = nuoviDati;
+  salvaRicerca(nuoviDati: IRicercaSale): void {
+    console.warn('Service: Salvataggio dati...', nuoviDati);
+    this.datiRicerca = { ...nuoviDati };
   }
 
-  recuperaRicerca() {
-    return this.datiRicerca;
+  recuperaRicerca(): IRicercaSale {
+    return { ...this.datiRicerca };
   }
 
-  resetRicerca() {
-    console.log('Service: Reset dati effettuato.');
+  resetRicerca(): void {
+    console.warn('Service: Reset dati effettuato.');
     this.datiRicerca = {
       data: '',
       ora: '',
-      capienza: 1,
+      capienzaMin: 1,
+      capienzaMax: undefined,
     };
   }
 }

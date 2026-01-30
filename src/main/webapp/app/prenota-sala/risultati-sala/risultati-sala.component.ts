@@ -1,11 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { RicercaService } from 'app/services/ricerca.service';
-import { EventiService } from 'app/entities/eventi/service/eventi.service';
-import { IEventi } from 'app/entities/eventi/eventi.model';
+import { SaleApiService, ISalaDTO } from 'app/services/sale-api.service';
+
+export interface Sala {
+  id: string;
+  nome: string;
+  capienza: number;
+}
 
 @Component({
   selector: 'jhi-risultati-sala',
@@ -15,63 +20,78 @@ import { IEventi } from 'app/entities/eventi/eventi.model';
   styleUrl: './risultati-sala.component.scss',
 })
 export class RisultatiSalaComponent implements OnInit {
-  dataRicerca: string = '';
-  oraRicerca: string = '';
-  capienzaRicerca: number = 0;
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private ricercaService = inject(RicercaService);
+  private saleApiService = inject(SaleApiService);
 
-  eventi: IEventi[] = [];
-  caricamento: boolean = true;
+  dataRicerca = '';
+  oraRicerca = '';
+  capienzaRicerca = 0;
+  sale: Sala[] = [];
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private ricercaService: RicercaService,
-    private eventiService: EventiService,
-  ) {}
+  // Il tuo loader indispensabile!
+  isLoading = false;
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
-      this.dataRicerca = params['data'] || '';
-      this.oraRicerca = params['ora'] || '';
-      this.capienzaRicerca = +params['persone'] || 0;
+      this.dataRicerca = (params['data'] as string | undefined) ?? '';
+      this.oraRicerca = (params['ora'] as string | undefined) ?? '';
+      this.capienzaRicerca = params['persone'] ? Number(params['persone']) : 0;
 
-      this.caricaEFilterEventi();
-    });
-  }
-
-  caricaEFilterEventi(): void {
-    this.caricamento = true;
-    this.eventiService.query().subscribe({
-      next: res => {
-        const tuttiGliEventi = res.body ?? [];
-
-        this.eventi = tuttiGliEventi.filter(ev => {
-          const isValido = !!ev.titolo && !!ev.data;
-          const matchData = ev.data === this.dataRicerca;
-          const matchOra = this.oraRicerca ? ev.oraInizio?.toString().includes(this.oraRicerca) : true;
-
-          return isValido && matchData && matchOra;
-        });
-
-        this.caricamento = false;
-        console.log('Risultati filtrati:', this.eventi);
-      },
-      error: err => {
-        console.error('Errore:', err);
-        this.caricamento = false;
-      },
+      this.caricaSaleDisponibili();
     });
   }
 
   tornaIndietro(): void {
-    this.caricamento = true;
+    this.isLoading = true; // Attiva loader
     this.router.navigate(['/prenota-sala']).then(() => {
-      this.caricamento = false;
+      this.isLoading = false;
     });
   }
 
-  selezionaSala(evento: IEventi): void {
-    this.caricamento = true;
-    console.log('Sala selezionata:', evento.salaNome);
+  selezionaSala(sala: Sala): void {
+    this.isLoading = true; // Attiva loader
+    console.warn('Hai scelto per il tuo evento:', sala.nome);
+
+    // Simulo un'operazione o navigazione
+    setTimeout(() => {
+      this.ricercaService.resetRicerca();
+      this.isLoading = false;
+      // Qui aggiungerai la navigazione al form di creazione evento
+    }, 1000);
+  }
+
+  private caricaSaleDisponibili(): void {
+    if (!this.dataRicerca || !this.oraRicerca) return;
+
+    const parts = this.oraRicerca.split('-');
+    if (parts.length !== 2) return;
+
+    this.isLoading = true;
+    const inizio = this.normalizzaOra(parts[0].trim());
+    const fine = this.normalizzaOra(parts[1].trim());
+
+    this.saleApiService.getSaleDisponibili(this.dataRicerca, inizio, fine, this.capienzaRicerca).subscribe({
+      next: (saleDto: ISalaDTO[]) => {
+        this.sale = saleDto.map(s => ({
+          id: s.id,
+          nome: s.nome,
+          capienza: s.capienza,
+        }));
+        this.isLoading = false;
+      },
+      error: err => {
+        console.error('Errore nel caricamento sale', err);
+        this.isLoading = false;
+      },
+    });
+  }
+
+  private normalizzaOra(ora: string): string {
+    const [h, m] = ora.split(':');
+    const hh = h.padStart(2, '0');
+    const mm = m ?? '00';
+    return `${hh}:${mm}`;
   }
 }

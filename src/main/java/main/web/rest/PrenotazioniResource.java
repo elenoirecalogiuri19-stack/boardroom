@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -61,7 +63,6 @@ public class PrenotazioniResource {
         this.prenotazioniMapper = prenotazioniMapper;
     }
 
-    // --- CREATE GENERICO ---
     @PostMapping
     public ResponseEntity<PrenotazioniDTO> createPrenotazioni(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO) {
         LOG.debug("REST request to save Prenotazioni : {}", prenotazioniDTO);
