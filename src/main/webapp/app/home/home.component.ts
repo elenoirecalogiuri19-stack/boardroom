@@ -17,7 +17,6 @@ import { Account } from 'app/core/auth/account.model';
 export default class HomeComponent implements OnInit, OnDestroy {
   account = signal<Account | null>(null);
 
-  // LA TUA LISTA EVENTI (Dati che vedrai nelle card)
   eventiFinti = [
     { titolo: 'Workshop Strategie', sala: 'Sala A - Piano 1', ora: '10:00 - 12:00', prezzo: '25,00' },
     { titolo: 'Cyber Security Talk', sala: 'Sala BoardRoom', ora: '15:00 - 17:00', prezzo: '15,00' },

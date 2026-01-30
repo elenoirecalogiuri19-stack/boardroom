@@ -16,6 +16,14 @@ const routes: Routes = [
     loadComponent: () => import('./layouts/navbar/navbar.component'),
     outlet: 'navbar',
   },
+
+  {
+    path: 'prenota-sala',
+    loadComponent: () => import('./prenota-sala/prenota-sala.component'),
+    title: 'Prenota Sala',
+    canActivate: [UserRouteAccessService],
+  },
+
   {
     path: 'admin',
     data: {
@@ -31,7 +39,7 @@ const routes: Routes = [
   {
     path: 'login',
     loadComponent: () => import('./login/login.component'),
-    title: 'login.title',
+    title: 'Login',
   },
   {
     path: '',

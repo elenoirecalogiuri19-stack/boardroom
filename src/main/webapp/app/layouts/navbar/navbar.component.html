@@ -1,7 +1,7 @@
 <nav data-cy="navbar" class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
   <div class="container-fluid">
     <a class="navbar-brand logo" routerLink="/" (click)="collapseNavbar()">
-      <span class="logo-img"></span>
+      <img src="content/images/logo-jhipster.png" alt="Boardroom Logo" style="max-height: 80px; width: auto" />
     </a>
 
     <button
@@ -21,6 +21,13 @@
           <a class="nav-link" routerLink="/" (click)="collapseNavbar()">
             <fa-icon icon="home"></fa-icon>
             <span>Home</span>
+          </a>
+        </li>
+
+        <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          <a class="nav-link" routerLink="/prenota-sala" (click)="collapseNavbar()">
+            <fa-icon icon="calendar-alt"></fa-icon>
+            <span>Prenota sala</span>
           </a>
         </li>
 
