@@ -14,20 +14,25 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
     @Query(
         "SELECT s " +
         "FROM Sale s " +
-        "WHERE s.capienza >= :capienza " +
+        "WHERE s.capienza >= :capienzaMin " +
+        "AND (:capienzaMax IS NULL OR s.capienza <= :capienzaMax)" +
         "AND s.id NOT IN (" +
         "SELECT p.sala.id " +
         "FROM Prenotazioni p " +
         "WHERE p.data = :data " +
         "AND p.oraInizio < :fine " +
         "AND p.oraFine > :inizio " +
-        "AND p.stato.codice = main.domain.enumeration.StatoCodice.CONFIRMED)" +
+        "AND p.stato.codice IN (" +
+        "main.domain.enumeration.StatoCodice.CONFIRMED," +
+        "main.domain.enumeration.StatoCodice.WAITING) " +
+        ")" +
         "ORDER BY s.capienza ASC"
     )
     List<Sale> findFreeSales(
         @Param("data") LocalDate data,
         @Param("inizio") LocalTime c,
         @Param("fine") LocalTime fine,
-        @Param("capienza") Integer capienza
+        @Param("capienzaMin") Integer capienzaMin,
+        @Param("capienzaMax") Integer capienzaMax
     );
 }
