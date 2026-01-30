@@ -1,6 +1,7 @@
 package main.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.List;
@@ -19,6 +20,7 @@ import main.repository.StatiPrenotazioneRepository;
 import main.repository.UtentiRepository;
 import main.service.dto.PrenotazioniDTO;
 import main.service.mapper.PrenotazioniMapper;
+import main.web.rest.errors.UtenteNonAutenticatoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -274,10 +276,10 @@ public class PrenotazioniService {
         }
     }
 
-    private String getAuthenticatedUsername() throws AccessDeniedException {
+    private String getAuthenticatedUsername() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || auth.getName() == null) {
-            throw new AccessDeniedException("Utente non autenticato");
+            throw new UtenteNonAutenticatoException("Utente non autenticato");
         }
         return auth.getName();
     }
@@ -348,5 +350,53 @@ public class PrenotazioniService {
         if (sovrapposizione) {
             throw new IllegalStateException("Non è possibile confermare la prenotazione: conflitto con prenotazione esistente");
         }
+    }
+
+    public PrenotazioniDTO nuovoPrenotazioni(PrenotazioniDTO dto) {
+        LOG.debug("Request to nuovo Prenotazioni : {}", dto);
+
+        validaInputRicerca(dto);
+
+        Sale sala = caricaSala(dto.getSala().getId());
+        Utenti utente = caricaUtenteAutenticato();
+
+        Prenotazioni pren = costruisciPrenotazioneDaRicerca(dto, sala, utente);
+
+        validaPrenotazione(pren);
+        impostaStatoIniziale(pren);
+
+        Prenotazioni salvata = prenotazioniRepository.save(pren);
+        return prenotazioniMapper.toDto(salvata);
+    }
+
+    private void validaInputRicerca(PrenotazioniDTO dto) {
+        if (dto.getSala() == null || dto.getSala().getId() == null) {
+            throw new IllegalArgumentException("Sala non valida: ID mancante");
+        }
+        if (dto.getData() == null) {
+            throw new IllegalArgumentException("La data è obbligatoria");
+        }
+        if (dto.getOraInizio() == null || dto.getOraFine() == null) {
+            throw new IllegalArgumentException("Orario di inizio e fine sono obbligatori");
+        }
+    }
+
+    private Sale caricaSala(UUID salaId) {
+        return saleRepository.findById(salaId).orElseThrow(() -> new EntityNotFoundException("Sala non trovata"));
+    }
+
+    private Utenti caricaUtenteAutenticato() {
+        String username = getAuthenticatedUsername();
+        return utentiRepository.findByUser_Login(username).orElseThrow(() -> new EntityNotFoundException("Utente non trovato"));
+    }
+
+    private Prenotazioni costruisciPrenotazioneDaRicerca(PrenotazioniDTO dto, Sale sala, Utenti utente) {
+        Prenotazioni pren = new Prenotazioni();
+        pren.setSala(sala);
+        pren.setUtente(utente);
+        pren.setData(dto.getData());
+        pren.setOraInizio(dto.getOraInizio());
+        pren.setOraFine(dto.getOraFine());
+        return pren;
     }
 }
