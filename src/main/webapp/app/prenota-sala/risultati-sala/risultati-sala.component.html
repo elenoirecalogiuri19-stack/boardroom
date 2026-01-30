@@ -1,1 +1,46 @@
-<p>risultati-sala works!</p>
+<div class="results-container">
+  <aside class="sidebar">
+    <button class="btn-back" (click)="tornaIndietro()"><fa-icon icon="arrow-left"></fa-icon> Indietro</button>
+
+    <div class="report-section">
+      <div class="report-item">
+        <label>DATA</label>
+        <p>{{ dataRicerca | date: 'dd/MM/yyyy' }}</p>
+      </div>
+      <div class="report-item">
+        <label>ORA</label>
+        <p>{{ oraRicerca || '08:00 - 09:00' }}</p>
+      </div>
+      <div class="report-item">
+        <label>PERSONE</label>
+        <p>{{ capienzaRicerca }} persone</p>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <h1 class="page-title">Sale disponibili</h1>
+
+    <div class="rooms-list">
+      @for (item of sale; track item.id) {
+        <div class="room-card">
+          <div class="card-content">
+            <h3 class="room-name">{{ item.nome }}</h3>
+
+            <div class="room-meta">
+              <div class="avatar-circle"></div>
+              <div class="text-info">
+                <span class="info-title">{{ item.titolo }}</span>
+                <span class="info-desc">{{ item.descrizione }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-action">
+            <button class="btn-book" (click)="selezionaSala(item)">Prenota</button>
+          </div>
+        </div>
+      }
+    </div>
+  </main>
+</div>
