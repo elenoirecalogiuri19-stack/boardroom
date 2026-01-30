@@ -20,6 +20,7 @@ export default class NavbarComponent implements OnInit {
   isNavbarCollapsed = signal(true);
   openAPIEnabled?: boolean;
   version = '';
+  isLoading = false;
 
   public accountService = inject(AccountService);
   account = this.accountService.trackCurrentAccount();
@@ -54,13 +55,19 @@ export default class NavbarComponent implements OnInit {
   }
 
   login(): void {
-    this.router.navigate(['/login']);
+    this.isLoading = true;
+    this.router.navigate(['/login']).then(() => {
+      this.isLoading = false;
+    });
   }
 
   logout(): void {
+    this.isLoading = true;
     this.collapseNavbar();
     this.loginService.logout();
-    this.router.navigate(['']);
+    this.router.navigate(['']).then(() => {
+      this.isLoading = false;
+    });
   }
 
   toggleNavbar(): void {
