@@ -14,8 +14,8 @@ import { RicercaService } from '../services/ricerca.service';
 export default class PrenotaSalaComponent implements OnInit {
   orari: string[] = [];
   capienza = 50;
-  dataSelezionata: string = '';
-  oraSelezionata: string = '';
+  dataSelezionata = '';
+  oraSelezionata = '';
 
   constructor(
     private router: Router,
@@ -29,7 +29,7 @@ export default class PrenotaSalaComponent implements OnInit {
     if (salvati.data) {
       this.dataSelezionata = salvati.data;
       this.oraSelezionata = salvati.ora;
-      this.capienza = salvati.capienza;
+      this.capienza = salvati.capienzaMin;
     }
   }
 
@@ -45,7 +45,8 @@ export default class PrenotaSalaComponent implements OnInit {
     this.ricercaService.salvaRicerca({
       data: this.dataSelezionata,
       ora: this.oraSelezionata,
-      capienza: this.capienza,
+      capienzaMin: this.capienza,
+      capienzaMax: undefined,
     });
 
     this.router.navigate(['/risultati-sala'], {

@@ -2,14 +2,15 @@
   <h2 class="title-green">Prenota sala</h2>
 
   <div class="search-bar-card">
+    <!-- DATA -->
     <div class="input-group-custom">
-      <label>Data</label>
-      <input type="date" class="form-control-br" [(ngModel)]="dataSelezionata" />
+      <label for="data">Data</label>
+      <input id="data" type="date" class="form-control-br" [(ngModel)]="dataSelezionata" />
     </div>
 
     <div class="input-group-custom">
-      <label>Ora</label>
-      <select class="form-control-br" [(ngModel)]="oraSelezionata">
+      <label for="ora">Ora</label>
+      <select id="ora" class="form-control-br" [(ngModel)]="oraSelezionata">
         <option value="" disabled selected>Seleziona fascia</option>
         @for (ora of orari; track ora) {
           <option [value]="ora">{{ ora }}</option>
@@ -19,10 +20,12 @@
 
     <div class="input-group-custom">
       <div class="label-box">
-        <label>Capienza</label>
+        <span class="label">Capienza</span>
         <span class="value-badge">{{ capienza }}</span>
       </div>
-      <input type="range" min="0" max="100" class="form-range-br" [(ngModel)]="capienza" />
+
+      <input id="capienza" type="range" min="0" max="100" class="form-range-br" [(ngModel)]="capienza" />
+
       <div class="range-limits">
         <span>0</span>
         <span>100</span>

@@ -3,8 +3,14 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { Sala } from './sala.model';
 import { RicercaService } from 'app/services/ricerca.service';
+import { SaleApiService, ISalaDTO } from 'app/services/sale-api.service';
+
+export interface Sala {
+  id: string;
+  nome: string;
+  capienza: number;
+}
 
 @Component({
   selector: 'jhi-risultati-sala',
@@ -14,37 +20,77 @@ import { RicercaService } from 'app/services/ricerca.service';
   styleUrl: './risultati-sala.component.scss',
 })
 export class RisultatiSalaComponent implements OnInit {
-  dataRicerca: string = '';
-  oraRicerca: string = '';
-  capienzaRicerca: number = 0;
+  dataRicerca = '';
+  oraRicerca = '';
+  capienzaRicerca = 0;
 
-  sale: Sala[] = [
-    { id: 1, nome: 'Sala Smeraldo', titolo: 'Meeting Room A', descrizione: 'Perfetta per brainstorming e team building.' },
-    { id: 2, nome: 'Sala Rubino', titolo: 'Conference Room B', descrizione: 'Attrezzatura video 4K e sistema audio surround.' },
-    { id: 3, nome: 'Sala Zaffiro', titolo: 'Workshop Space', descrizione: 'Ampia e luminosa, ideale per corsi di formazione.' },
-  ];
+  sale: Sala[] = [];
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private ricercaService: RicercaService,
+    private saleApiService: SaleApiService,
   ) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
-      this.dataRicerca = params['data'];
-      this.oraRicerca = params['ora'];
-      this.capienzaRicerca = +params['persone'];
+      this.dataRicerca = params['data'] ?? '';
+      this.oraRicerca = params['ora'] ?? '';
+      this.capienzaRicerca = params['persone'] ? Number(params['persone']) : 0;
+
+      this.caricaSaleDisponibili();
     });
   }
 
+  // 🔹 Metodi pubblici PRIMA dei private
   tornaIndietro(): void {
     this.router.navigate(['/prenota-sala']);
   }
 
   selezionaSala(sala: Sala): void {
-    console.log('Hai scelto per il tuo evento:', sala.nome);
-
+    console.warn('Hai scelto per il tuo evento:', sala.nome);
     this.ricercaService.resetRicerca();
+  }
+
+  // 🔹 Metodi privati DOPO
+  private caricaSaleDisponibili(): void {
+    if (!this.dataRicerca || !this.oraRicerca) {
+      return;
+    }
+
+    const parts = this.oraRicerca.split('-');
+    if (parts.length !== 2) {
+      console.error('Formato ora non valido:', this.oraRicerca);
+      return;
+    }
+
+    const inizioRaw = parts[0].trim();
+    const fineRaw = parts[1].trim();
+
+    const inizio = this.normalizzaOra(inizioRaw);
+    const fine = this.normalizzaOra(fineRaw);
+
+    this.saleApiService.getSaleDisponibili(this.dataRicerca, inizio, fine, this.capienzaRicerca).subscribe({
+      next: (saleDto: ISalaDTO[]) => {
+        this.sale = saleDto.map(s => ({
+          id: s.id,
+          nome: s.nome,
+          capienza: s.capienza,
+        }));
+      },
+      error(err) {
+        console.error('Errore nel caricamento delle sale disponibili', err);
+      },
+    });
+  }
+
+  private normalizzaOra(ora: string): string {
+    const [h, m] = ora.split(':');
+
+    const hh = h.padStart(2, '0');
+    const mm = (m as string | undefined) ?? '00';
+
+    return `${hh}:${mm}`;
   }
 }

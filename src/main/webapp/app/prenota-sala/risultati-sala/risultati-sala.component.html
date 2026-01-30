@@ -4,15 +4,17 @@
 
     <div class="report-section">
       <div class="report-item">
-        <label>DATA</label>
+        <span class="label">DATA</span>
         <p>{{ dataRicerca | date: 'dd/MM/yyyy' }}</p>
       </div>
+
       <div class="report-item">
-        <label>ORA</label>
+        <span class="label">ORA</span>
         <p>{{ oraRicerca || '08:00 - 09:00' }}</p>
       </div>
+
       <div class="report-item">
-        <label>PERSONE</label>
+        <span class="label">PERSONE</span>
         <p>{{ capienzaRicerca }} persone</p>
       </div>
     </div>
@@ -30,8 +32,8 @@
             <div class="room-meta">
               <div class="avatar-circle"></div>
               <div class="text-info">
-                <span class="info-title">{{ item.titolo }}</span>
-                <span class="info-desc">{{ item.descrizione }}</span>
+                <span class="info-title">Capienza: {{ item.capienza }} persone</span>
+                <span class="info-desc">Disponibile nella fascia selezionata</span>
               </div>
             </div>
           </div>
