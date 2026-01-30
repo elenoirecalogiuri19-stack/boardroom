@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { Sala } from './sala.model';
 import { RicercaService } from 'app/services/ricerca.service';
+import { EventiService } from 'app/entities/eventi/service/eventi.service';
+import { IEventi } from 'app/entities/eventi/eventi.model';
 
 @Component({
   selector: 'jhi-risultati-sala',
@@ -18,23 +19,49 @@ export class RisultatiSalaComponent implements OnInit {
   oraRicerca: string = '';
   capienzaRicerca: number = 0;
 
-  sale: Sala[] = [
-    { id: 1, nome: 'Sala Smeraldo', titolo: 'Meeting Room A', descrizione: 'Perfetta per brainstorming e team building.' },
-    { id: 2, nome: 'Sala Rubino', titolo: 'Conference Room B', descrizione: 'Attrezzatura video 4K e sistema audio surround.' },
-    { id: 3, nome: 'Sala Zaffiro', titolo: 'Workshop Space', descrizione: 'Ampia e luminosa, ideale per corsi di formazione.' },
-  ];
+  eventi: IEventi[] = [];
+  caricamento: boolean = true;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private ricercaService: RicercaService,
+    private eventiService: EventiService,
   ) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
-      this.dataRicerca = params['data'];
-      this.oraRicerca = params['ora'];
-      this.capienzaRicerca = +params['persone'];
+      this.dataRicerca = params['data'] || '';
+      this.oraRicerca = params['ora'] || '';
+      this.capienzaRicerca = +params['persone'] || 0;
+
+      this.caricaEFilterEventi();
+    });
+  }
+
+  caricaEFilterEventi(): void {
+    this.caricamento = true;
+    this.eventiService.query().subscribe({
+      next: res => {
+        const tuttiGliEventi = res.body ?? [];
+
+        this.eventi = tuttiGliEventi.filter(ev => {
+          const isValido = !!ev.titolo && !!ev.data;
+
+          const matchData = ev.data === this.dataRicerca;
+
+          const matchOra = this.oraRicerca ? ev.oraInizio?.toString().includes(this.oraRicerca) : true;
+
+          return isValido && matchData && matchOra;
+        });
+
+        this.caricamento = false;
+        console.log('Risultati filtrati:', this.eventi);
+      },
+      error: err => {
+        console.error('Errore:', err);
+        this.caricamento = false;
+      },
     });
   }
 
@@ -42,9 +69,8 @@ export class RisultatiSalaComponent implements OnInit {
     this.router.navigate(['/prenota-sala']);
   }
 
-  selezionaSala(sala: Sala): void {
-    console.log('Hai scelto per il tuo evento:', sala.nome);
-
-    this.ricercaService.resetRicerca();
+  selezionaSala(evento: IEventi): void {
+    console.log('Sala selezionata:', evento.salaNome);
+    // Qui andrai alla pagina di conferma o pagamento
   }
 }

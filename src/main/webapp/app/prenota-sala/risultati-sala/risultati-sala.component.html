@@ -1,46 +1,69 @@
 <div class="results-container">
   <aside class="sidebar">
-    <button class="btn-back" (click)="tornaIndietro()"><fa-icon icon="arrow-left"></fa-icon> Indietro</button>
+    <button class="btn-back" (click)="tornaIndietro()"><fa-icon icon="arrow-left"></fa-icon> Nuova Ricerca</button>
 
     <div class="report-section">
+      <h3>Il tuo riepilogo</h3>
       <div class="report-item">
         <label>DATA</label>
-        <p>{{ dataRicerca | date: 'dd/MM/yyyy' }}</p>
+        <p>{{ dataRicerca | date: 'fullDate' }}</p>
       </div>
       <div class="report-item">
-        <label>ORA</label>
-        <p>{{ oraRicerca || '08:00 - 09:00' }}</p>
+        <label>ORARIO RICHIESTO</label>
+        <p>{{ oraRicerca || 'Tutto il giorno' }}</p>
       </div>
       <div class="report-item">
-        <label>PERSONE</label>
+        <label>PARTECIPANTI</label>
         <p>{{ capienzaRicerca }} persone</p>
       </div>
     </div>
   </aside>
 
   <main class="main-content">
-    <h1 class="page-title">Sale disponibili</h1>
+    <h1 class="page-title">Sale disponibili per i tuoi criteri</h1>
 
-    <div class="rooms-list">
-      @for (item of sale; track item.id) {
-        <div class="room-card">
-          <div class="card-content">
-            <h3 class="room-name">{{ item.nome }}</h3>
+    @if (caricamento) {
+      <div class="loading-state">
+        <p>Ricerca sale in corso...</p>
+      </div>
+    } @else {
+      <div class="rooms-list">
+        @for (item of eventi; track item.id) {
+          <div class="room-card">
+            <div class="card-content">
+              <h3 class="room-name">{{ item.salaNome || 'Sala Premium' }}</h3>
 
-            <div class="room-meta">
-              <div class="avatar-circle"></div>
-              <div class="text-info">
-                <span class="info-title">{{ item.titolo }}</span>
-                <span class="info-desc">{{ item.descrizione }}</span>
+              <div class="room-meta">
+                <div class="avatar-circle">
+                  {{ item.tipo ? item.tipo.charAt(0) : 'S' }}
+                </div>
+                <div class="text-info">
+                  <span class="info-title">{{ item.titolo }}</span>
+                  <span class="info-desc">{{ item.descrizione || 'Nessuna descrizione per questo evento.' }}</span>
+
+                  <div class="event-details">
+                    <span><fa-icon icon="clock"></fa-icon> {{ item.oraInizio }} - {{ item.oraFine }}</span>
+                    <span class="price-tag"
+                      ><strong>{{ item.prezzo | currency: 'EUR' }}</strong></span
+                    >
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="card-action">
-            <button class="btn-book" (click)="selezionaSala(item)">Prenota</button>
+            <div class="card-action">
+              <button class="btn-book" (click)="selezionaSala(item)">Prenota ora</button>
+            </div>
           </div>
-        </div>
-      }
-    </div>
+        } @empty {
+          <div class="no-results">
+            <fa-icon icon="calendar-times" size="3x"></fa-icon>
+            <h2>Nessuna sala disponibile</h2>
+            <p>Non abbiamo trovato sale per il {{ dataRicerca | date: 'dd/MM' }} alle {{ oraRicerca }}.</p>
+            <button class="btn-back" (click)="tornaIndietro()">Cambia filtri</button>
+          </div>
+        }
+      </div>
+    }
   </main>
 </div>
