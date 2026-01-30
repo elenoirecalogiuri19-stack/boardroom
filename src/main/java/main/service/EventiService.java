@@ -46,7 +46,23 @@ public class EventiService {
      */
     public EventiDTO createEvento(EventiDTO dto) {
         LOG.debug("REST request to save Eventi : {}", dto);
-        return save(dto);
+
+        Prenotazioni pre = prenotazioniRepository
+            .findById(dto.getPrenotazioneId())
+            .orElseThrow(() -> new BadRequestAlertException("Prenotazione non trovata", "eventi", "prenotazioneNotFound"));
+
+        if (!pre.getStato().getCodice().equals(StatoCodice.CONFIRMED)) {
+            throw new BadRequestAlertException("Prenotazione non confermata", "eventi", "prenotazioneNotFound");
+        }
+
+        Eventi eventi = new Eventi();
+        eventi.setTitolo(dto.getTitolo());
+        eventi.setTipo(dto.getTipo());
+        eventi.setPrezzo(dto.getPrezzo());
+        eventi.setPrenotazione(pre);
+
+        eventi = eventiRepository.save(eventi);
+        return eventiMapper.toDto(eventi);
     }
 
     /**
@@ -143,33 +159,6 @@ public class EventiService {
     public List<EventiDTO> findPublicEventi() {
         LOG.debug("Request to get all Eventi");
         List<Eventi> eventi = eventiRepository.findByTipo(TipoEvento.PUBBLICO);
-        return eventiMapper.toDto(eventi);
-    }
-
-    /**
-     *
-     * Metodo per creare Eventi publici
-     *
-     */
-    @Transactional
-    public EventiDTO creaEventoPubblico(EventiDTO eventiDTO) {
-        LOG.debug("Request to create Eventi : {}", eventiDTO);
-        Prenotazioni pre = prenotazioniRepository
-            .findById(eventiDTO.getPrenotazioneId())
-            .orElseThrow(() -> new BadRequestAlertException("Prenotazione non trvata", "eventi", "prenotazioneNotFound"));
-
-        if (!pre.getStato().getCodice().equals(StatoCodice.CONFIRMED)) {
-            throw new BadRequestAlertException("Prenotazione non confermata", "eventi", "prenotazioneNotFound");
-        }
-
-        Eventi eventi = new Eventi();
-        eventi.setTitolo(eventiDTO.getTitolo());
-        eventi.setTipo(TipoEvento.PUBBLICO);
-        eventi.setPrezzo(eventiDTO.getPrezzo());
-        eventi.setPrenotazione(pre);
-
-        eventi = eventiRepository.save(eventi);
-
         return eventiMapper.toDto(eventi);
     }
 
