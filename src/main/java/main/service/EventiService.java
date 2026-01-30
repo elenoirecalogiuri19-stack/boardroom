@@ -1,15 +1,18 @@
 package main.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal; // Import fondamentale per gestire i prezzi
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import main.domain.Eventi;
 import main.domain.Prenotazioni;
+import main.domain.StatiPrenotazione;
 import main.domain.enumeration.StatoCodice;
 import main.domain.enumeration.TipoEvento;
 import main.repository.EventiRepository;
 import main.repository.PrenotazioniRepository;
+import main.repository.StatiPrenotazioneRepository;
 import main.service.dto.EventiDTO;
 import main.service.mapper.EventiMapper;
 import main.web.rest.errors.BadRequestAlertException;
@@ -34,11 +37,18 @@ public class EventiService {
     private final EventiMapper eventiMapper;
 
     private final PrenotazioniRepository prenotazioniRepository;
+    private final StatiPrenotazioneRepository statiPrenotazioneRepository;
 
-    public EventiService(EventiRepository eventiRepository, EventiMapper eventiMapper, PrenotazioniRepository prenotazioniRepository) {
+    public EventiService(
+        EventiRepository eventiRepository,
+        EventiMapper eventiMapper,
+        PrenotazioniRepository prenotazioniRepository,
+        StatiPrenotazioneRepository statiPrenotazioneRepository
+    ) {
         this.eventiRepository = eventiRepository;
         this.eventiMapper = eventiMapper;
         this.prenotazioniRepository = prenotazioniRepository;
+        this.statiPrenotazioneRepository = statiPrenotazioneRepository;
     }
 
     /**
@@ -47,26 +57,38 @@ public class EventiService {
     public EventiDTO createEvento(EventiDTO dto) {
         LOG.debug("REST request to save Eventi : {}", dto);
 
-        Prenotazioni pre = prenotazioniRepository
+        Prenotazioni pren = prenotazioniRepository
             .findById(dto.getPrenotazioneId())
             .orElseThrow(() -> new BadRequestAlertException("Prenotazione non trovata", "eventi", "prenotazioneNotFound"));
 
-        if (!pre.getStato().getCodice().equals(StatoCodice.CONFIRMED)) {
+        if (!pren.getStato().getCodice().equals(StatoCodice.WAITING)) {
             throw new BadRequestAlertException("Prenotazione non confermata", "eventi", "prenotazioneNotFound");
         }
 
         Eventi eventi = new Eventi();
         eventi.setTitolo(dto.getTitolo());
+        eventi.setDescrizione(dto.getDescrizione());
         eventi.setTipo(dto.getTipo());
-        eventi.setPrezzo(dto.getPrezzo());
-        eventi.setPrenotazione(pre);
+        eventi.setPrenotazione(pren);
+
+        if (dto.getTipo() == TipoEvento.PUBBLICO) {
+            eventi.setPrezzo(dto.getPrezzo());
+        } else {
+            eventi.setPrezzo(null);
+        }
 
         eventi = eventiRepository.save(eventi);
+        StatiPrenotazione confirmed = statiPrenotazioneRepository
+            .findByCodice(StatoCodice.CONFIRMED)
+            .orElseThrow(() -> new EntityNotFoundException("Stati prenotazione non trovata"));
+
+        pren.setStato(confirmed);
+        prenotazioniRepository.save(pren);
         return eventiMapper.toDto(eventi);
     }
 
     /**
-     * Save a eventi.
+     * Save  eventi.
      */
     public EventiDTO save(EventiDTO eventiDTO) {
         LOG.debug("Request to save Eventi : {}", eventiDTO);

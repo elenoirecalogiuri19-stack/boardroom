@@ -21,6 +21,8 @@ public class PrenotazioniDTO implements Serializable {
     @NotNull
     private LocalTime oraFine;
 
+    private Integer numPersone;
+
     private TipoEvento tipoEvento;
     private BigDecimal prezzo;
     private StatiPrenotazioneDTO stato;
