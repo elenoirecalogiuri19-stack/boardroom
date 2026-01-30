@@ -1,7 +1,7 @@
 <nav data-cy="navbar" class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
   <div class="container-fluid">
     <a class="navbar-brand logo" routerLink="/" (click)="collapseNavbar()">
-      <img src="content/images/logo-jhipster.png" alt="Boardroom Logo" style="max-height: 80px; width: auto" />
+      <img src="content/images/logo-boardroom.png" alt="Boardroom Logo" style="max-height: 80px; width: auto" />
     </a>
 
     <button
@@ -84,11 +84,6 @@
                 >
               </li>
               <li>
-                <a class="dropdown-item" routerLink="/admin/configuration" (click)="collapseNavbar()"
-                  ><fa-icon icon="cogs"></fa-icon> Configurazione</a
-                >
-              </li>
-              <li>
                 <a class="dropdown-item" routerLink="/admin/logs" (click)="collapseNavbar()"><fa-icon icon="tasks"></fa-icon> Log</a>
               </li>
               @if (openAPIEnabled) {
@@ -104,7 +99,9 @@
           @let accountRef = account();
           <a class="nav-link dropdown-toggle" ngbDropdownToggle href="javascript:void(0);" id="account-menu">
             @if (!accountRef?.imageUrl) {
-              <span><fa-icon icon="user"></fa-icon> <span>Utente</span></span>
+              <span
+                ><fa-icon icon="user"></fa-icon> <span>{{ accountRef ? accountRef.firstName : 'Utente' }}</span></span
+              >
             } @else {
               <img [src]="accountRef!.imageUrl" class="profile-image rounded-circle" alt="Avatar" />
             }
@@ -117,16 +114,17 @@
                 >
               </li>
               <li>
-                <a class="dropdown-item" routerLink="/account/password" (click)="collapseNavbar()"
-                  ><fa-icon icon="lock"></fa-icon> Password</a
-                >
-              </li>
-              <li>
-                <a class="dropdown-item" (click)="logout()"><fa-icon icon="sign-out-alt"></fa-icon> Esci</a>
+                <a class="dropdown-item" (click)="logout()">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                  <fa-icon icon="sign-out-alt" *ngIf="!isLoading"></fa-icon> Esci
+                </a>
               </li>
             } @else {
               <li>
-                <a class="dropdown-item" (click)="login()"><fa-icon icon="sign-in-alt"></fa-icon> Accesso</a>
+                <a class="dropdown-item" (click)="login()">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                  <fa-icon icon="sign-in-alt" *ngIf="!isLoading"></fa-icon> Accesso
+                </a>
               </li>
               <li>
                 <a class="dropdown-item" routerLink="/account/register" (click)="collapseNavbar()"

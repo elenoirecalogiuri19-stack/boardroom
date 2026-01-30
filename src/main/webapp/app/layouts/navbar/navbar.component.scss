@@ -2,7 +2,7 @@
 @import 'bootswatch/dist/flatly/variables';
 @import 'bootstrap/scss/variables';
 
-$boardroom-green: #4a8c40;
+$boardroom-green: #28a745; // Verde Boardroom
 $dark-grey: #444444;
 
 .navbar {
@@ -10,35 +10,9 @@ $dark-grey: #444444;
   min-height: 120px !important;
   padding: 0 2rem !important;
   background-color: #ffffff !important;
-  display: flex !important;
-  align-items: center !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
 
-  .container-fluid {
-    height: 100% !important;
-    display: flex !important;
-    align-items: center !important;
-  }
-
-  .navbar-brand.logo {
-    height: 100px !important;
-    width: 320px !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-  }
-
-  .logo-img {
-    height: 100% !important;
-    width: 100% !important;
-    display: inline-block !important;
-    background: url('../../../content/images/logo-boardroom.png') no-repeat center left !important;
-    background-size: contain !important;
-  }
-
   .navbar-nav {
-    height: 100% !important;
     align-items: center !important;
 
     .nav-link {
@@ -50,16 +24,9 @@ $dark-grey: #444444;
       align-items: center !important;
       transition: all 0.3s ease;
 
-      fa-icon {
-        color: inherit !important;
-        font-size: 1.3rem;
-        margin-right: 8px;
-      }
-
       &.active,
       &:hover {
         color: $boardroom-green !important;
-
         fa-icon {
           color: $boardroom-green !important;
         }
@@ -68,12 +35,14 @@ $dark-grey: #444444;
   }
 }
 
-.navbar-version {
-  display: none !important;
-}
-
 .profile-image {
   height: 45px !important;
   width: 45px !important;
   border: 2px solid $boardroom-green !important;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.15em;
 }
