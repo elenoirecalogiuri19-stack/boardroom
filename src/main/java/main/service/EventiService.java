@@ -166,6 +166,7 @@ public class EventiService {
         eventi.setTitolo(eventiDTO.getTitolo());
         eventi.setTipo(TipoEvento.PUBBLICO);
         eventi.setPrezzo(eventiDTO.getPrezzo());
+        eventi.setDescrizione(eventiDTO.getDescrizione());
         eventi.setPrenotazione(pre);
 
         eventi = eventiRepository.save(eventi);
