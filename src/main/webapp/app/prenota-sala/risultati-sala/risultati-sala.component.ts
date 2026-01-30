@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { Sala } from './sala.model';
 import { RicercaService } from 'app/services/ricerca.service';
 import { SaleApiService, ISalaDTO } from 'app/services/sale-api.service';
 
@@ -36,14 +35,15 @@ export class RisultatiSalaComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
-      this.dataRicerca = params['data'] ?? '';
-      this.oraRicerca = params['ora'] ?? '';
+      this.dataRicerca = (params['data'] as string | undefined) ?? '';
+      this.oraRicerca = (params['ora'] as string | undefined) ?? '';
       this.capienzaRicerca = params['persone'] ? Number(params['persone']) : 0;
 
       this.caricaSaleDisponibili();
     });
   }
 
+  // ✔️ Metodi pubblici prima dei private
   tornaIndietro(): void {
     this.router.navigate(['/prenota-sala']);
   }
@@ -53,7 +53,7 @@ export class RisultatiSalaComponent implements OnInit {
     this.ricercaService.resetRicerca();
   }
 
-  // 🔹 Metodi privati DOPO
+  // ✔️ Metodi privati dopo
   private caricaSaleDisponibili(): void {
     if (!this.dataRicerca || !this.oraRicerca) {
       return;
