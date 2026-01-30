@@ -24,6 +24,8 @@ export default class RegisterComponent implements AfterViewInit {
   errorUserExists = signal(false);
   success = signal(false);
 
+  isLoading = false;
+
   registerForm = new FormGroup({
     login: new FormControl('', {
       nonNullable: true,
@@ -46,8 +48,6 @@ export default class RegisterComponent implements AfterViewInit {
   private readonly registerService = inject(RegisterService);
 
   ngAfterViewInit(): void {
-    // Il focus automatico a volte attiva la validazione visiva verde.
-    // Usiamo un timeout minimo per separarlo dal rendering iniziale.
     setTimeout(() => {
       this.login().nativeElement.focus();
     }, 0);
@@ -60,13 +60,22 @@ export default class RegisterComponent implements AfterViewInit {
     this.errorUserExists.set(false);
 
     const { password, confirmPassword } = this.registerForm.getRawValue();
+
     if (password !== confirmPassword) {
       this.doNotMatch.set(true);
     } else {
+      this.isLoading = true;
+
       const { login, firstName, lastName, email, numeroDiTelefono, nomeAzienda } = this.registerForm.getRawValue();
       this.registerService.save({ login, firstName, lastName, numeroDiTelefono, nomeAzienda, email, password, langKey: 'it' }).subscribe({
-        next: () => this.success.set(true),
-        error: response => this.processError(response),
+        next: () => {
+          this.success.set(true);
+          this.isLoading = false;
+        },
+        error: response => {
+          this.isLoading = false;
+          this.processError(response);
+        },
       });
     }
   }

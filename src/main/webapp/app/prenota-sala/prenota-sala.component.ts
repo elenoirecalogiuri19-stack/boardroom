@@ -17,6 +17,8 @@ export default class PrenotaSalaComponent implements OnInit {
   dataSelezionata: string = '';
   oraSelezionata: string = '';
 
+  caricamento = false;
+
   constructor(
     private router: Router,
     private ricercaService: RicercaService,
@@ -42,18 +44,24 @@ export default class PrenotaSalaComponent implements OnInit {
   }
 
   confermaPrenotazione(): void {
+    this.caricamento = true;
+
     this.ricercaService.salvaRicerca({
       data: this.dataSelezionata,
       ora: this.oraSelezionata,
       capienza: this.capienza,
     });
 
-    this.router.navigate(['/risultati-sala'], {
-      queryParams: {
-        data: this.dataSelezionata,
-        ora: this.oraSelezionata,
-        persone: this.capienza,
-      },
-    });
+    this.router
+      .navigate(['/risultati-sala'], {
+        queryParams: {
+          data: this.dataSelezionata,
+          ora: this.oraSelezionata,
+          persone: this.capienza,
+        },
+      })
+      .then(() => {
+        this.caricamento = false;
+      });
   }
 }

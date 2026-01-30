@@ -1,6 +1,6 @@
 <div class="results-container">
   <aside class="sidebar">
-    <button class="btn-back" (click)="tornaIndietro()"><fa-icon icon="arrow-left"></fa-icon> Nuova Ricerca</button>
+    <button class="btn-back" (click)="tornaIndietro()"><fa-icon icon="arrow-left"></fa-icon> Indietro</button>
 
     <div class="report-section">
       <h3>Il tuo riepilogo</h3>
@@ -52,15 +52,20 @@
             </div>
 
             <div class="card-action">
-              <button class="btn-book" (click)="selezionaSala(item)">Prenota ora</button>
+              <button class="btn-book" [class.btn-loading]="caricamento" [disabled]="caricamento" (click)="selezionaSala(item)">
+                Prenota ora
+              </button>
             </div>
           </div>
         } @empty {
           <div class="no-results">
-            <fa-icon icon="calendar-times" size="3x"></fa-icon>
+            <fa-icon icon="calendar-xmark" size="3x"></fa-icon>
             <h2>Nessuna sala disponibile</h2>
             <p>Non abbiamo trovato sale per il {{ dataRicerca | date: 'dd/MM' }} alle {{ oraRicerca }}.</p>
-            <button class="btn-back" (click)="tornaIndietro()">Cambia filtri</button>
+
+            <button class="btn-back" [class.btn-loading]="caricamento" [disabled]="caricamento" (click)="tornaIndietro()">
+              Cambia filtri
+            </button>
           </div>
         }
       </div>

@@ -29,7 +29,15 @@
           <form name="form" (ngSubmit)="register()" [formGroup]="registerForm">
             <div class="mb-3">
               <label class="form-label" for="login">Username</label>
-              <input type="text" class="form-control" id="login" name="login" placeholder="Scegli un username" formControlName="login" />
+              <input
+                #login
+                type="text"
+                class="form-control"
+                id="login"
+                name="login"
+                placeholder="Scegli un username"
+                formControlName="login"
+              />
             </div>
 
             <div class="row">
@@ -98,7 +106,14 @@
               />
             </div>
 
-            <button type="submit" [disabled]="registerForm.invalid" class="btn btn-primary w-100 py-2">Crea Account</button>
+            <button
+              type="submit"
+              [disabled]="registerForm.invalid || isLoading"
+              class="btn btn-primary w-100 py-2"
+              [class.btn-loading]="isLoading"
+            >
+              Crea Account
+            </button>
           </form>
         }
 

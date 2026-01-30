@@ -22,7 +22,8 @@
               </div>
               <div class="card-footer-custom">
                 <button class="btn btn-price">€ {{ evento.prezzo }}</button>
-                <button class="btn btn-details">Dettagli</button>
+
+                <button class="btn btn-details" [class.btn-loading]="caricamento" (click)="vaiADettagli(evento)">Dettagli</button>
               </div>
             </div>
           </div>

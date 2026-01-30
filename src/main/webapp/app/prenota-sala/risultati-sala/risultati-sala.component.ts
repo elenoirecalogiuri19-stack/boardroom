@@ -47,9 +47,7 @@ export class RisultatiSalaComponent implements OnInit {
 
         this.eventi = tuttiGliEventi.filter(ev => {
           const isValido = !!ev.titolo && !!ev.data;
-
           const matchData = ev.data === this.dataRicerca;
-
           const matchOra = this.oraRicerca ? ev.oraInizio?.toString().includes(this.oraRicerca) : true;
 
           return isValido && matchData && matchOra;
@@ -66,11 +64,14 @@ export class RisultatiSalaComponent implements OnInit {
   }
 
   tornaIndietro(): void {
-    this.router.navigate(['/prenota-sala']);
+    this.caricamento = true;
+    this.router.navigate(['/prenota-sala']).then(() => {
+      this.caricamento = false;
+    });
   }
 
   selezionaSala(evento: IEventi): void {
+    this.caricamento = true;
     console.log('Sala selezionata:', evento.salaNome);
-    // Qui andrai alla pagina di conferma o pagamento
   }
 }

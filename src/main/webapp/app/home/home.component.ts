@@ -19,8 +19,9 @@ import { Account } from 'app/core/auth/account.model';
 })
 export default class HomeComponent implements OnInit, OnDestroy {
   account = signal<Account | null>(null);
-
   eventi = signal<IEventi[]>([]);
+
+  caricamento = false;
 
   private readonly destroy$ = new Subject<void>();
   private readonly accountService = inject(AccountService);
@@ -39,6 +40,14 @@ export default class HomeComponent implements OnInit, OnDestroy {
         this.eventi.set(data);
       },
       error: err => console.error('Errore caricamento eventi pubblici', err),
+    });
+  }
+
+  vaiADettagli(evento: IEventi): void {
+    this.caricamento = true;
+
+    this.router.navigate(['/eventi', evento.id, 'view']).then(() => {
+      this.caricamento = false;
     });
   }
 
