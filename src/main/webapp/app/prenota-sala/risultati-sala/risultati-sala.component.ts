@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { Sala } from './sala.model';
 import { RicercaService } from 'app/services/ricerca.service';
 import { SaleApiService, ISalaDTO } from 'app/services/sale-api.service';
 
@@ -43,7 +44,6 @@ export class RisultatiSalaComponent implements OnInit {
     });
   }
 
-  // 🔹 Metodi pubblici PRIMA dei private
   tornaIndietro(): void {
     this.router.navigate(['/prenota-sala']);
   }
