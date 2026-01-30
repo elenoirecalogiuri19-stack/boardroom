@@ -11,23 +11,27 @@
       <div class="content-section">
         <div class="header-content">
           <h1 class="event-title">{{ eventiRef.titolo }}</h1>
-          <p class="price-tag">{{ eventiRef.prezzo | currency: 'EUR' : 'symbol' : '1.0-2' }}</p>
+          <p class="price-tag">
+            {{ eventiRef.prezzo | currency: 'EUR' : 'symbol' : '1.0-2' }}
+          </p>
         </div>
 
         <div class="info-grid">
           <div class="info-item">
             <label>SALA</label>
-            <p>Sala Boardroom</p>
+            <p>{{ eventiRef.salaNome }}</p>
           </div>
+
           <div class="info-item">
             <label>DATA E ORA</label>
-            <p>30 Gen 2026 - 18:00</p>
+            <p>{{ eventiRef.data }}</p>
+            <p>Ora inizio {{ eventiRef.oraInizio }} | Ora fine {{ eventiRef.oraFine }}</p>
           </div>
         </div>
 
         <div class="description-box">
           <label>DESCRIZIONE</label>
-          <p>Esperienza di networking professionale negli spazi Boardroom.</p>
+          <p>{{ eventiRef.descrizione }}</p>
         </div>
 
         <div class="actions-wrapper">
