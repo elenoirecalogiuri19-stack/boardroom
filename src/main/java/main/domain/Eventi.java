@@ -30,6 +30,9 @@ public class Eventi implements Serializable {
     @Column(name = "titolo", nullable = false)
     private String titolo;
 
+    @Column(name = "titolo", nullable = false)
+    private String descrizione;
+
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false)
@@ -107,6 +110,14 @@ public class Eventi implements Serializable {
     public Eventi prenotazione(Prenotazioni prenotazioni) {
         this.setPrenotazione(prenotazioni);
         return this;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
+
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here

@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -74,6 +75,12 @@ public class PrenotazioniResource {
         return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result.getId()).toUri())
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
+    }
+
+    @PostMapping("/prenotta")
+    public ResponseEntity<PrenotazioniDTO> nuovaPrenotazione(@Valid @RequestBody PrenotazioniDTO dto) {
+        PrenotazioniDTO result = prenotazioniService.nuovoPrenotazioni(dto);
+        return ResponseEntity.ok(result);
     }
 
     /**

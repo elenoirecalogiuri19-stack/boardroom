@@ -24,7 +24,7 @@ public class EventiDTO implements Serializable {
     private TipoEvento tipo;
 
     private BigDecimal prezzo;
-
+    private String descrizione;
     private LocalDate data;
     private LocalTime oraInizio;
     private LocalTime oraFine;
@@ -102,6 +102,14 @@ public class EventiDTO implements Serializable {
 
     public void setSalaNome(String salaNome) {
         this.salaNome = salaNome;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
+
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione;
     }
 
     @Override
