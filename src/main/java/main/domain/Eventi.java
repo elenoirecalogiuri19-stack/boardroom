@@ -30,7 +30,7 @@ public class Eventi implements Serializable {
     @Column(name = "titolo", nullable = false)
     private String titolo;
 
-    @Column(name = "titolo", nullable = false)
+    @Column(name = "descrizione", nullable = false)
     private String descrizione;
 
     @NotNull
