@@ -80,6 +80,7 @@ public class SecurityConfiguration {
                     .requestMatchers(mvc.pattern("/api/account/reset-password/init")).permitAll()
                     .requestMatchers(mvc.pattern("/api/account/reset-password/finish")).permitAll()
                     .requestMatchers(mvc.pattern(HttpMethod.GET,"/api/eventis/pubblici")).permitAll()
+                    .requestMatchers(mvc.pattern(HttpMethod.GET,"/api/eventis/*")).permitAll() // Per Antonio: ho sistemato io questo permesso per far vedere il dettaglio eventi senza login
                     .requestMatchers(mvc.pattern("/management/health")).permitAll()
                     .requestMatchers(mvc.pattern("/management/health/**")).permitAll()
                     .requestMatchers(mvc.pattern("/management/info")).permitAll()
@@ -98,11 +99,6 @@ public class SecurityConfiguration {
                     .requestMatchers(mvc.pattern("/api/prenotazionis/*/conferma")).authenticated()
                     .requestMatchers(mvc.pattern(HttpMethod.GET,"/api/prenotazionis")).authenticated()
                     .requestMatchers(mvc.pattern(HttpMethod.GET,"/api/prenotazionis/**")).authenticated()
-                    //.requestMatchers(mvc.pattern("/api/eventis/crea-pubblico")).authenticated()
-                    //.requestMatchers(mvc.pattern(HttpMethod.POST,"/api/eventis")).authenticated()
-                    //.requestMatchers(mvc.pattern(HttpMethod.PUT,"/api/eventis/**")).authenticated()
-                    //.requestMatchers(mvc.pattern(HttpMethod.PATCH,"/api/eventis/**")).authenticated()
-                    //.requestMatchers(mvc.pattern("/api/sales/disponibili")).authenticated()
                     .requestMatchers(mvc.pattern("/api/prenotazionis/storico")).authenticated()
                     .requestMatchers(mvc.pattern("/api/prenotazionis/odierne")).authenticated()
 

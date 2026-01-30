@@ -1,0 +1,140 @@
+$primary-green: #28a745;
+$dark-text: #2c3e50;
+$medium-text: #5d6d7e;
+$light-bg: #f4f7f6;
+$border-color: #e1e8ed;
+
+.crea-evento-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 80px 20px;
+  background-color: $light-bg;
+
+  .minimal-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 500px;
+    padding: 40px;
+    border-radius: 24px;
+    border: 1px solid $border-color;
+    box-shadow: 0 12px 24px rgba(44, 62, 80, 0.05);
+  }
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 40px;
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: $dark-text;
+    letter-spacing: -0.5px;
+  }
+
+  p {
+    font-size: 15px;
+    color: $medium-text;
+    span {
+      color: $primary-green;
+      font-weight: 600;
+      background: rgba(40, 167, 69, 0.08);
+      padding: 3px 10px;
+      border-radius: 8px;
+    }
+  }
+}
+
+.input-field {
+  margin-bottom: 25px;
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: $medium-text;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    border: 1.5px solid $border-color;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 15px;
+    color: $dark-text;
+    background: #ffffff;
+    transition: all 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-green;
+      box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+    }
+  }
+}
+
+.actions-group {
+  display: flex;
+  gap: 15px;
+  margin-top: 40px;
+
+  button {
+    flex: 1;
+    padding: 16px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 54px;
+  }
+
+  .btn-cancel {
+    background: #edf2f4;
+    color: $medium-text;
+    &:hover {
+      background: #e2e8f0;
+      color: $dark-text;
+    }
+  }
+
+  .btn-confirm {
+    background: $primary-green;
+    color: white;
+
+    &:hover:not(:disabled) {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.minimal-loader {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

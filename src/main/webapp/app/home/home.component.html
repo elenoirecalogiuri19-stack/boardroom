@@ -1,7 +1,7 @@
 <div class="home-container">
   <div class="container text-center hero-section">
     <h1 class="display-5 fw-bold mt-3">Eventi in programma</h1>
-    <p class="subtitle-verde">Scorri per vedere i prossimi eventi in BoardRoom</p>
+    <p class="subtitle-verde">Scorri per vedere i prossimi eventi in <span>Boardroom</span></p>
   </div>
 
   <div class="container carousel-wrapper">
@@ -9,21 +9,28 @@
     <div class="fake-arrow right"><i class="bi bi-chevron-right"></i></div>
 
     <div class="event-scroll-container">
-      @for (evento of eventi(); track evento.titolo) {
+      @for (evento of eventi(); track evento.id) {
         <div class="event-card-item">
-          <div class="card event-card shadow-sm">
+          <div class="card event-card">
             <div class="card-body">
               <h5 class="card-title">{{ evento.titolo }}</h5>
-
               <p class="sala-text">{{ evento.salaNome }}</p>
+
               <div class="date-badge">
-                <span class="event-date">{{ evento.data }}</span>
+                <span class="event-date">{{ evento.data | date: 'dd MMM yyyy' }}</span>
                 <p class="event-time">{{ evento.oraInizio }} - {{ evento.oraFine }}</p>
               </div>
-              <div class="card-footer-custom">
-                <button class="btn btn-price">€ {{ evento.prezzo }}</button>
 
-                <button class="btn btn-details" [class.btn-loading]="caricamento" (click)="vaiADettagli(evento)">Dettagli</button>
+              <div class="card-footer-custom">
+                <button class="btn btn-price">
+                  <span *ngIf="!caricamento">€ {{ evento.prezzo }}</span>
+                  <div *ngIf="caricamento" class="minimal-loader"></div>
+                </button>
+
+                <button class="btn btn-details" (click)="vaiADettagli(evento)" [disabled]="caricamento">
+                  <span *ngIf="!caricamento">Dettagli</span>
+                  <div *ngIf="caricamento" class="minimal-loader"></div>
+                </button>
               </div>
             </div>
           </div>
