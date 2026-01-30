@@ -1,23 +1,181 @@
-/* ==========================================================================
-Main page styles
-========================================================================== */
+$br-primary: #4a8c40;
+$br-dark: #2c3e50;
 
-.hipster {
-  display: inline-block;
-  width: 347px;
-  height: 497px;
-  background: url('../../content/images/jhipster_family_member_3.svg') no-repeat center top;
-  background-size: contain;
+:host {
+  display: block;
+  margin-top: -15px;
 }
 
-/* wait autoprefixer update to allow simple generation of high pixel density media query */
-@media only screen and (-webkit-min-device-pixel-ratio: 2),
-  only screen and (-moz-min-device-pixel-ratio: 2),
-  only screen and (-o-min-device-pixel-ratio: 2/1),
-  only screen and (min-resolution: 192dpi),
-  only screen and (min-resolution: 2dppx) {
-  .hipster {
-    background: url('../../content/images/jhipster_family_member_3.svg') no-repeat center top;
-    background-size: contain;
+.home-container {
+  overflow-x: hidden;
+  padding-bottom: 50px;
+  background-color: #ffffff;
+}
+
+.hero-section {
+  padding: 5px 0 30px;
+
+  h1 {
+    font-weight: 800;
+    color: $br-dark;
+    margin-top: 0;
+    margin-bottom: 5px;
+  }
+
+  .subtitle-verde {
+    color: $br-primary !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-top: 0;
+    opacity: 1 !important;
+  }
+}
+
+.carousel-wrapper {
+  position: relative;
+  padding: 0 40px;
+}
+
+.event-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 25px;
+  padding: 35px 10px;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.event-card-item {
+  min-width: 280px;
+  flex: 0 0 auto;
+}
+
+.event-card {
+  border: 1px solid #f0f0f0;
+  border-radius: 20px;
+  background: white;
+  transition:
+    transform 0.3s ease-out,
+    box-shadow 0.3s ease-out;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 12px 24px rgba(44, 62, 80, 0.08) !important;
+    z-index: 10;
+  }
+
+  .card-body {
+    padding: 25px;
+    text-align: center;
+  }
+
+  .card-title {
+    font-weight: 700;
+    color: $br-dark;
+    font-size: 1.1rem;
+  }
+
+  .sala-text {
+    font-size: 0.8rem;
+    color: #999;
+    margin-bottom: 15px;
+  }
+}
+
+.date-badge {
+  background: rgba(74, 140, 64, 0.05);
+  padding: 12px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+
+  .event-date {
+    color: $br-primary;
+    font-weight: 800;
+    font-size: 0.85rem;
+    display: block;
+  }
+
+  .event-time {
+    font-size: 0.75rem;
+    color: $br-primary;
+    margin: 0;
+    opacity: 0.8;
+  }
+}
+
+.card-footer-custom {
+  display: flex;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.btn-price {
+  background-color: $br-primary !important;
+  color: white !important;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 8px !important;
+  border: none;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-details {
+  background: transparent;
+  border: 1px solid $br-dark;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 8px !important;
+  flex: 1.2;
+  color: $br-dark;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.fake-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  color: #ddd;
+  &.left {
+    left: 10px;
+  }
+  &.right {
+    right: 10px;
+  }
+}
+
+.minimal-loader {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(44, 62, 80, 0.2);
+  border-top-color: $br-dark;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.btn-price .minimal-loader {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }

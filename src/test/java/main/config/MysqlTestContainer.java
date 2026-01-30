@@ -23,6 +23,7 @@ public class MysqlTestContainer implements SqlTestContainer {
     @Override
     public void afterPropertiesSet() {
         if (null == mysqlContainer) {
+            // Usiamo la versione 9.2.0 come indicato nel tuo file originale
             mysqlContainer = new MySQLContainer<>("mysql:9.2.0")
                 .withDatabaseName("boardroom")
                 .withTmpFs(Collections.singletonMap("/testtmpfs", "rw"))

@@ -15,6 +15,10 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface EventiMapper extends EntityMapper<EventiDTO, Eventi> {
     @Mapping(target = "prenotazioneId", source = "prenotazione.id")
+    @Mapping(source = "prenotazione.data", target = "data")
+    @Mapping(source = "prenotazione.oraInizio", target = "oraInizio")
+    @Mapping(source = "prenotazione.oraFine", target = "oraFine")
+    @Mapping(source = "prenotazione.sala.nome", target = "salaNome")
     EventiDTO toDto(Eventi s);
 
     List<EventiDTO> toDto(List<Eventi> eventiList);

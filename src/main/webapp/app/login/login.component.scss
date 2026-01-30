@@ -1,0 +1,82 @@
+$boardroom-green: #4a8c40;
+
+:host {
+  display: block;
+  background-color: #ffffff;
+  min-height: calc(100vh - 120px);
+}
+
+.login-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 80px;
+  margin-bottom: 80px;
+}
+
+.login-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 380px;
+  padding: 50px 40px;
+  border-radius: 24px;
+
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+
+  text-align: center;
+  border: 1px solid #f2f2f2;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.figma-input {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 15px;
+  text-align: center;
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $boardroom-green !important;
+    box-shadow: 0 0 0 4px rgba(74, 140, 64, 0.1) !important;
+  }
+}
+
+.figma-btn {
+  background-color: $boardroom-green !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50px;
+  padding: 14px 60px;
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 25px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(74, 140, 64, 0.25) !important;
+  transition: all 0.3s;
+
+  &:hover {
+    background-color: darken($boardroom-green, 5%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(74, 140, 64, 0.3) !important;
+  }
+}
+
+.figma-footer {
+  margin-top: 35px;
+  .green-link {
+    color: $boardroom-green !important;
+    font-weight: 500;
+    font-size: 13px;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

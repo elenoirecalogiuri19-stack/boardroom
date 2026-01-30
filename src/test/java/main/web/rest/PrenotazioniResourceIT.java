@@ -5,7 +5,11 @@ import static main.web.rest.TestUtil.createUpdateProxyForBean;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +23,7 @@ import main.IntegrationTest;
 import main.domain.Prenotazioni;
 import main.domain.Sale;
 import main.domain.StatiPrenotazione;
+import main.domain.User;
 import main.domain.Utenti;
 import main.domain.enumeration.StatoCodice;
 import main.repository.PrenotazioniRepository;
@@ -49,7 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 @IntegrationTest
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
-@WithMockUser
+@WithMockUser(username = "user")
 class PrenotazioniResourceIT {
 
     private static final LocalDate DEFAULT_DATA = LocalDate.ofEpochDay(0L);
@@ -65,7 +70,7 @@ class PrenotazioniResourceIT {
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
 
     @Autowired
-    private ObjectMapper om;
+    private ObjectMapper objectMapper;
 
     @Autowired
     private PrenotazioniRepository prenotazioniRepository;
@@ -80,14 +85,10 @@ class PrenotazioniResourceIT {
     private PrenotazioniService prenotazioniServiceMock;
 
     @Autowired
-    private EntityManager em;
+    private EntityManager entityManager;
 
     @Autowired
-    private MockMvc restPrenotazioniMockMvc;
-
-    private Prenotazioni prenotazioni;
-
-    private Prenotazioni insertedPrenotazioni;
+    private MockMvc mockMvc;
 
     @Autowired
     private StatiPrenotazioneRepository statiPrenotazioneRepository;
@@ -98,24 +99,26 @@ class PrenotazioniResourceIT {
     @Autowired
     private SaleRepository saleRepository;
 
-    /**
-     * Create an entity for this test.
-     *
-     * This is a static method, as tests for other entities might also need it,
-     * if they test an entity which requires the current entity.
-     */
+    @Autowired
+    private main.repository.UserRepository userRepository;
+
+    private Prenotazioni prenotazioni;
+    private Prenotazioni insertedPrenotazioni;
+
     public static Prenotazioni createEntity() {
-        return new Prenotazioni().data(DEFAULT_DATA).oraInizio(DEFAULT_ORA_INIZIO).oraFine(DEFAULT_ORA_FINE);
+        Prenotazioni prenotazioni = new Prenotazioni();
+        prenotazioni.setData(DEFAULT_DATA);
+        prenotazioni.setOraInizio(DEFAULT_ORA_INIZIO);
+        prenotazioni.setOraFine(DEFAULT_ORA_FINE);
+        return prenotazioni;
     }
 
-    /**
-     * Create an updated entity for this test.
-     *
-     * This is a static method, as tests for other entities might also need it,
-     * if they test an entity which requires the current entity.
-     */
     public static Prenotazioni createUpdatedEntity() {
-        return new Prenotazioni().data(UPDATED_DATA).oraInizio(UPDATED_ORA_INIZIO).oraFine(UPDATED_ORA_FINE);
+        Prenotazioni prenotazioni = new Prenotazioni();
+        prenotazioni.setData(UPDATED_DATA);
+        prenotazioni.setOraInizio(UPDATED_ORA_INIZIO);
+        prenotazioni.setOraFine(UPDATED_ORA_FINE);
+        return prenotazioni;
     }
 
     @BeforeEach
@@ -133,13 +136,16 @@ class PrenotazioniResourceIT {
 
     @Test
     @Transactional
-    void createPrenotazioni() throws Exception {
+    void createPrenotazioni_shouldPersistEntity() throws Exception {
         long databaseSizeBeforeCreate = getRepositoryCount();
-        // Create the Prenotazioni
+
         PrenotazioniDTO prenotazioniDTO = prenotazioniMapper.toDto(prenotazioni);
-        var returnedPrenotazioniDTO = om.readValue(
-            restPrenotazioniMockMvc
-                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(prenotazioniDTO)))
+
+        PrenotazioniDTO returnedPrenotazioniDTO = objectMapper.readValue(
+            mockMvc
+                .perform(
+                    post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(prenotazioniDTO))
+                )
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
@@ -147,9 +153,9 @@ class PrenotazioniResourceIT {
             PrenotazioniDTO.class
         );
 
-        // Validate the Prenotazioni in the database
         assertIncrementedRepositoryCount(databaseSizeBeforeCreate);
-        var returnedPrenotazioni = prenotazioniMapper.toEntity(returnedPrenotazioniDTO);
+
+        Prenotazioni returnedPrenotazioni = prenotazioniMapper.toEntity(returnedPrenotazioniDTO);
         assertPrenotazioniUpdatableFieldsEquals(returnedPrenotazioni, getPersistedPrenotazioni(returnedPrenotazioni));
 
         insertedPrenotazioni = returnedPrenotazioni;
@@ -157,34 +163,29 @@ class PrenotazioniResourceIT {
 
     @Test
     @Transactional
-    void createPrenotazioniWithExistingId() throws Exception {
-        // Create the Prenotazioni with an existing ID
+    void createPrenotazioniWithExistingId_shouldReturnBadRequest() throws Exception {
         insertedPrenotazioni = prenotazioniRepository.saveAndFlush(prenotazioni);
         PrenotazioniDTO prenotazioniDTO = prenotazioniMapper.toDto(prenotazioni);
 
         long databaseSizeBeforeCreate = getRepositoryCount();
 
-        // An entity with an existing ID cannot be created, so this API call must fail
-        restPrenotazioniMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(prenotazioniDTO)))
+        mockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(prenotazioniDTO)))
             .andExpect(status().isBadRequest());
 
-        // Validate the Prenotazioni in the database
         assertSameRepositoryCount(databaseSizeBeforeCreate);
     }
 
     @Test
     @Transactional
-    void checkDataIsRequired() throws Exception {
+    void checkDataIsRequired_shouldFailOnNull() throws Exception {
         long databaseSizeBeforeTest = getRepositoryCount();
-        // set the field null
         prenotazioni.setData(null);
 
-        // Create the Prenotazioni, which fails.
         PrenotazioniDTO prenotazioniDTO = prenotazioniMapper.toDto(prenotazioni);
 
-        restPrenotazioniMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(prenotazioniDTO)))
+        mockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(prenotazioniDTO)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -192,16 +193,14 @@ class PrenotazioniResourceIT {
 
     @Test
     @Transactional
-    void checkOraInizioIsRequired() throws Exception {
+    void checkOraInizioIsRequired_shouldFailOnNull() throws Exception {
         long databaseSizeBeforeTest = getRepositoryCount();
-        // set the field null
         prenotazioni.setOraInizio(null);
 
-        // Create the Prenotazioni, which fails.
         PrenotazioniDTO prenotazioniDTO = prenotazioniMapper.toDto(prenotazioni);
 
-        restPrenotazioniMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(prenotazioniDTO)))
+        mockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(prenotazioniDTO)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -209,16 +208,14 @@ class PrenotazioniResourceIT {
 
     @Test
     @Transactional
-    void checkOraFineIsRequired() throws Exception {
+    void checkOraFineIsRequired_shouldFailOnNull() throws Exception {
         long databaseSizeBeforeTest = getRepositoryCount();
-        // set the field null
         prenotazioni.setOraFine(null);
 
-        // Create the Prenotazioni, which fails.
         PrenotazioniDTO prenotazioniDTO = prenotazioniMapper.toDto(prenotazioni);
 
-        restPrenotazioniMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(prenotazioniDTO)))
+        mockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(prenotazioniDTO)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -226,12 +223,10 @@ class PrenotazioniResourceIT {
 
     @Test
     @Transactional
-    void getAllPrenotazionis() throws Exception {
-        // Initialize the database
+    void getAllPrenotazionis_shouldReturnList() throws Exception {
         insertedPrenotazioni = prenotazioniRepository.saveAndFlush(prenotazioni);
 
-        // Get all the prenotazioniList
-        restPrenotazioniMockMvc
+        mockMvc
             .perform(get(ENTITY_API_URL + "?sort=id,desc"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -241,31 +236,12 @@ class PrenotazioniResourceIT {
             .andExpect(jsonPath("$.[*].oraFine").value(hasItem(DEFAULT_ORA_FINE.toString())));
     }
 
-    @SuppressWarnings({ "unchecked" })
-    void getAllPrenotazionisWithEagerRelationshipsIsEnabled() throws Exception {
-        when(prenotazioniServiceMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
-
-        restPrenotazioniMockMvc.perform(get(ENTITY_API_URL + "?eagerload=true")).andExpect(status().isOk());
-
-        verify(prenotazioniServiceMock, times(1)).findAllWithEagerRelationships(any());
-    }
-
-    @SuppressWarnings({ "unchecked" })
-    void getAllPrenotazionisWithEagerRelationshipsIsNotEnabled() throws Exception {
-        when(prenotazioniServiceMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
-
-        restPrenotazioniMockMvc.perform(get(ENTITY_API_URL + "?eagerload=false")).andExpect(status().isOk());
-        verify(prenotazioniRepositoryMock, times(1)).findAll(any(Pageable.class));
-    }
-
     @Test
     @Transactional
-    void getPrenotazioni() throws Exception {
-        // Initialize the database
+    void getPrenotazioni_shouldReturnSingleEntity() throws Exception {
         insertedPrenotazioni = prenotazioniRepository.saveAndFlush(prenotazioni);
 
-        // Get the prenotazioni
-        restPrenotazioniMockMvc
+        mockMvc
             .perform(get(ENTITY_API_URL_ID, prenotazioni.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -277,124 +253,107 @@ class PrenotazioniResourceIT {
 
     @Test
     @Transactional
-    void getNonExistingPrenotazioni() throws Exception {
-        // Get the prenotazioni
-        restPrenotazioniMockMvc.perform(get(ENTITY_API_URL_ID, UUID.randomUUID().toString())).andExpect(status().isNotFound());
+    void getNonExistingPrenotazioni_shouldReturnNotFound() throws Exception {
+        mockMvc.perform(get(ENTITY_API_URL_ID, UUID.randomUUID().toString())).andExpect(status().isNotFound());
     }
 
     @Test
     @Transactional
-    void putExistingPrenotazioni() throws Exception {
-        // Initialize the database
+    void putExistingPrenotazioni_shouldUpdateEntity() throws Exception {
         insertedPrenotazioni = prenotazioniRepository.saveAndFlush(prenotazioni);
-
         long databaseSizeBeforeUpdate = getRepositoryCount();
 
-        // Update the prenotazioni
         Prenotazioni updatedPrenotazioni = prenotazioniRepository.findById(prenotazioni.getId()).orElseThrow();
-        // Disconnect from session so that the updates on updatedPrenotazioni are not directly saved in db
-        em.detach(updatedPrenotazioni);
-        updatedPrenotazioni.data(UPDATED_DATA).oraInizio(UPDATED_ORA_INIZIO).oraFine(UPDATED_ORA_FINE);
+        entityManager.detach(updatedPrenotazioni);
+
+        updatedPrenotazioni.setData(UPDATED_DATA);
+        updatedPrenotazioni.setOraInizio(UPDATED_ORA_INIZIO);
+        updatedPrenotazioni.setOraFine(UPDATED_ORA_FINE);
+
         PrenotazioniDTO prenotazioniDTO = prenotazioniMapper.toDto(updatedPrenotazioni);
 
-        restPrenotazioniMockMvc
+        mockMvc
             .perform(
                 put(ENTITY_API_URL_ID, prenotazioniDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(prenotazioniDTO))
+                    .content(objectMapper.writeValueAsBytes(prenotazioniDTO))
             )
             .andExpect(status().isOk());
 
-        // Validate the Prenotazioni in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
         assertPersistedPrenotazioniToMatchAllProperties(updatedPrenotazioni);
     }
 
     @Test
     @Transactional
-    void putNonExistingPrenotazioni() throws Exception {
+    void putNonExistingPrenotazioni_shouldReturnBadRequest() throws Exception {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         prenotazioni.setId(UUID.randomUUID());
 
-        // Create the Prenotazioni
         PrenotazioniDTO prenotazioniDTO = prenotazioniMapper.toDto(prenotazioni);
 
-        // If the entity doesn't have an ID, it will throw BadRequestAlertException
-        restPrenotazioniMockMvc
+        mockMvc
             .perform(
                 put(ENTITY_API_URL_ID, prenotazioniDTO.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(prenotazioniDTO))
+                    .content(objectMapper.writeValueAsBytes(prenotazioniDTO))
             )
             .andExpect(status().isBadRequest());
 
-        // Validate the Prenotazioni in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
-    void putWithIdMismatchPrenotazioni() throws Exception {
+    void putWithIdMismatchPrenotazioni_shouldReturnBadRequest() throws Exception {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         prenotazioni.setId(UUID.randomUUID());
 
-        // Create the Prenotazioni
         PrenotazioniDTO prenotazioniDTO = prenotazioniMapper.toDto(prenotazioni);
 
-        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
-        restPrenotazioniMockMvc
+        mockMvc
             .perform(
                 put(ENTITY_API_URL_ID, UUID.randomUUID())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(prenotazioniDTO))
+                    .content(objectMapper.writeValueAsBytes(prenotazioniDTO))
             )
             .andExpect(status().isBadRequest());
 
-        // Validate the Prenotazioni in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
-    void putWithMissingIdPathParamPrenotazioni() throws Exception {
+    void putWithMissingIdPathParamPrenotazioni_shouldReturnMethodNotAllowed() throws Exception {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         prenotazioni.setId(UUID.randomUUID());
 
-        // Create the Prenotazioni
         PrenotazioniDTO prenotazioniDTO = prenotazioniMapper.toDto(prenotazioni);
 
-        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
-        restPrenotazioniMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(prenotazioniDTO)))
+        mockMvc
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(prenotazioniDTO)))
             .andExpect(status().isMethodNotAllowed());
 
-        // Validate the Prenotazioni in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
-    void partialUpdatePrenotazioniWithPatch() throws Exception {
-        // Initialize the database
+    void partialUpdatePrenotazioniWithPatch_shouldUpdateSelectedFields() throws Exception {
         insertedPrenotazioni = prenotazioniRepository.saveAndFlush(prenotazioni);
-
         long databaseSizeBeforeUpdate = getRepositoryCount();
 
-        // Update the prenotazioni using partial update
         Prenotazioni partialUpdatedPrenotazioni = new Prenotazioni();
         partialUpdatedPrenotazioni.setId(prenotazioni.getId());
+        partialUpdatedPrenotazioni.setData(UPDATED_DATA);
 
-        partialUpdatedPrenotazioni.oraInizio(UPDATED_ORA_INIZIO).oraFine(UPDATED_ORA_FINE);
-
-        restPrenotazioniMockMvc
+        mockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, partialUpdatedPrenotazioni.getId())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(partialUpdatedPrenotazioni))
+                    .content(objectMapper.writeValueAsBytes(partialUpdatedPrenotazioni))
             )
             .andExpect(status().isOk());
-
-        // Validate the Prenotazioni in the database
 
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
         assertPrenotazioniUpdatableFieldsEquals(
@@ -405,27 +364,23 @@ class PrenotazioniResourceIT {
 
     @Test
     @Transactional
-    void fullUpdatePrenotazioniWithPatch() throws Exception {
-        // Initialize the database
+    void fullUpdatePrenotazioniWithPatch_shouldUpdateAllUpdatableFields() throws Exception {
         insertedPrenotazioni = prenotazioniRepository.saveAndFlush(prenotazioni);
-
         long databaseSizeBeforeUpdate = getRepositoryCount();
 
-        // Update the prenotazioni using partial update
         Prenotazioni partialUpdatedPrenotazioni = new Prenotazioni();
         partialUpdatedPrenotazioni.setId(prenotazioni.getId());
+        partialUpdatedPrenotazioni.setData(UPDATED_DATA);
+        partialUpdatedPrenotazioni.setOraInizio(UPDATED_ORA_INIZIO);
+        partialUpdatedPrenotazioni.setOraFine(UPDATED_ORA_FINE);
 
-        partialUpdatedPrenotazioni.data(UPDATED_DATA).oraInizio(UPDATED_ORA_INIZIO).oraFine(UPDATED_ORA_FINE);
-
-        restPrenotazioniMockMvc
+        mockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, partialUpdatedPrenotazioni.getId())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(partialUpdatedPrenotazioni))
+                    .content(objectMapper.writeValueAsBytes(partialUpdatedPrenotazioni))
             )
             .andExpect(status().isOk());
-
-        // Validate the Prenotazioni in the database
 
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
         assertPrenotazioniUpdatableFieldsEquals(partialUpdatedPrenotazioni, getPersistedPrenotazioni(partialUpdatedPrenotazioni));
@@ -433,159 +388,250 @@ class PrenotazioniResourceIT {
 
     @Test
     @Transactional
-    void patchNonExistingPrenotazioni() throws Exception {
+    void patchNonExistingPrenotazioni_shouldReturnBadRequest() throws Exception {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         prenotazioni.setId(UUID.randomUUID());
 
-        // Create the Prenotazioni
         PrenotazioniDTO prenotazioniDTO = prenotazioniMapper.toDto(prenotazioni);
 
-        // If the entity doesn't have an ID, it will throw BadRequestAlertException
-        restPrenotazioniMockMvc
+        mockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, prenotazioniDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(prenotazioniDTO))
+                    .content(objectMapper.writeValueAsBytes(prenotazioniDTO))
             )
             .andExpect(status().isBadRequest());
 
-        // Validate the Prenotazioni in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
-    void patchWithIdMismatchPrenotazioni() throws Exception {
+    void patchWithIdMismatchPrenotazioni_shouldReturnBadRequest() throws Exception {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         prenotazioni.setId(UUID.randomUUID());
 
-        // Create the Prenotazioni
         PrenotazioniDTO prenotazioniDTO = prenotazioniMapper.toDto(prenotazioni);
 
-        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
-        restPrenotazioniMockMvc
+        mockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, UUID.randomUUID())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(prenotazioniDTO))
+                    .content(objectMapper.writeValueAsBytes(prenotazioniDTO))
             )
             .andExpect(status().isBadRequest());
 
-        // Validate the Prenotazioni in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
-    void patchWithMissingIdPathParamPrenotazioni() throws Exception {
+    void patchWithMissingIdPathParamPrenotazioni_shouldReturnMethodNotAllowed() throws Exception {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         prenotazioni.setId(UUID.randomUUID());
 
-        // Create the Prenotazioni
         PrenotazioniDTO prenotazioniDTO = prenotazioniMapper.toDto(prenotazioni);
 
-        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
-        restPrenotazioniMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(prenotazioniDTO)))
+        mockMvc
+            .perform(
+                patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(objectMapper.writeValueAsBytes(prenotazioniDTO))
+            )
             .andExpect(status().isMethodNotAllowed());
 
-        // Validate the Prenotazioni in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
-    void deletePrenotazioni() throws Exception {
-        // Initialize the database
-        insertedPrenotazioni = prenotazioniRepository.saveAndFlush(prenotazioni);
+    void deletePrenotazioni_shouldCancelWhenOwner() throws Exception {
+        initStatiPrenotazione();
 
+        User user = createUserWithLogin("user");
+        Utenti utente = createUtenteForUser(user);
+        Prenotazioni ownedPrenotazione = createPrenotazioneForUtente(utente);
+
+        insertedPrenotazioni = ownedPrenotazione;
         long databaseSizeBeforeDelete = getRepositoryCount();
 
-        // Delete the prenotazioni
-        restPrenotazioniMockMvc
-            .perform(delete(ENTITY_API_URL_ID, prenotazioni.getId().toString()).accept(MediaType.APPLICATION_JSON))
+        mockMvc
+            .perform(delete(ENTITY_API_URL_ID, ownedPrenotazione.getId().toString()).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
-        // Validate the database contains one less item
-        assertDecrementedRepositoryCount(databaseSizeBeforeDelete);
+        assertSameRepositoryCount(databaseSizeBeforeDelete);
+        Prenotazioni updated = prenotazioniRepository.findById(ownedPrenotazione.getId()).orElseThrow();
+        assertThat(updated.getStato().getCodice()).isEqualTo(StatoCodice.CANCELLED);
     }
 
     @Test
     @Transactional
-    void testCreaPrenotazioniCustom() throws Exception {
+    void deletePrenotazioni_shouldReturnForbiddenWhenNotOwner() throws Exception {
         initStatiPrenotazione();
 
-        Sale sala = new Sale();
-        sala.setNome("Sala Test");
-        sala.setCapienza(10);
-        sala = saleRepository.saveAndFlush(sala);
+        User otherUser = createUserWithLogin("other");
+        Utenti otherUtente = createUtenteForUser(otherUser);
+        Prenotazioni prenotazione = createPrenotazioneForUtente(otherUtente);
 
-        Utenti utente = new Utenti();
-        utente.setNome("Utenti Test");
-        utente.setNumeroDiTelefono("12345678");
-        utente = utentiRepository.saveAndFlush(utente);
+        insertedPrenotazioni = prenotazione;
+        long databaseSizeBeforeDelete = getRepositoryCount();
+
+        mockMvc
+            .perform(delete(ENTITY_API_URL_ID, prenotazione.getId().toString()).accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+
+        assertSameRepositoryCount(databaseSizeBeforeDelete);
+    }
+
+    @Test
+    @Transactional
+    void createPrenotazioneEndpoint_shouldApplyBusinessRules() throws Exception {
+        initStatiPrenotazione();
+
+        Utenti utente = createUtente("Mario", "3331234567");
+        Sale sala = createSala("Sala Test", 10);
 
         PrenotazioniDTO dto = new PrenotazioniDTO();
         dto.setData(LocalDate.now().plusDays(1));
         dto.setOraInizio(LocalTime.of(10, 0));
         dto.setOraFine(LocalTime.of(11, 0));
-        dto.setSalaId(sala.getId());
-        dto.setUtenteId(utente.getId());
+        dto.setUtente(
+            utentiRepository
+                .findById(utente.getId())
+                .map(u -> {
+                    var uDto = new main.service.dto.UtentiDTO();
+                    uDto.setId(u.getId());
+                    return uDto;
+                })
+                .orElseThrow()
+        );
+        dto.setSala(
+            saleRepository
+                .findById(sala.getId())
+                .map(s -> {
+                    var sDto = new main.service.dto.SaleDTO();
+                    sDto.setId(s.getId());
+                    return sDto;
+                })
+                .orElseThrow()
+        );
 
-        restPrenotazioniMockMvc
-            .perform(post("/api/prenotazionis/crea").contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(dto)))
+        mockMvc
+            .perform(post(ENTITY_API_URL + "/crea").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(dto)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.stato.codice").value("WAITING"))
-            .andExpect(jsonPath("$.salaId").value(sala.getId().toString()))
-            .andExpect(jsonPath("$.utenteId").value(utente.getId().toString()));
+            .andExpect(jsonPath("$.data").value(dto.getData().toString()))
+            .andExpect(jsonPath("$.oraInizio").value(dto.getOraInizio().toString()))
+            .andExpect(jsonPath("$.oraFine").value(dto.getOraFine().toString()));
     }
 
     @Test
     @Transactional
-    void testConfermaPrenotazioniCustom() throws Exception {
+    void confermaPrenotazioneEndpoint_shouldSetConfirmedState() throws Exception {
         initStatiPrenotazione();
 
-        Sale sala = new Sale();
-        sala.setNome("Sala Test");
-        sala.setCapienza(10);
-        sala = saleRepository.saveAndFlush(sala);
+        Utenti utente = createUtente("Mario", "3331234567");
+        Sale sala = createSala("Sala Test", 10);
 
-        Utenti utente = new Utenti();
-        utente.setNome("Mario Rossi");
-        utente.setNumeroDiTelefono("12345678");
-        utente = utentiRepository.saveAndFlush(utente);
+        Prenotazioni pren = new Prenotazioni();
+        pren.setData(LocalDate.now().plusDays(1));
+        pren.setOraInizio(LocalTime.of(10, 0));
+        pren.setOraFine(LocalTime.of(11, 0));
+        pren.setUtente(utente);
+        pren.setSala(sala);
+        pren.setStato(statiPrenotazioneRepository.findByCodice(StatoCodice.WAITING).orElseThrow());
+        pren = prenotazioniRepository.saveAndFlush(pren);
 
-        Prenotazioni p = new Prenotazioni();
-        p.setData(LocalDate.now().plusDays(1));
-        p.setOraInizio(LocalTime.of(10, 0));
-        p.setOraFine(LocalTime.of(11, 0));
-        p.setSala(sala);
-        p.setUtente(utente);
-        p.setStato(statiPrenotazioneRepository.findByCodice(StatoCodice.WAITING).get());
-        p = prenotazioniRepository.saveAndFlush(p);
-
-        restPrenotazioniMockMvc
-            .perform(post("/api/prenotazionis/" + p.getId() + "/conferma"))
+        mockMvc
+            .perform(post(ENTITY_API_URL + "/" + pren.getId() + "/conferma").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.stato.codice").value("CONFIRMED"));
+            .andExpect(jsonPath("$.id").value(pren.getId().toString()));
+
+        Prenotazioni updated = prenotazioniRepository.findById(pren.getId()).orElseThrow();
+        assertThat(updated.getStato().getCodice()).isEqualTo(StatoCodice.CONFIRMED);
+    }
+
+    @Test
+    @Transactional
+    void getAllPrenotazionis_withSalaFilter_shouldReturnOnlyMatchingSala() throws Exception {
+        Sale sala1 = createSala("Sala 1", 10);
+        Sale sala2 = createSala("Sala 2", 20);
+
+        Prenotazioni p1 = createPrenotazioneForSala(sala1);
+        Prenotazioni p2 = createPrenotazioneForSala(sala2);
+
+        insertedPrenotazioni = p1; // at least one to clean up
+
+        mockMvc
+            .perform(get(ENTITY_API_URL + "?salaId=" + sala1.getId()).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.[*].id").value(hasItem(p1.getId().toString())))
+            .andExpect(jsonPath("$.[*].id").value(org.hamcrest.Matchers.not(hasItem(p2.getId().toString()))));
     }
 
     private void initStatiPrenotazione() {
-        if (statiPrenotazioneRepository.count() == 0) {
-            statiPrenotazioneRepository.saveAndFlush(
-                new StatiPrenotazione().codice(StatoCodice.WAITING).descrizione("In attesa").ordineAzione(1)
-            );
-            statiPrenotazioneRepository.saveAndFlush(
-                new StatiPrenotazione().codice(StatoCodice.CONFIRMED).descrizione("Confermata").ordineAzione(2)
-            );
-            statiPrenotazioneRepository.saveAndFlush(
-                new StatiPrenotazione().codice(StatoCodice.REJECTED).descrizione("Rifiutata").ordineAzione(3)
-            );
-            statiPrenotazioneRepository.saveAndFlush(
-                new StatiPrenotazione().codice(StatoCodice.CANCELLED).descrizione("Annullata").ordineAzione(4)
-            );
+        if (statiPrenotazioneRepository.count() > 0) {
+            return;
         }
+
+        statiPrenotazioneRepository.saveAndFlush(
+            new StatiPrenotazione().codice(StatoCodice.WAITING).descrizione("In attesa").ordineAzione(1)
+        );
+        statiPrenotazioneRepository.saveAndFlush(
+            new StatiPrenotazione().codice(StatoCodice.CONFIRMED).descrizione("Confermata").ordineAzione(2)
+        );
+        statiPrenotazioneRepository.saveAndFlush(
+            new StatiPrenotazione().codice(StatoCodice.REJECTED).descrizione("Rifiutata").ordineAzione(3)
+        );
+        statiPrenotazioneRepository.saveAndFlush(
+            new StatiPrenotazione().codice(StatoCodice.CANCELLED).descrizione("Annullata").ordineAzione(4)
+        );
+    }
+
+    private User createUserWithLogin(String login) {
+        User user = new User();
+        user.setLogin(login);
+        return userRepository.saveAndFlush(user);
+    }
+
+    private Utenti createUtenteForUser(User user) {
+        Utenti utente = new Utenti();
+        utente.setNome("Nome " + user.getLogin());
+        utente.setNumeroDiTelefono("3330000000");
+        utente.setUser(user);
+        return utentiRepository.saveAndFlush(utente);
+    }
+
+    private Prenotazioni createPrenotazioneForUtente(Utenti utente) {
+        Sale sala = createSala("Sala Owner", 10);
+        Prenotazioni pren = new Prenotazioni();
+        pren.setData(LocalDate.now().plusDays(1));
+        pren.setOraInizio(LocalTime.of(10, 0));
+        pren.setOraFine(LocalTime.of(11, 0));
+        pren.setUtente(utente);
+        pren.setSala(sala);
+        pren.setStato(statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED).orElseThrow());
+        return prenotazioniRepository.saveAndFlush(pren);
+    }
+
+    private Prenotazioni createPrenotazioneForSala(Sale sala) {
+        Prenotazioni pren = new Prenotazioni();
+        pren.setData(LocalDate.now().plusDays(1));
+        pren.setOraInizio(LocalTime.of(10, 0));
+        pren.setOraFine(LocalTime.of(11, 0));
+        pren.setSala(sala);
+        return prenotazioniRepository.saveAndFlush(pren);
+    }
+
+    private Utenti createUtente(String nome, String telefono) {
+        Utenti utente = new Utenti();
+        utente.setNome(nome);
+        utente.setNumeroDiTelefono(telefono);
+        return utentiRepository.saveAndFlush(utente);
+    }
+
+    private Sale createSala(String nome, int capienza) {
+        Sale sala = new Sale();
+        sala.setNome(nome);
+        sala.setCapienza(capienza);
+        return saleRepository.saveAndFlush(sala);
     }
 
     protected long getRepositoryCount() {

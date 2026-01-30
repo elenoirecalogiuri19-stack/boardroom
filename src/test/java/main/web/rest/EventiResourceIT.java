@@ -7,7 +7,11 @@ import static main.web.rest.TestUtil.sameNumber;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,10 +21,18 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 import main.IntegrationTest;
-import main.domain.*;
+import main.domain.Eventi;
+import main.domain.Prenotazioni;
+import main.domain.Sale;
+import main.domain.StatiPrenotazione;
+import main.domain.Utenti;
 import main.domain.enumeration.StatoCodice;
 import main.domain.enumeration.TipoEvento;
-import main.repository.*;
+import main.repository.EventiRepository;
+import main.repository.PrenotazioniRepository;
+import main.repository.SaleRepository;
+import main.repository.StatiPrenotazioneRepository;
+import main.repository.UtentiRepository;
 import main.service.dto.EventiDTO;
 import main.service.mapper.EventiMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -54,7 +66,7 @@ class EventiResourceIT {
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
 
     @Autowired
-    private ObjectMapper om;
+    private ObjectMapper objectMapper;
 
     @Autowired
     private EventiRepository eventiRepository;
@@ -63,14 +75,10 @@ class EventiResourceIT {
     private EventiMapper eventiMapper;
 
     @Autowired
-    private EntityManager em;
+    private EntityManager entityManager;
 
     @Autowired
-    private MockMvc restEventiMockMvc;
-
-    private Eventi eventi;
-
-    private Eventi insertedEventi;
+    private MockMvc mockMvc;
 
     @Autowired
     private PrenotazioniRepository prenotazioniRepository;
@@ -84,22 +92,13 @@ class EventiResourceIT {
     @Autowired
     private StatiPrenotazioneRepository statiPrenotazioneRepository;
 
-    /**
-     * Create an entity for this test.
-     *
-     * This is a static method, as tests for other entities might also need it,
-     * if they test an entity which requires the current entity.
-     */
+    private Eventi eventi;
+    private Eventi insertedEventi;
+
     public static Eventi createEntity() {
         return new Eventi().titolo(DEFAULT_TITOLO).tipo(DEFAULT_TIPO).prezzo(DEFAULT_PREZZO);
     }
 
-    /**
-     * Create an updated entity for this test.
-     *
-     * This is a static method, as tests for other entities might also need it,
-     * if they test an entity which requires the current entity.
-     */
     public static Eventi createUpdatedEntity() {
         return new Eventi().titolo(UPDATED_TITOLO).tipo(UPDATED_TIPO).prezzo(UPDATED_PREZZO);
     }
@@ -119,13 +118,14 @@ class EventiResourceIT {
 
     @Test
     @Transactional
-    void createEventi() throws Exception {
+    void createEventi_shouldPersistEntity() throws Exception {
         long databaseSizeBeforeCreate = getRepositoryCount();
-        // Create the Eventi
+
         EventiDTO eventiDTO = eventiMapper.toDto(eventi);
-        var returnedEventiDTO = om.readValue(
-            restEventiMockMvc
-                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(eventiDTO)))
+
+        EventiDTO returnedEventiDTO = objectMapper.readValue(
+            mockMvc
+                .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(eventiDTO)))
                 .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
@@ -133,9 +133,9 @@ class EventiResourceIT {
             EventiDTO.class
         );
 
-        // Validate the Eventi in the database
         assertIncrementedRepositoryCount(databaseSizeBeforeCreate);
-        var returnedEventi = eventiMapper.toEntity(returnedEventiDTO);
+
+        Eventi returnedEventi = eventiMapper.toEntity(returnedEventiDTO);
         assertEventiUpdatableFieldsEquals(returnedEventi, getPersistedEventi(returnedEventi));
 
         insertedEventi = returnedEventi;
@@ -143,34 +143,29 @@ class EventiResourceIT {
 
     @Test
     @Transactional
-    void createEventiWithExistingId() throws Exception {
-        // Create the Eventi with an existing ID
+    void createEventiWithExistingId_shouldReturnBadRequest() throws Exception {
         insertedEventi = eventiRepository.saveAndFlush(eventi);
         EventiDTO eventiDTO = eventiMapper.toDto(eventi);
 
         long databaseSizeBeforeCreate = getRepositoryCount();
 
-        // An entity with an existing ID cannot be created, so this API call must fail
-        restEventiMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(eventiDTO)))
+        mockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(eventiDTO)))
             .andExpect(status().isBadRequest());
 
-        // Validate the Eventi in the database
         assertSameRepositoryCount(databaseSizeBeforeCreate);
     }
 
     @Test
     @Transactional
-    void checkTitoloIsRequired() throws Exception {
+    void checkTitoloIsRequired_shouldFailOnNull() throws Exception {
         long databaseSizeBeforeTest = getRepositoryCount();
-        // set the field null
         eventi.setTitolo(null);
 
-        // Create the Eventi, which fails.
         EventiDTO eventiDTO = eventiMapper.toDto(eventi);
 
-        restEventiMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(eventiDTO)))
+        mockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(eventiDTO)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -178,16 +173,14 @@ class EventiResourceIT {
 
     @Test
     @Transactional
-    void checkTipoIsRequired() throws Exception {
+    void checkTipoIsRequired_shouldFailOnNull() throws Exception {
         long databaseSizeBeforeTest = getRepositoryCount();
-        // set the field null
         eventi.setTipo(null);
 
-        // Create the Eventi, which fails.
         EventiDTO eventiDTO = eventiMapper.toDto(eventi);
 
-        restEventiMockMvc
-            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(eventiDTO)))
+        mockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(eventiDTO)))
             .andExpect(status().isBadRequest());
 
         assertSameRepositoryCount(databaseSizeBeforeTest);
@@ -195,12 +188,10 @@ class EventiResourceIT {
 
     @Test
     @Transactional
-    void getAllEventis() throws Exception {
-        // Initialize the database
+    void getAllEventis_shouldReturnList() throws Exception {
         insertedEventi = eventiRepository.saveAndFlush(eventi);
 
-        // Get all the eventiList
-        restEventiMockMvc
+        mockMvc
             .perform(get(ENTITY_API_URL + "?sort=id,desc"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -212,12 +203,10 @@ class EventiResourceIT {
 
     @Test
     @Transactional
-    void getEventi() throws Exception {
-        // Initialize the database
+    void getEventi_shouldReturnSingleEntity() throws Exception {
         insertedEventi = eventiRepository.saveAndFlush(eventi);
 
-        // Get the eventi
-        restEventiMockMvc
+        mockMvc
             .perform(get(ENTITY_API_URL_ID, eventi.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -229,118 +218,104 @@ class EventiResourceIT {
 
     @Test
     @Transactional
-    void getNonExistingEventi() throws Exception {
-        // Get the eventi
-        restEventiMockMvc.perform(get(ENTITY_API_URL_ID, UUID.randomUUID().toString())).andExpect(status().isNotFound());
+    void getNonExistingEventi_shouldReturnNotFound() throws Exception {
+        mockMvc.perform(get(ENTITY_API_URL_ID, UUID.randomUUID().toString())).andExpect(status().isNotFound());
     }
 
     @Test
     @Transactional
-    void putExistingEventi() throws Exception {
-        // Initialize the database
+    void putExistingEventi_shouldUpdateEntity() throws Exception {
         insertedEventi = eventiRepository.saveAndFlush(eventi);
-
         long databaseSizeBeforeUpdate = getRepositoryCount();
 
-        // Update the eventi
         Eventi updatedEventi = eventiRepository.findById(eventi.getId()).orElseThrow();
-        // Disconnect from session so that the updates on updatedEventi are not directly saved in db
-        em.detach(updatedEventi);
+        entityManager.detach(updatedEventi);
         updatedEventi.titolo(UPDATED_TITOLO).tipo(UPDATED_TIPO).prezzo(UPDATED_PREZZO);
+
         EventiDTO eventiDTO = eventiMapper.toDto(updatedEventi);
 
-        restEventiMockMvc
+        mockMvc
             .perform(
-                put(ENTITY_API_URL_ID, eventiDTO.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(eventiDTO))
+                put(ENTITY_API_URL_ID, eventiDTO.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsBytes(eventiDTO))
             )
             .andExpect(status().isOk());
 
-        // Validate the Eventi in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
         assertPersistedEventiToMatchAllProperties(updatedEventi);
     }
 
     @Test
     @Transactional
-    void putNonExistingEventi() throws Exception {
+    void putNonExistingEventi_shouldReturnBadRequest() throws Exception {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         eventi.setId(UUID.randomUUID());
 
-        // Create the Eventi
         EventiDTO eventiDTO = eventiMapper.toDto(eventi);
 
-        // If the entity doesn't have an ID, it will throw BadRequestAlertException
-        restEventiMockMvc
+        mockMvc
             .perform(
-                put(ENTITY_API_URL_ID, eventiDTO.getId()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(eventiDTO))
+                put(ENTITY_API_URL_ID, eventiDTO.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsBytes(eventiDTO))
             )
             .andExpect(status().isBadRequest());
 
-        // Validate the Eventi in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
-    void putWithIdMismatchEventi() throws Exception {
+    void putWithIdMismatchEventi_shouldReturnBadRequest() throws Exception {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         eventi.setId(UUID.randomUUID());
 
-        // Create the Eventi
         EventiDTO eventiDTO = eventiMapper.toDto(eventi);
 
-        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
-        restEventiMockMvc
+        mockMvc
             .perform(
-                put(ENTITY_API_URL_ID, UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(eventiDTO))
+                put(ENTITY_API_URL_ID, UUID.randomUUID())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsBytes(eventiDTO))
             )
             .andExpect(status().isBadRequest());
 
-        // Validate the Eventi in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
-    void putWithMissingIdPathParamEventi() throws Exception {
+    void putWithMissingIdPathParamEventi_shouldReturnMethodNotAllowed() throws Exception {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         eventi.setId(UUID.randomUUID());
 
-        // Create the Eventi
         EventiDTO eventiDTO = eventiMapper.toDto(eventi);
 
-        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
-        restEventiMockMvc
-            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(eventiDTO)))
+        mockMvc
+            .perform(put(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(eventiDTO)))
             .andExpect(status().isMethodNotAllowed());
 
-        // Validate the Eventi in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
-    void partialUpdateEventiWithPatch() throws Exception {
-        // Initialize the database
+    void partialUpdateEventiWithPatch_shouldUpdateSelectedFields() throws Exception {
         insertedEventi = eventiRepository.saveAndFlush(eventi);
-
         long databaseSizeBeforeUpdate = getRepositoryCount();
 
-        // Update the eventi using partial update
         Eventi partialUpdatedEventi = new Eventi();
         partialUpdatedEventi.setId(eventi.getId());
-
         partialUpdatedEventi.titolo(UPDATED_TITOLO);
 
-        restEventiMockMvc
+        mockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, partialUpdatedEventi.getId())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(partialUpdatedEventi))
+                    .content(objectMapper.writeValueAsBytes(partialUpdatedEventi))
             )
             .andExpect(status().isOk());
-
-        // Validate the Eventi in the database
 
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
         assertEventiUpdatableFieldsEquals(createUpdateProxyForBean(partialUpdatedEventi, eventi), getPersistedEventi(eventi));
@@ -348,27 +323,21 @@ class EventiResourceIT {
 
     @Test
     @Transactional
-    void fullUpdateEventiWithPatch() throws Exception {
-        // Initialize the database
+    void fullUpdateEventiWithPatch_shouldUpdateAllUpdatableFields() throws Exception {
         insertedEventi = eventiRepository.saveAndFlush(eventi);
-
         long databaseSizeBeforeUpdate = getRepositoryCount();
 
-        // Update the eventi using partial update
         Eventi partialUpdatedEventi = new Eventi();
         partialUpdatedEventi.setId(eventi.getId());
-
         partialUpdatedEventi.titolo(UPDATED_TITOLO).tipo(UPDATED_TIPO).prezzo(UPDATED_PREZZO);
 
-        restEventiMockMvc
+        mockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, partialUpdatedEventi.getId())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(partialUpdatedEventi))
+                    .content(objectMapper.writeValueAsBytes(partialUpdatedEventi))
             )
             .andExpect(status().isOk());
-
-        // Validate the Eventi in the database
 
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
         assertEventiUpdatableFieldsEquals(partialUpdatedEventi, getPersistedEventi(partialUpdatedEventi));
@@ -376,115 +345,90 @@ class EventiResourceIT {
 
     @Test
     @Transactional
-    void patchNonExistingEventi() throws Exception {
+    void patchNonExistingEventi_shouldReturnBadRequest() throws Exception {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         eventi.setId(UUID.randomUUID());
 
-        // Create the Eventi
         EventiDTO eventiDTO = eventiMapper.toDto(eventi);
 
-        // If the entity doesn't have an ID, it will throw BadRequestAlertException
-        restEventiMockMvc
+        mockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, eventiDTO.getId())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(eventiDTO))
+                    .content(objectMapper.writeValueAsBytes(eventiDTO))
             )
             .andExpect(status().isBadRequest());
 
-        // Validate the Eventi in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
-    void patchWithIdMismatchEventi() throws Exception {
+    void patchWithIdMismatchEventi_shouldReturnBadRequest() throws Exception {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         eventi.setId(UUID.randomUUID());
 
-        // Create the Eventi
         EventiDTO eventiDTO = eventiMapper.toDto(eventi);
 
-        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
-        restEventiMockMvc
+        mockMvc
             .perform(
                 patch(ENTITY_API_URL_ID, UUID.randomUUID())
                     .contentType("application/merge-patch+json")
-                    .content(om.writeValueAsBytes(eventiDTO))
+                    .content(objectMapper.writeValueAsBytes(eventiDTO))
             )
             .andExpect(status().isBadRequest());
 
-        // Validate the Eventi in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
-    void patchWithMissingIdPathParamEventi() throws Exception {
+    void patchWithMissingIdPathParamEventi_shouldReturnMethodNotAllowed() throws Exception {
         long databaseSizeBeforeUpdate = getRepositoryCount();
         eventi.setId(UUID.randomUUID());
 
-        // Create the Eventi
         EventiDTO eventiDTO = eventiMapper.toDto(eventi);
 
-        // If url ID doesn't match entity ID, it will throw BadRequestAlertException
-        restEventiMockMvc
-            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(om.writeValueAsBytes(eventiDTO)))
+        mockMvc
+            .perform(patch(ENTITY_API_URL).contentType("application/merge-patch+json").content(objectMapper.writeValueAsBytes(eventiDTO)))
             .andExpect(status().isMethodNotAllowed());
 
-        // Validate the Eventi in the database
         assertSameRepositoryCount(databaseSizeBeforeUpdate);
     }
 
     @Test
     @Transactional
-    void deleteEventi() throws Exception {
-        // Initialize the database
+    void deleteEventi_shouldRemoveEntity() throws Exception {
         insertedEventi = eventiRepository.saveAndFlush(eventi);
-
         long databaseSizeBeforeDelete = getRepositoryCount();
 
-        // Delete the eventi
-        restEventiMockMvc
+        mockMvc
             .perform(delete(ENTITY_API_URL_ID, eventi.getId().toString()).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
-        // Validate the database contains one less item
         assertDecrementedRepositoryCount(databaseSizeBeforeDelete);
     }
 
     @Test
     @Transactional
-    void testCreaEventoPubblico() throws Exception {
+    void createPublicEvent_shouldSetPublicTypeAndPrice() throws Exception {
         initStatiPrenotazione();
 
-        Sale sala = new Sale();
-        sala.setNome("Sala Test");
-        sala.setCapienza(10);
-        sala = saleRepository.saveAndFlush(sala);
+        Sale sala = createSala("Sala Test", 10);
+        Utenti utente = createUtente("Mario", "3331234567");
 
-        Utenti utente = new Utenti();
-        utente.setNome("Mario");
-        utente.setNumeroDiTelefono("3331234567");
-        utente = utentiRepository.saveAndFlush(utente);
-
-        Prenotazioni p = new Prenotazioni();
-        p.setData(LocalDate.now().plusDays(1));
-        p.setOraInizio(LocalTime.of(10, 0));
-        p.setOraFine(LocalTime.of(11, 0));
-        p.setSala(sala);
-        p.setUtente(utente);
-        p.setStato(statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED).get());
-        p = prenotazioniRepository.saveAndFlush(p);
+        Prenotazioni prenotazione = createConfirmedPrenotazione(sala, utente);
 
         EventiDTO dto = new EventiDTO();
-        dto.setPrenotazioneId(p.getId());
+        dto.setPrenotazioneId(prenotazione.getId());
         dto.setTitolo("Concerto");
         dto.setTipo(PUBBLICO);
         dto.setPrezzo(BigDecimal.valueOf(20));
 
-        restEventiMockMvc
-            .perform(post("/api/eventis/crea-pubblico").contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(dto)))
+        mockMvc
+            .perform(
+                post("/api/eventis/crea-pubblico").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(dto))
+            )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.tipo").value("PUBBLICO"))
             .andExpect(jsonPath("$.prezzo").value(20));
@@ -492,41 +436,43 @@ class EventiResourceIT {
 
     @Test
     @Transactional
-    void testEventoPubblicoPrenotazioneNonConfermata() throws Exception {
+    void createPublicEvent_withNonConfirmedBooking_shouldReturnBadRequest() throws Exception {
         initStatiPrenotazione();
 
-        Prenotazioni p = new Prenotazioni();
-        p.setData(LocalDate.now().plusDays(1));
-        p.setOraInizio(LocalTime.of(10, 0));
-        p.setOraFine(LocalTime.of(11, 0));
-        p.setStato(statiPrenotazioneRepository.findByCodice(StatoCodice.WAITING).get());
-        p = prenotazioniRepository.saveAndFlush(p);
+        Prenotazioni prenotazione = new Prenotazioni();
+        prenotazione.setData(LocalDate.now().plusDays(1));
+        prenotazione.setOraInizio(LocalTime.of(10, 0));
+        prenotazione.setOraFine(LocalTime.of(11, 0));
+        prenotazione.setStato(statiPrenotazioneRepository.findByCodice(StatoCodice.WAITING).orElseThrow());
+        prenotazione = prenotazioniRepository.saveAndFlush(prenotazione);
 
         EventiDTO dto = new EventiDTO();
-        dto.setPrenotazioneId(p.getId());
+        dto.setPrenotazioneId(prenotazione.getId());
         dto.setTitolo("Evento");
         dto.setTipo(PUBBLICO);
         dto.setPrezzo(BigDecimal.valueOf(10));
 
-        restEventiMockMvc
-            .perform(post("/api/eventis/crea-pubblico").contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(dto)))
+        mockMvc
+            .perform(
+                post("/api/eventis/crea-pubblico").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(dto))
+            )
             .andExpect(status().isBadRequest());
     }
 
     @Test
     @Transactional
-    void testGetEventiPubblici() throws Exception {
-        Eventi e1 = new Eventi();
-        e1.setTitolo("Pubblico");
-        e1.setTipo(PUBBLICO);
-        eventiRepository.saveAndFlush(e1);
+    void getPublicEvents_shouldReturnOnlyPublicEvents() throws Exception {
+        Eventi publicEvent = new Eventi();
+        publicEvent.setTitolo("Pubblico");
+        publicEvent.setTipo(PUBBLICO);
+        eventiRepository.saveAndFlush(publicEvent);
 
-        Eventi e2 = new Eventi();
-        e2.setTitolo("Privato");
-        e2.setTipo(TipoEvento.PRIVATO);
-        eventiRepository.saveAndFlush(e2);
+        Eventi privateEvent = new Eventi();
+        privateEvent.setTitolo("Privato");
+        privateEvent.setTipo(TipoEvento.PRIVATO);
+        eventiRepository.saveAndFlush(privateEvent);
 
-        restEventiMockMvc
+        mockMvc
             .perform(get("/api/eventis/pubblici"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.[*].titolo").value(hasItem("Pubblico")))
@@ -534,20 +480,47 @@ class EventiResourceIT {
     }
 
     private void initStatiPrenotazione() {
-        if (statiPrenotazioneRepository.count() == 0) {
-            statiPrenotazioneRepository.saveAndFlush(
-                new StatiPrenotazione().codice(StatoCodice.WAITING).descrizione("In attesa").ordineAzione(1)
-            );
-            statiPrenotazioneRepository.saveAndFlush(
-                new StatiPrenotazione().codice(StatoCodice.CONFIRMED).descrizione("Confermata").ordineAzione(2)
-            );
-            statiPrenotazioneRepository.saveAndFlush(
-                new StatiPrenotazione().codice(StatoCodice.REJECTED).descrizione("Rifiutata").ordineAzione(3)
-            );
-            statiPrenotazioneRepository.saveAndFlush(
-                new StatiPrenotazione().codice(StatoCodice.CANCELLED).descrizione("Annullata").ordineAzione(4)
-            );
+        if (statiPrenotazioneRepository.count() > 0) {
+            return;
         }
+
+        statiPrenotazioneRepository.saveAndFlush(
+            new StatiPrenotazione().codice(StatoCodice.WAITING).descrizione("In attesa").ordineAzione(1)
+        );
+        statiPrenotazioneRepository.saveAndFlush(
+            new StatiPrenotazione().codice(StatoCodice.CONFIRMED).descrizione("Confermata").ordineAzione(2)
+        );
+        statiPrenotazioneRepository.saveAndFlush(
+            new StatiPrenotazione().codice(StatoCodice.REJECTED).descrizione("Rifiutata").ordineAzione(3)
+        );
+        statiPrenotazioneRepository.saveAndFlush(
+            new StatiPrenotazione().codice(StatoCodice.CANCELLED).descrizione("Annullata").ordineAzione(4)
+        );
+    }
+
+    private Sale createSala(String nome, int capienza) {
+        Sale sala = new Sale();
+        sala.setNome(nome);
+        sala.setCapienza(capienza);
+        return saleRepository.saveAndFlush(sala);
+    }
+
+    private Utenti createUtente(String nome, String telefono) {
+        Utenti utente = new Utenti();
+        utente.setNome(nome);
+        utente.setNumeroDiTelefono(telefono);
+        return utentiRepository.saveAndFlush(utente);
+    }
+
+    private Prenotazioni createConfirmedPrenotazione(Sale sala, Utenti utente) {
+        Prenotazioni prenotazione = new Prenotazioni();
+        prenotazione.setData(LocalDate.now().plusDays(1));
+        prenotazione.setOraInizio(LocalTime.of(10, 0));
+        prenotazione.setOraFine(LocalTime.of(11, 0));
+        prenotazione.setSala(sala);
+        prenotazione.setUtente(utente);
+        prenotazione.setStato(statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED).orElseThrow());
+        return prenotazioniRepository.saveAndFlush(prenotazione);
     }
 
     protected long getRepositoryCount() {

@@ -1,5 +1,6 @@
 package main.web.rest.vm;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import main.service.dto.AdminUserDTO;
 
@@ -15,6 +16,13 @@ public class ManagedUserVM extends AdminUserDTO {
     @Size(min = PASSWORD_MIN_LENGTH, max = PASSWORD_MAX_LENGTH)
     private String password;
 
+    @NotBlank
+    @Size(min = 4, max = 20)
+    private String numeroDiTelefono;
+
+    @Size(max = 100)
+    private String nomeAzienda;
+
     public ManagedUserVM() {
         // Empty constructor needed for Jackson.
     }
@@ -25,6 +33,22 @@ public class ManagedUserVM extends AdminUserDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getNumeroDiTelefono() {
+        return numeroDiTelefono;
+    }
+
+    public void setNumeroDiTelefono(String numeroDiTelefono) {
+        this.numeroDiTelefono = numeroDiTelefono;
+    }
+
+    public String getNomeAzienda() {
+        return nomeAzienda;
+    }
+
+    public void setNomeAzienda(String nomeAzienda) {
+        this.nomeAzienda = nomeAzienda;
     }
 
     // prettier-ignore

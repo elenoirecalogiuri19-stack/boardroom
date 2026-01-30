@@ -8,13 +8,17 @@ import { AccountService } from 'app/core/auth/account.service';
 
 @Component({
   selector: 'jhi-login',
+  standalone: true,
   imports: [SharedModule, FormsModule, ReactiveFormsModule, RouterModule],
   templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
 })
 export default class LoginComponent implements OnInit, AfterViewInit {
   username = viewChild.required<ElementRef>('username');
 
   authenticationError = signal(false);
+
+  isLoading = false;
 
   loginForm = new FormGroup({
     username: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -27,7 +31,6 @@ export default class LoginComponent implements OnInit, AfterViewInit {
   private readonly router = inject(Router);
 
   ngOnInit(): void {
-    // if already authenticated then navigate to home page
     this.accountService.identity().subscribe(() => {
       if (this.accountService.isAuthenticated()) {
         this.router.navigate(['']);
@@ -40,15 +43,20 @@ export default class LoginComponent implements OnInit, AfterViewInit {
   }
 
   login(): void {
+    this.isLoading = true;
+    this.authenticationError.set(false);
+
     this.loginService.login(this.loginForm.getRawValue()).subscribe({
       next: () => {
-        this.authenticationError.set(false);
+        this.isLoading = false;
         if (!this.router.getCurrentNavigation()) {
-          // There were no routing during login (eg from navigationToStoredUrl)
           this.router.navigate(['']);
         }
       },
-      error: () => this.authenticationError.set(true),
+      error: () => {
+        this.isLoading = false;
+        this.authenticationError.set(true);
+      },
     });
   }
 }

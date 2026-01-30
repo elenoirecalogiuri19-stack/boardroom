@@ -1,56 +1,26 @@
-<div>
-  <div class="d-flex justify-content-center">
-    <div class="col-lg-6 col-md-8 col-sm-10">
-      <h1 data-cy="loginTitle">Accedi</h1>
-      @if (authenticationError()) {
-        <div class="alert alert-danger" data-cy="loginError">
-          <strong>Accesso non riuscito!</strong> Si prega di controllare le credenziali e riprovare.
-        </div>
-      }
-      <form class="form" (ngSubmit)="login()" [formGroup]="loginForm">
-        <div class="mb-3">
-          <label class="username-label" for="username">Utente</label>
-          <input
-            type="text"
-            class="form-control"
-            name="username"
-            id="username"
-            placeholder="Il tuo nome utente"
-            formControlName="username"
-            data-cy="username"
-          />
-        </div>
+<div class="login-wrapper">
+  <div class="login-card">
+    @if (authenticationError()) {
+      <div class="alert alert-danger">Email o password errati.</div>
+    }
 
-        <div class="mb-3">
-          <label for="password">Password</label>
-          <input
-            type="password"
-            class="form-control"
-            name="password"
-            id="password"
-            placeholder="La tua password"
-            formControlName="password"
-            data-cy="password"
-          />
-        </div>
-
-        <div class="form-check">
-          <label class="form-check-label" for="rememberMe">
-            <input class="form-check-input" type="checkbox" name="rememberMe" id="rememberMe" formControlName="rememberMe" />
-            <span>Ricordami</span>
-          </label>
-        </div>
-
-        <button type="submit" class="btn btn-primary" data-cy="submit">Accedi</button>
-      </form>
-      <div class="mt-3 alert alert-warning">
-        <a class="alert-link" routerLink="/account/reset/request" data-cy="forgetYourPasswordSelector">Password dimenticata?</a>
+    <form (ngSubmit)="login()" [formGroup]="loginForm">
+      <div class="input-group">
+        <input #username type="text" class="figma-input" placeholder="Username" formControlName="username" />
       </div>
 
-      <div class="alert alert-warning">
-        <span>Non hai ancora un account?</span>
-        <a class="alert-link" routerLink="/account/register">Crea un account</a>
+      <div class="input-group">
+        <input type="password" class="figma-input" placeholder="Password" formControlName="password" />
       </div>
+
+      <button type="submit" class="figma-btn" [class.btn-loading]="isLoading" [disabled]="isLoading">Accedi</button>
+    </form>
+
+    <div class="figma-footer">
+      <a routerLink="/account/reset/request" class="green-link">Password dimenticata?</a>
+      <p class="small-text">
+        Non hai un account? <a routerLink="/account/register" class="green-link"><strong>Crea un account</strong></a>
+      </p>
     </div>
   </div>
 </div>

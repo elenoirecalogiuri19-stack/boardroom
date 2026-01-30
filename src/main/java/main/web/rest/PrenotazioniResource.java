@@ -6,16 +6,16 @@ import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.UUID;
-import main.domain.Utenti;
 import main.repository.PrenotazioniRepository;
-import main.repository.UserRepository;
 import main.service.PrenotazioniService;
 import main.service.dto.PrenotazioniDTO;
+import main.service.mapper.PrenotazioniMapper;
 import main.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +23,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
@@ -39,6 +38,7 @@ import tech.jhipster.web.util.ResponseUtil;
  */
 @RestController
 @RequestMapping("/api/prenotazionis")
+@Transactional
 public class PrenotazioniResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(PrenotazioniResource.class);
@@ -52,36 +52,35 @@ public class PrenotazioniResource {
 
     private final PrenotazioniRepository prenotazioniRepository;
 
-    private final UserRepository userRepository;
+    private final PrenotazioniMapper prenotazioniMapper;
 
     public PrenotazioniResource(
         PrenotazioniService prenotazioniService,
         PrenotazioniRepository prenotazioniRepository,
-        UserRepository userRepository
+        PrenotazioniMapper prenotazioniMapper
     ) {
         this.prenotazioniService = prenotazioniService;
         this.prenotazioniRepository = prenotazioniRepository;
-        this.userRepository = userRepository;
+        this.prenotazioniMapper = prenotazioniMapper;
     }
 
-    /**
-     * {@code POST  /prenotazionis} : Create a new prenotazioni.
-     *
-     * @param prenotazioniDTO the prenotazioniDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new prenotazioniDTO, or with status {@code 400 (Bad Request)} if the prenotazioni has already an ID.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-    @PostMapping("")
-    public ResponseEntity<PrenotazioniDTO> createPrenotazioni(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO)
-        throws URISyntaxException {
+    @PostMapping
+    public ResponseEntity<PrenotazioniDTO> createPrenotazioni(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO) {
         LOG.debug("REST request to save Prenotazioni : {}", prenotazioniDTO);
         if (prenotazioniDTO.getId() != null) {
             throw new BadRequestAlertException("A new prenotazioni cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        prenotazioniDTO = prenotazioniService.save(prenotazioniDTO);
-        return ResponseEntity.created(new URI("/api/prenotazionis/" + prenotazioniDTO.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, prenotazioniDTO.getId().toString()))
-            .body(prenotazioniDTO);
+
+        PrenotazioniDTO result = prenotazioniService.save(prenotazioniDTO);
+        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result.getId()).toUri())
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+
+    @PostMapping("/prenotta")
+    public ResponseEntity<PrenotazioniDTO> nuovaPrenotazione(@Valid @RequestBody PrenotazioniDTO dto) {
+        PrenotazioniDTO result = prenotazioniService.nuovoPrenotazioni(dto);
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -100,21 +99,24 @@ public class PrenotazioniResource {
         @Valid @RequestBody PrenotazioniDTO prenotazioniDTO
     ) throws URISyntaxException {
         LOG.debug("REST request to update Prenotazioni : {}, {}", id, prenotazioniDTO);
-        if (prenotazioniDTO.getId() == null) {
+        validaPrenoUpdate(id, prenotazioniDTO);
+
+        PrenotazioniDTO result = prenotazioniService.save(prenotazioniDTO);
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, prenotazioniDTO.getId().toString()))
+            .body(result);
+    }
+
+    private void validaPrenoUpdate(UUID id, PrenotazioniDTO dto) {
+        if (dto.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (!Objects.equals(id, prenotazioniDTO.getId())) {
+        if (!Objects.equals(id, dto.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
-
         if (!prenotazioniRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
-
-        prenotazioniDTO = prenotazioniService.update(prenotazioniDTO);
-        return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, prenotazioniDTO.getId().toString()))
-            .body(prenotazioniDTO);
     }
 
     /**
@@ -134,16 +136,7 @@ public class PrenotazioniResource {
         @NotNull @RequestBody PrenotazioniDTO prenotazioniDTO
     ) throws URISyntaxException {
         LOG.debug("REST request to partial update Prenotazioni partially : {}, {}", id, prenotazioniDTO);
-        if (prenotazioniDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        if (!Objects.equals(id, prenotazioniDTO.getId())) {
-            throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
-        }
-
-        if (!prenotazioniRepository.existsById(id)) {
-            throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
-        }
+        validaPrenoUpdate(id, prenotazioniDTO);
 
         Optional<PrenotazioniDTO> result = prenotazioniService.partialUpdate(prenotazioniDTO);
 
@@ -159,28 +152,24 @@ public class PrenotazioniResource {
      * @param pageable the pagination information.
      * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of prenotazionis in body.
+     * US2: Semplificato per evitare errori di compilazione con il Service.
      */
     @GetMapping("")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<PrenotazioniDTO>> getAllPrenotazionis(
         @org.springdoc.core.annotations.ParameterObject Pageable pageable,
-        @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload
+        @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload,
+        @RequestParam(name = "salaId", required = false) UUID salaId
     ) {
-        LOG.debug("REST request to get a page of Prenotazionis");
-        Page<PrenotazioniDTO> page;
-        if (eagerload) {
-            page = prenotazioniService.findAllWithEagerRelationships(pageable);
-        } else {
-            page = prenotazioniService.findAll(pageable);
-        }
+        LOG.debug("REST request to get a page of Prenotazionis. Filter salaId: {}", salaId);
+        Page<PrenotazioniDTO> page = prenotazioniService.getAll(pageable, eagerload, salaId);
+
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
     /**
      * {@code GET  /prenotazionis/:id} : get the "id" prenotazioni.
-     *
-     * @param id the id of the prenotazioniDTO to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the prenotazioniDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id}")
     public ResponseEntity<PrenotazioniDTO> getPrenotazioni(@PathVariable("id") UUID id) {
@@ -189,26 +178,35 @@ public class PrenotazioniResource {
         return ResponseUtil.wrapOrNotFound(prenotazioniDTO);
     }
 
+    @GetMapping("/storico")
+    public ResponseEntity<List<PrenotazioniDTO>> getStoricoPrenotazioni() {
+        LOG.debug("REST request to get storico prenotazioni");
+        return ResponseEntity.ok(prenotazioniService.getStoricoPrenotazioni());
+    }
+
+    @GetMapping("/odierne")
+    public ResponseEntity<List<PrenotazioniDTO>> getPrenotazioniOdierne() {
+        LOG.debug("REST request to get odierne prenotazioni");
+        return ResponseEntity.ok(prenotazioniService.getPrenotazioniOdierne());
+    }
+
     /**
      * {@code DELETE  /prenotazionis/:id} : delete the "id" prenotazioni.
-     *
-     * @param id the id of the prenotazioniDTO to delete.
-     * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePrenotazioni(@PathVariable UUID id) throws AccessDeniedException {
+    public ResponseEntity<Void> deletePrenotazioni(@PathVariable("id") UUID id) {
         LOG.debug("REST request to delete Prenotazioni : {}", id);
 
-        Authentication a = SecurityContextHolder.getContext().getAuthentication();
-        String username = a.getName();
-
-        Utenti ute = userRepository.findByUserLogin(username).orElseThrow(() -> new EntityNotFoundException("utente non trovato"));
-        String utenteId = ute.getId().toString();
-
-        prenotazioniService.delete(id, utenteId);
-        return ResponseEntity.noContent()
-            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
-            .build();
+        try {
+            prenotazioniService.delete(id);
+            return ResponseEntity.noContent()
+                .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
+                .build();
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**

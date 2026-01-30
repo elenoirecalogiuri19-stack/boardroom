@@ -1,0 +1,84 @@
+<div class="results-container" [class.blur-background]="showPrivacyModal">
+  <aside class="sidebar">
+    <button class="btn-back" (click)="tornaIndietro()" [class.btn-loading]="isLoading" [disabled]="isLoading">
+      <fa-icon icon="arrow-left" *ngIf="!isLoading"></fa-icon>
+      {{ isLoading ? '' : 'Indietro' }}
+    </button>
+
+    <div class="report-section">
+      <h3>Il tuo riepilogo</h3>
+      <div class="report-item">
+        <span class="label">DATA</span>
+        <p>{{ dataRicerca | date: 'dd/MM/yyyy' }}</p>
+      </div>
+      <div class="report-item">
+        <span class="label">ORA</span>
+        <p>{{ oraRicerca || '08:00 - 09:00' }}</p>
+      </div>
+      <div class="report-item">
+        <span class="label">PERSONE</span>
+        <p>{{ capienzaRicerca }} persone</p>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <h1 class="page-title">Sale disponibili</h1>
+    <div class="rooms-list">
+      @for (item of sale; track item.id) {
+        <div class="room-card">
+          <div class="card-content">
+            <h3 class="room-name">{{ item.nome }}</h3>
+            <div class="room-meta">
+              <div class="avatar-circle"></div>
+              <div class="text-info">
+                <span class="info-title">Capienza: {{ item.capienza }} persone</span>
+                <span class="info-desc">Disponibile nella fascia selezionata</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-action">
+            <button class="btn-book" (click)="apriSceltaPrivacy(item)" [class.btn-loading]="isLoading" [disabled]="isLoading">
+              {{ isLoading ? '' : 'Prenota' }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </main>
+</div>
+
+<div class="minimal-overlay" *ngIf="showPrivacyModal">
+  <div class="minimal-modal">
+    <button class="close-btn" (click)="showPrivacyModal = false">&times;</button>
+
+    <div class="modal-content">
+      <h2 class="modal-title">Tipo di evento</h2>
+      <p class="modal-subtitle">
+        Configura il tuo evento in <span>{{ salaSelezionata?.nome }}</span>
+      </p>
+
+      <div class="options-container">
+        <div class="option-card" (click)="confermaEProcedi(true)" [class.disabled]="isLoading">
+          <div class="option-info">
+            <strong>Evento Pubblico</strong>
+          </div>
+          <div class="action-zone">
+            <span *ngIf="!isLoading" class="arrow-icon">→</span>
+            <div *ngIf="isLoading" class="minimal-spinner"></div>
+          </div>
+        </div>
+
+        <div class="option-card" (click)="confermaEProcedi(false)" [class.disabled]="isLoading">
+          <div class="option-info">
+            <strong>Evento Privato</strong>
+          </div>
+          <div class="action-zone">
+            <span *ngIf="!isLoading" class="arrow-icon">→</span>
+            <div *ngIf="isLoading" class="minimal-spinner"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

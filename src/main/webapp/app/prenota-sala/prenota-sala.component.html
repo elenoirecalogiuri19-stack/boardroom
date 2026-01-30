@@ -1,0 +1,41 @@
+<div class="booking-container">
+  <h2 class="title-green">Prenota sala</h2>
+
+  <div class="search-bar-card">
+    <!-- DATA -->
+    <div class="input-group-custom">
+      <label for="data">Data</label>
+      <input id="data" type="date" class="form-control-br" [(ngModel)]="dataSelezionata" />
+    </div>
+
+    <div class="input-group-custom">
+      <label for="ora">Ora</label>
+      <select id="ora" class="form-control-br" [(ngModel)]="oraSelezionata">
+        <option value="" disabled selected>Seleziona fascia</option>
+        @for (ora of orari; track ora) {
+          <option [value]="ora">{{ ora }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="input-group-custom">
+      <div class="label-box">
+        <span class="label">Capienza</span>
+        <span class="value-badge">{{ capienza }}</span>
+      </div>
+
+      <input id="capienza" type="range" min="0" max="100" class="form-range-br" [(ngModel)]="capienza" />
+
+      <div class="range-limits">
+        <span>0</span>
+        <span>100</span>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button class="btn-conferma" [class.btn-loading]="caricamento" [disabled]="caricamento" (click)="confermaPrenotazione()">
+        Conferma
+      </button>
+    </div>
+  </div>
+</div>

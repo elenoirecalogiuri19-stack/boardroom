@@ -9,9 +9,8 @@ import main.IntegrationTest;
 import main.domain.Eventi;
 import main.domain.enumeration.TipoEvento;
 import main.repository.EventiRepository;
-import main.service.mapper.EventiMapper;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
@@ -19,10 +18,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Focused tests for the /api/eventis/pubblici endpoint.
+ */
 @IntegrationTest
 @AutoConfigureMockMvc
 @WithMockUser
-public class EventiResourceTest {
+class EventiResourceTest {
 
     private static final String PUBLIC_API_URL = "/api/eventis/pubblici";
 
@@ -32,20 +34,17 @@ public class EventiResourceTest {
     @Autowired
     private EventiRepository eventiRepository;
 
-    @Autowired
-    private EventiMapper eventiMapper;
-
-    private Eventi eventoPubb;
+    private Eventi publicEvent;
 
     @BeforeEach
     void initTest() {
-        eventoPubb = new Eventi().titolo("Evento pubblici").tipo(TipoEvento.PUBBLICO).prezzo(BigDecimal.valueOf(10));
+        publicEvent = new Eventi().titolo("Evento pubblico").tipo(TipoEvento.PUBBLICO).prezzo(BigDecimal.valueOf(10));
     }
 
     @Test
     @Transactional
-    public void getPublicEventi_ShouldReturnOnlyPublicEvents() throws Exception {
-        eventiRepository.saveAndFlush(eventoPubb);
+    void getPublicEventi_shouldReturnOnlyPublicEvents() throws Exception {
+        eventiRepository.saveAndFlush(publicEvent);
 
         mockMvc
             .perform(get(PUBLIC_API_URL).contentType(MediaType.APPLICATION_JSON))

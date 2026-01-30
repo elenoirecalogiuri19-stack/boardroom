@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.UUID;
 import main.domain.Prenotazioni;
 import main.domain.Sale;
+import main.domain.Utenti;
+import main.domain.enumeration.StatoCodice;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
@@ -18,6 +20,9 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID> {
+    // US2: Metodo aggiunto per filtrare le prenotazioni per sala
+    Page<Prenotazioni> findBySalaId(UUID salaId, Pageable pageable);
+
     default Optional<Prenotazioni> findOneWithEagerRelationships(UUID id) {
         return this.findOneWithToOneRelationships(id);
     }
@@ -46,13 +51,10 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
     )
     Optional<Prenotazioni> findOneWithToOneRelationships(@Param("id") UUID id);
 
-    // inplementazione metodo per la disponibilita sale
-
     @Query(
-        "SELECT COUNT(p) > 0 " +
-        "FROM Prenotazioni p WHERE p.sala = :sala AND p.data = :data " +
+        "SELECT COUNT(p) > 0 FROM Prenotazioni p WHERE p.sala = :sala AND p.data = :data " +
         "AND ((p.oraInizio < :oraFine) AND (p.oraFine > :oraInizio)) " +
-        "AND p.stato.codice = 'CONFIRMED'"
+        "AND p.stato.codice = main.domain.enumeration.StatoCodice.CONFIRMED"
     )
     boolean existsOverlappingConfirmedPrenotazione(
         @Param("sala") Sale sala,
@@ -60,4 +62,10 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         @Param("oraInizio") LocalTime oraInizio,
         @Param("oraFine") LocalTime oraFine
     );
+
+    @Query("SELECT p FROM Prenotazioni p WHERE p.data < :oggi ORDER BY p.data DESC, p.oraInizio DESC ")
+    List<Prenotazioni> findStorico(@Param("oggi") LocalDate oggi);
+
+    @Query("SELECT p FROM Prenotazioni p WHERE p.data >= :oggi ORDER BY p.data DESC, p.oraInizio DESC ")
+    List<Prenotazioni> findOggiEFutre(@Param("oggi") LocalDate oggi);
 }
