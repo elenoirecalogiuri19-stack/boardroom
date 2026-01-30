@@ -11,3 +11,8 @@
 
   <jhi-footer />
 </div>
+@if (loadingService.isLoading()) {
+  <div class="loading-overlay">
+    <div class="minimal-spinner"></div>
+  </div>
+}

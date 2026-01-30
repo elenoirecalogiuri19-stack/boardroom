@@ -3,6 +3,7 @@
 @import 'bootstrap/scss/variables';
 
 $boardroom-green: #4a8c40;
+$dark-grey: #444444;
 
 .navbar {
   height: 120px !important;
@@ -41,17 +42,27 @@ $boardroom-green: #4a8c40;
     align-items: center !important;
 
     .nav-link {
-      color: #444444 !important;
+      color: $dark-grey !important;
       font-weight: 700;
       font-size: 18px !important;
       height: 120px !important;
       display: flex !important;
       align-items: center !important;
+      transition: all 0.3s ease;
 
       fa-icon {
-        color: $boardroom-green !important;
+        color: inherit !important;
         font-size: 1.3rem;
         margin-right: 8px;
+      }
+
+      &.active,
+      &:hover {
+        color: $boardroom-green !important;
+
+        fa-icon {
+          color: $boardroom-green !important;
+        }
       }
     }
   }
