@@ -25,6 +25,13 @@ const routes: Routes = [
   },
 
   {
+    path: 'risultati-sala',
+    loadComponent: () => import('./prenota-sala/risultati-sala/risultati-sala.component').then(m => m.RisultatiSalaComponent),
+    title: 'Sale Disponibili',
+    canActivate: [UserRouteAccessService],
+  },
+
+  {
     path: 'admin',
     data: {
       authorities: [Authority.ADMIN],

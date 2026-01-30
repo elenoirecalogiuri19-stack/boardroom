@@ -1,0 +1,136 @@
+.results-container {
+  display: flex;
+  padding: 40px 8%;
+  gap: 50px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+
+  .btn-back {
+    background: transparent;
+    border: none;
+    color: #4a8c40;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .report-box {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    border: 1px solid #edf2f7;
+
+    .report-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #a0aec0;
+      margin-bottom: 20px;
+      display: block;
+    }
+  }
+}
+
+.report-item {
+  margin-bottom: 18px;
+  label {
+    display: block;
+    font-size: 0.8rem;
+    color: #4a8c40;
+    font-weight: 700;
+  }
+  p {
+    margin: 4px 0 0;
+    font-size: 1rem;
+    color: #2d3748;
+    font-weight: 500;
+  }
+}
+
+.main-content {
+  flex-grow: 1;
+
+  .page-title {
+    color: #4a8c40;
+    font-weight: 800;
+    margin-bottom: 35px;
+    font-size: 2rem;
+  }
+}
+
+.room-card {
+  background: white;
+  border-radius: 20px;
+  padding: 25px 35px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid transparent;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    border-color: rgba(74, 140, 64, 0.2);
+  }
+
+  .room-name {
+    color: #4a8c40;
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 0 0 10px 0;
+  }
+
+  .room-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    .avatar-circle {
+      width: 40px;
+      height: 40px;
+      background: #f0fdf4; // Verde chiarissimo per il fondo dell'icona
+      border-radius: 12px; // Leggermente squadrato come Figma
+    }
+
+    .info-title {
+      display: block;
+      font-weight: 700;
+      color: #333;
+      font-size: 0.95rem;
+    }
+
+    .info-desc {
+      color: #718096;
+      font-size: 0.85rem;
+    }
+  }
+}
+
+.btn-book {
+  background-color: #4a8c40;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background-color: #3d7535;
+  }
+}
