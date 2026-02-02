@@ -1,13 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { HttpResponse } from '@angular/common/http';
 import SharedModule from 'app/shared/shared.module';
 
 import { IPrenotazioni } from 'app/entities/prenotazioni/prenotazioni.model';
 import { PrenotazioniService } from 'app/entities/prenotazioni/service/prenotazioni.service';
 
 import dayjs from 'dayjs/esm';
+import { PrenotazioneDTO } from '../services/prenotazioni-api.service';
 
 @Component({
   standalone: true,
@@ -31,14 +31,13 @@ export class StoricoPrenotazioniComponent implements OnInit {
   loadAll(): void {
     this.isLoading.set(true);
 
-    this.prenotazioniService.query().subscribe({
-      next: (res: HttpResponse<IPrenotazioni[]>) => {
+    this.prenotazioniService.getStorico().subscribe({
+      next: res => {
         this.isLoading.set(false);
-        const ora = dayjs();
 
-        const concluse = (res.body ?? [])
-          .filter((p: any) => p.oraFine && dayjs(p.oraFine).isBefore(ora))
-          .sort((a: any, b: any) => dayjs(b.oraInizio).diff(dayjs(a.oraInizio)));
+        const body = res.body ?? [];
+
+        const concluse = body.sort((a, b) => dayjs(b.data).diff(dayjs(a.data)) || dayjs(b.oraInizio).diff(dayjs(a.oraInizio)));
 
         this.tutteLePrenotazioni = concluse;
         this.prenotazioniPassate.set(concluse);

@@ -13,9 +13,9 @@
         <div class="timeline-dot"></div>
         <div class="booking-card shadow-sm">
           <div class="card-left">
-            <p class="date-label">{{ p.oraInizio | date: 'dd MMMM yyyy' }}</p>
+            <p class="date-label">{{ p.data?.toDate() | date: 'dd MMMM yyyy' }}</p>
             <h3 class="room-title">{{ p.sala?.nome }}</h3>
-            <p class="time-range">{{ p.oraInizio | date: 'HH:mm' }} - {{ p.oraFine | date: 'HH:mm' }}</p>
+            <p class="time-range">{{ p.oraInizio }} - {{ p.oraFine }}</p>
           </div>
           <div class="card-right">
             <span class="status-badge">Conclusa</span>
