@@ -54,6 +54,15 @@ export default class NavbarComponent implements OnInit {
     this.isNavbarCollapsed.set(true);
   }
 
+  gestisciMiePrenotazioni(): void {
+    this.collapseNavbar();
+    if (this.accountService.isAuthenticated()) {
+      this.router.navigate(['/mie-prenotazioni']);
+    } else {
+      this.login();
+    }
+  }
+
   login(): void {
     this.isLoading = true;
     this.router.navigate(['/login']).then(() => {

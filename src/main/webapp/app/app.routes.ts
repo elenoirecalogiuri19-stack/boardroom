@@ -1,9 +1,12 @@
 import { Routes } from '@angular/router';
 
 import { Authority } from 'app/config/authority.constants';
-
 import { UserRouteAccessService } from 'app/core/auth/user-route-access.service';
 import { errorRoute } from './layouts/error/error.route';
+
+import { MIE_PRENOTAZIONI_ROUTE } from './mie-prenotazioni/mie-prenotazioni.route';
+import { PROFILO_UTENTE_ROUTE } from './profilo-utente/profilo-utente.route';
+import { STORICO_PRENOTAZIONI_ROUTE } from './storico-prenotazioni/storico-prenotazioni.route';
 
 const routes: Routes = [
   {
@@ -23,6 +26,10 @@ const routes: Routes = [
     title: 'Prenota Sala',
     canActivate: [UserRouteAccessService],
   },
+
+  MIE_PRENOTAZIONI_ROUTE,
+  PROFILO_UTENTE_ROUTE,
+  STORICO_PRENOTAZIONI_ROUTE,
 
   {
     path: 'risultati-sala',

@@ -1,0 +1,107 @@
+$br-green: #28a745;
+$bg-light: #f8f9fa;
+
+.storico-container {
+  max-width: 850px;
+  margin: 50px auto;
+  padding: 0 20px;
+}
+
+.filter-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 40px;
+
+  .filter-btn {
+    border: none;
+    padding: 8px 24px;
+    border-radius: 50px;
+    background: #eeeeee;
+    color: #666;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.3s;
+
+    &.active {
+      background: $br-green;
+      color: white;
+    }
+  }
+}
+
+.timeline-wrapper {
+  position: relative;
+  padding-left: 50px;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #e0e0e0;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 35px;
+
+  .timeline-dot {
+    position: absolute;
+    left: -50px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    background-color: #999;
+    border-radius: 50%;
+    z-index: 5;
+  }
+}
+
+.booking-card {
+  background: #f4f4f4;
+  border-radius: 20px;
+  padding: 25px 35px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid transparent;
+  transition: 0.3s;
+
+  &:hover {
+    border-color: #ddd;
+    background: #eeeeee;
+  }
+
+  .date-label {
+    font-size: 13px;
+    color: #888;
+    font-weight: 700;
+    margin-bottom: 5px;
+    text-transform: capitalize;
+  }
+
+  .room-title {
+    font-size: 24px;
+    font-weight: 850;
+    margin: 0;
+    color: #333;
+  }
+
+  .time-range {
+    font-size: 15px;
+    color: #555;
+    margin-top: 4px;
+  }
+}
+
+.status-badge {
+  background: #cccccc;
+  color: white;
+  padding: 6px 18px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 700;
+}

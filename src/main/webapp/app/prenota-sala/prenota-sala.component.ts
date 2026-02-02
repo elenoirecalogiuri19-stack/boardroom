@@ -38,7 +38,7 @@ export default class PrenotaSalaComponent implements OnInit {
   generaOrari(): void {
     this.orari = [];
     for (let i = 8; i < 20; i++) {
-      const fascia = `${i}:00 - ${i + 1}:00`;
+      const fascia = `${i.toString().padStart(2, '0')}:00 - ${(i + 1).toString().padStart(2, '0')}:00`;
       this.orari.push(fascia);
     }
   }
@@ -53,16 +53,25 @@ export default class PrenotaSalaComponent implements OnInit {
       capienzaMax: undefined,
     });
 
-    this.router
-      .navigate(['/risultati-sala'], {
-        queryParams: {
-          data: this.dataSelezionata,
-          ora: this.oraSelezionata,
-          persone: this.capienza,
-        },
-      })
-      .then(() => {
-        this.caricamento = false;
-      });
+    setTimeout(() => {
+      this.router
+        .navigate(['/risultati-sala'], {
+          queryParams: {
+            data: this.dataSelezionata,
+            ora: this.oraSelezionata,
+            persone: this.capienza,
+          },
+        })
+        .then(
+          navigated => {
+            if (!navigated) {
+              this.caricamento = false;
+            }
+          },
+          () => {
+            this.caricamento = false;
+          },
+        );
+    }, 800);
   }
 }

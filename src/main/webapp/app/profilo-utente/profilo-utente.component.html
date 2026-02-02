@@ -1,0 +1,52 @@
+<div class="profile-container">
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="avatar-column">
+        <div class="avatar-circle">
+          <fa-icon icon="user"></fa-icon>
+        </div>
+      </div>
+      <div class="title-column">
+        <p class="profile-tag">Il mio profilo</p>
+        <h1 class="user-full-name">{{ account()?.firstName }} {{ account()?.lastName }}</h1>
+        <p class="user-email-sub">{{ account()?.email }}</p>
+        <hr class="separator" />
+      </div>
+    </div>
+
+    <div class="data-table">
+      <div class="data-row">
+        <span class="data-label">Nome:</span>
+        <span class="data-value">{{ account()?.firstName }}</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Cognome:</span>
+        <span class="data-value">{{ account()?.lastName }}</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Email:</span>
+        <span class="data-value">{{ account()?.email }}</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Password:</span>
+        <span class="data-value">••••••••</span>
+      </div>
+    </div>
+
+    <div class="secondary-actions">
+      <button class="btn-light-green" routerLink="/storico-prenotazioni">
+        <fa-icon icon="history" class="me-2"></fa-icon>
+        <span>Storico prenotazioni</span>
+      </button>
+
+      <button class="btn-light-green" routerLink="/account/settings">
+        <fa-icon icon="cog" class="me-2"></fa-icon>
+        <span>Impostazioni account</span>
+      </button>
+    </div>
+
+    <div class="logout-wrapper">
+      <span class="logout-text-link" (click)="logout()">Logout</span>
+    </div>
+  </div>
+</div>

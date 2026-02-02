@@ -1,18 +1,18 @@
-<jhi-page-ribbon />
+<jhi-page-ribbon></jhi-page-ribbon>
 
-<div>
-  <router-outlet name="navbar" />
-</div>
-
-<div class="container-fluid">
-  <div class="card jh-card">
-    <router-outlet />
-  </div>
-
-  <jhi-footer />
-</div>
 @if (loadingService.isLoading()) {
   <div class="loading-overlay">
     <div class="minimal-spinner"></div>
   </div>
 }
+
+<div>
+  <router-outlet name="navbar"></router-outlet>
+</div>
+
+<div class="container-fluid">
+  <div class="card jh-card">
+    <router-outlet></router-outlet>
+  </div>
+  <jhi-footer></jhi-footer>
+</div>

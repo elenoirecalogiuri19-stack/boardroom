@@ -20,9 +20,7 @@ $boardroom-green: #4a8c40;
   max-width: 380px;
   padding: 50px 40px;
   border-radius: 24px;
-
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
-
   text-align: center;
   border: 1px solid #f2f2f2;
 }
@@ -53,18 +51,65 @@ $boardroom-green: #4a8c40;
   color: white !important;
   border: none !important;
   border-radius: 50px;
-  padding: 14px 60px;
+  min-width: 180px;
+  min-height: 50px;
   font-size: 15px;
   font-weight: 600;
   margin-top: 25px;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(74, 140, 64, 0.25) !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   transition: all 0.3s;
+  box-shadow: 0 8px 20px rgba(74, 140, 64, 0.25) !important;
 
-  &:hover {
+  // --- TECNICA ANTI-DOPPIO LOADER ---
+  // Se JHipster inietta icone, spinner o indicatori, li nascondiamo tutti
+  // Tranne il nostro elemento che ha la classe .mio-loader
+  * {
+    &:not(.mio-loader):not(.btn-text) {
+      display: none !important;
+    }
+  }
+
+  // Nasconde specificamente icone FontAwesome e indicatori JHipster comuni
+  fa-icon,
+  .spinner-border,
+  .loading,
+  jhi-loading-indicator {
+    display: none !important;
+  }
+
+  .btn-text {
+    color: white !important;
+    display: block;
+  }
+
+  &:hover:not(:disabled) {
     background-color: darken($boardroom-green, 5%) !important;
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(74, 140, 64, 0.3) !important;
+  }
+
+  &:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+  }
+}
+
+.mio-loader {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 0.8s linear infinite;
+  display: block !important;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -79,4 +124,10 @@ $boardroom-green: #4a8c40;
       text-decoration: underline;
     }
   }
+}
+
+.small-text {
+  font-size: 13px;
+  color: #666;
+  margin-top: 10px;
 }

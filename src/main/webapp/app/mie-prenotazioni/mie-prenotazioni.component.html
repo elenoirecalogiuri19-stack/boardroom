@@ -1,0 +1,47 @@
+<div class="mie-prenotazioni-container">
+  <div class="header-section">
+    <h1>I tuoi eventi</h1>
+    <p>Gestisci le tue prenotazioni</p>
+  </div>
+
+  <div class="list-container">
+    @for (evento of eventi(); track evento.id) {
+      <div class="event-card-row shadow-sm">
+        <div class="action-column">
+          <button class="btn-edit" [routerLink]="['/eventi', evento.id, 'edit']" [disabled]="loadingId === evento.id">
+            @if (loadingId !== evento.id) {
+              <span>📝 modifica</span>
+            } @else {
+              <div class="loader-mini-green"></div>
+            }
+          </button>
+        </div>
+
+        <div class="info-column">
+          <p class="event-info-text">
+            <span class="label">Titolo:</span> {{ evento.titolo }} <span class="label">Sala:</span> {{ evento.salaNome }}
+            <span class="label">Data/Ora:</span> {{ evento.data | date: 'dd MMM yyyy' }} - {{ evento.oraInizio }} / {{ evento.oraFine }}
+          </p>
+        </div>
+
+        <div class="action-column">
+          <button class="btn-delete" (click)="eliminaEvento(evento.id)" [disabled]="loadingId === evento.id">
+            @if (loadingId !== evento.id) {
+              <span>🗑️ elimina</span>
+            } @else {
+              <div class="loader-mini-red"></div>
+            }
+          </button>
+        </div>
+      </div>
+    } @empty {
+      @if (!isLoading) {
+        <div class="empty-state">
+          <fa-icon icon="calendar-times" size="3x"></fa-icon>
+          <p>Non hai ancora creato nessuna prenotazione.</p>
+          <button class="btn-primary-br" routerLink="/prenota-sala">Prenota ora</button>
+        </div>
+      }
+    }
+  </div>
+</div>

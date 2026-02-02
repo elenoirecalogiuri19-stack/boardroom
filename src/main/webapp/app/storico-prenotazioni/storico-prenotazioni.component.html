@@ -1,0 +1,34 @@
+<div class="storico-container">
+  <div class="filter-header">
+    <button class="filter-btn" [class.active]="filtroAttivo() === 'tutte'" (click)="applicaFiltro('tutte')">tutte</button>
+    <button class="filter-btn" [class.active]="filtroAttivo() === '30giorni'" (click)="applicaFiltro('30giorni')">ultimi 30 giorni</button>
+    <button class="filter-btn" [class.active]="filtroAttivo() === '2025'" (click)="applicaFiltro('2025')">2025</button>
+  </div>
+
+  <div class="timeline-wrapper">
+    <div class="timeline-line"></div>
+
+    @for (p of prenotazioniPassate(); track p.id) {
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="booking-card shadow-sm">
+          <div class="card-left">
+            <p class="date-label">{{ p.oraInizio | date: 'dd MMMM yyyy' }}</p>
+            <h3 class="room-title">{{ p.sala?.nome }}</h3>
+            <p class="time-range">{{ p.oraInizio | date: 'HH:mm' }} - {{ p.oraFine | date: 'HH:mm' }}</p>
+          </div>
+          <div class="card-right">
+            <span class="status-badge">Conclusa</span>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      @if (!isLoading()) {
+        <div class="empty-msg text-center mt-4">
+          <fa-icon icon="info-circle" class="me-2"></fa-icon>
+          Nessuna prenotazione passata presente nello storico.
+        </div>
+      }
+    }
+  </div>
+</div>

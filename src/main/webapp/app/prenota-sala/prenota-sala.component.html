@@ -2,7 +2,6 @@
   <h2 class="title-green">Prenota sala</h2>
 
   <div class="search-bar-card">
-    <!-- DATA -->
     <div class="input-group-custom">
       <label for="data">Data</label>
       <input id="data" type="date" class="form-control-br" [(ngModel)]="dataSelezionata" />
@@ -33,8 +32,12 @@
     </div>
 
     <div class="button-group">
-      <button class="btn-conferma" [class.btn-loading]="caricamento" [disabled]="caricamento" (click)="confermaPrenotazione()">
-        Conferma
+      <button class="btn-conferma" [disabled]="caricamento" (click)="confermaPrenotazione()">
+        @if (!caricamento) {
+          <span>Conferma</span>
+        } @else {
+          <div class="loader-white"></div>
+        }
       </button>
     </div>
   </div>

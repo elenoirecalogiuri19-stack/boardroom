@@ -19,22 +19,29 @@
       <ul class="navbar-nav ms-auto">
         <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <a class="nav-link" routerLink="/" (click)="collapseNavbar()">
-            <fa-icon icon="home"></fa-icon>
+            <fa-icon icon="home" class="me-1"></fa-icon>
             <span>Home</span>
           </a>
         </li>
 
         <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <a class="nav-link" routerLink="/prenota-sala" (click)="collapseNavbar()">
-            <fa-icon icon="calendar-alt"></fa-icon>
+            <fa-icon icon="calendar-alt" class="me-1"></fa-icon>
             <span>Prenota sala</span>
+          </a>
+        </li>
+
+        <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          <a class="nav-link" (click)="gestisciMiePrenotazioni()" style="cursor: pointer">
+            <fa-icon icon="list-alt" class="me-1"></fa-icon>
+            <span>Le mie prenotazioni</span>
           </a>
         </li>
 
         @if (account() !== null) {
           <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" routerLinkActive="active">
             <a class="nav-link dropdown-toggle" ngbDropdownToggle href="javascript:void(0);" id="entity-menu">
-              <fa-icon icon="th-list"></fa-icon>
+              <fa-icon icon="th-list" class="me-1"></fa-icon>
               <span>Entità</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" ngbDropdownMenu aria-labelledby="entity-menu">
@@ -64,7 +71,7 @@
         @if (hasAnyAuthority('ROLE_ADMIN')) {
           <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" routerLinkActive="active">
             <a class="nav-link dropdown-toggle" ngbDropdownToggle href="javascript:void(0);" id="admin-menu">
-              <fa-icon icon="users-cog"></fa-icon>
+              <fa-icon icon="users-cog" class="me-1"></fa-icon>
               <span>Amministratore</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" ngbDropdownMenu aria-labelledby="admin-menu">
@@ -95,44 +102,26 @@
           </li>
         }
 
-        <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" routerLinkActive="active">
+        <li class="nav-item" routerLinkActive="active">
           @let accountRef = account();
-          <a class="nav-link dropdown-toggle" ngbDropdownToggle href="javascript:void(0);" id="account-menu">
-            @if (!accountRef?.imageUrl) {
-              <span
-                ><fa-icon icon="user"></fa-icon> <span>{{ accountRef ? accountRef.firstName : 'Utente' }}</span></span
-              >
-            } @else {
-              <img [src]="accountRef!.imageUrl" class="profile-image rounded-circle" alt="Avatar" />
-            }
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end" ngbDropdownMenu aria-labelledby="account-menu">
-            @if (accountRef !== null) {
-              <li>
-                <a class="dropdown-item" routerLink="/account/settings" (click)="collapseNavbar()"
-                  ><fa-icon icon="wrench"></fa-icon> Impostazioni</a
-                >
-              </li>
-              <li>
-                <a class="dropdown-item" (click)="logout()">
-                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                  <fa-icon icon="sign-out-alt" *ngIf="!isLoading"></fa-icon> Esci
-                </a>
-              </li>
-            } @else {
-              <li>
-                <a class="dropdown-item" (click)="login()">
-                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                  <fa-icon icon="sign-in-alt" *ngIf="!isLoading"></fa-icon> Accesso
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" routerLink="/account/register" (click)="collapseNavbar()"
-                  ><fa-icon icon="user-plus"></fa-icon> Registrazione</a
-                >
-              </li>
-            }
-          </ul>
+          @if (accountRef !== null) {
+            <a
+              class="nav-link d-flex align-items-center"
+              routerLink="/profilo-utente"
+              (click)="collapseNavbar()"
+              title="Vai al mio profilo"
+            >
+              <div class="avatar-nav-circle">
+                <img *ngIf="accountRef?.imageUrl" [src]="accountRef!.imageUrl" class="profile-image-nav" alt="Avatar" />
+                <fa-icon icon="user" *ngIf="!accountRef?.imageUrl"></fa-icon>
+              </div>
+            </a>
+          } @else {
+            <a class="nav-link d-flex align-items-center" (click)="login()" style="cursor: pointer">
+              <fa-icon icon="user" class="me-1"></fa-icon>
+              <span>Accedi</span>
+            </a>
+          }
         </li>
       </ul>
     </div>

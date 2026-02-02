@@ -11,7 +11,7 @@ import {
   withNavigationErrorHandler,
 } from '@angular/router';
 import { ServiceWorkerModule } from '@angular/service-worker';
-import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http'; // Aggiunto withInterceptors
+import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 
 import { NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
 
@@ -29,17 +29,18 @@ const routerFeatures: RouterFeatures[] = [
   withComponentInputBinding(),
   withNavigationErrorHandler((e: NavigationError) => {
     const router = inject(Router);
-    if (e.error.status === 403) {
+    if (e?.error?.status === 403) {
       router.navigate(['/accessdenied']);
-    } else if (e.error.status === 404) {
+    } else if (e?.error?.status === 404) {
       router.navigate(['/404']);
-    } else if (e.error.status === 401) {
+    } else if (e?.error?.status === 401) {
       router.navigate(['/login']);
     } else {
       router.navigate(['/error']);
     }
   }),
 ];
+
 if (environment.DEBUG_INFO_ENABLED) {
   routerFeatures.push(withDebugTracing());
 }
@@ -55,7 +56,9 @@ export const appConfig: ApplicationConfig = {
     Title,
     { provide: LOCALE_ID, useValue: 'it' },
     { provide: NgbDateAdapter, useClass: NgbDateDayjsAdapter },
+
     httpInterceptorProviders,
+
     { provide: TitleStrategy, useClass: AppPageTitleStrategy },
   ],
 };

@@ -1,27 +1,28 @@
+$boardroom-green: #4a8c40;
+
 .loading-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.6); // Leggermente più visibile per feedback chiaro
   display: flex;
   justify-content: center;
   align-items: center;
-
   z-index: 99999;
-
-  pointer-events: all;
+  pointer-events: all; // Impedisce i click sotto
+  cursor: wait; // Mostra la clessidra al mouse
 }
 
 .minimal-spinner {
-  width: 45px;
-  height: 45px;
-  border: 4px solid #f1f1f1;
-  border-top: 4px solid #4a8c40;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f1f1f1;
+  border-top: 5px solid $boardroom-green;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05); // Un tocco di profondità
 }
 
 @keyframes spin {

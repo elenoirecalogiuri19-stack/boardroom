@@ -13,7 +13,13 @@
         <input type="password" class="figma-input" placeholder="Password" formControlName="password" />
       </div>
 
-      <button type="submit" class="figma-btn" [class.btn-loading]="isLoading" [disabled]="isLoading">Accedi</button>
+      <button type="submit" class="figma-btn" [disabled]="isLoading">
+        @if (!isLoading) {
+          <span class="btn-text">Accedi</span>
+        } @else {
+          <div class="mio-loader"></div>
+        }
+      </button>
     </form>
 
     <div class="figma-footer">
