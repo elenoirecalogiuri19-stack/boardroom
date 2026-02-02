@@ -159,6 +159,11 @@ public class PrenotazioniService {
         return findAll(pageable);
     }
 
+    public void delete(UUID id) {
+        LOG.debug("Request to delete Utenti : {}", id);
+        utentiRepository.deleteById(id);
+    }
+
     /**
      * Delete the prenotazioni by id.
      *
@@ -167,7 +172,7 @@ public class PrenotazioniService {
      * gestita permessi per eliminazione prenotazione
      *
      */
-    public void delete(UUID id) throws AccessDeniedException {
+    public void deletePrenotazione(UUID id) throws AccessDeniedException {
         LOG.debug("Request to delete Prenotazioni : {}", id);
 
         String username = getAuthenticatedUsername();
@@ -357,7 +362,7 @@ public class PrenotazioniService {
 
         validaInputRicerca(dto);
 
-        Sale sala = caricaSala(dto.getSala().getId());
+        Sale sala = caricaSala(dto.getSalaId());
         Utenti utente = caricaUtenteAutenticato();
 
         Prenotazioni pren = costruisciPrenotazioneDaRicerca(dto, sala, utente);
@@ -370,7 +375,7 @@ public class PrenotazioniService {
     }
 
     private void validaInputRicerca(PrenotazioniDTO dto) {
-        if (dto.getSala() == null || dto.getSala().getId() == null) {
+        if (dto.getSalaId() == null) {
             throw new IllegalArgumentException("Sala non valida: ID mancante");
         }
         if (dto.getData() == null) {
