@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { RicercaService } from 'app/services/ricerca.service';
 import { SaleApiService, ISalaDTO } from 'app/services/sale-api.service';
+import { PrenotazioniApiService } from 'app/services/prenotazioni-api.service';
 
 export interface Sala {
   id: string;
@@ -20,11 +21,6 @@ export interface Sala {
   styleUrl: './risultati-sala.component.scss',
 })
 export class RisultatiSalaComponent implements OnInit {
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
-  private ricercaService = inject(RicercaService);
-  private saleApiService = inject(SaleApiService);
-
   dataRicerca = '';
   oraRicerca = '';
   capienzaRicerca = 0;
@@ -34,16 +30,22 @@ export class RisultatiSalaComponent implements OnInit {
   showPrivacyModal = false;
   salaSelezionata: Sala | null = null;
 
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private ricercaService = inject(RicercaService);
+  private saleApiService = inject(SaleApiService);
+  private prenotazioniApi = inject(PrenotazioniApiService);
+
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      this.dataRicerca = (params['data'] as string | undefined) ?? '';
-      this.oraRicerca = (params['ora'] as string | undefined) ?? '';
-      this.capienzaRicerca = params['persone'] ? Number(params['persone']) : 0;
+    this.route.queryParams.subscribe((params: { data?: string; ora?: string; persone?: string; salaId?: string; apriModal?: string }) => {
+      this.dataRicerca = params.data ?? '';
+      this.oraRicerca = params.ora ?? '';
+      this.capienzaRicerca = Number(params.persone ?? 0);
 
       this.caricaSaleDisponibili();
 
-      if (params['apriModal'] === 'true' && params['salaId']) {
-        this.gestisciRiaperturaModal(params['salaId']);
+      if (params.apriModal === 'true' && params.salaId) {
+        this.gestisciRiaperturaModal(params.salaId);
       }
     });
   }
@@ -61,24 +63,48 @@ export class RisultatiSalaComponent implements OnInit {
   }
 
   confermaEProcedi(isPubblico: boolean): void {
+    if (!this.salaSelezionata) {
+      console.error('Nessuna sala selezionata');
+      return;
+    }
+
+    const sala = this.salaSelezionata;
+
     this.isLoading = true;
 
-    setTimeout(() => {
-      this.showPrivacyModal = false;
-      this.router
-        .navigate(['/prenota-sala/crea-evento'], {
-          queryParams: {
-            salaId: this.salaSelezionata?.id,
-            nomeSala: this.salaSelezionata?.nome,
-            data: this.dataRicerca,
-            ora: this.oraRicerca,
-            pubblico: isPubblico,
-          },
-        })
-        .then(() => {
-          this.isLoading = false;
-        });
-    }, 800);
+    const [oraInizio, oraFine] = this.oraRicerca.split('-').map(o => o.trim());
+
+    const payload = {
+      salaId: sala.id,
+      data: this.dataRicerca,
+      oraInizio: this.normalizzaOra(oraInizio),
+      oraFine: this.normalizzaOra(oraFine),
+    };
+
+    this.prenotazioniApi.creaPrenotazione(payload).subscribe({
+      next: pren => {
+        this.showPrivacyModal = false;
+
+        this.router
+          .navigate(['/prenota-sala/crea-evento'], {
+            queryParams: {
+              salaId: sala.id,
+              nomeSala: sala.nome,
+              data: this.dataRicerca,
+              ora: this.oraRicerca,
+              pubblico: isPubblico,
+              prenotazioneId: pren.id,
+            },
+          })
+          .then(() => {
+            this.isLoading = false;
+          });
+      },
+      error: err => {
+        console.error('Errore creazione prenotazione:', err);
+        this.isLoading = false;
+      },
+    });
   }
 
   private gestisciRiaperturaModal(idSala: string): void {
@@ -124,6 +150,7 @@ export class RisultatiSalaComponent implements OnInit {
   private normalizzaOra(ora: string): string {
     const [h, m] = ora.split(':');
     const hh = h.padStart(2, '0');
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const mm = m ?? '00';
     return `${hh}:${mm}`;
   }

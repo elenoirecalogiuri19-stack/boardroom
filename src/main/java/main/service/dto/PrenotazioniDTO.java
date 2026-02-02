@@ -29,6 +29,8 @@ public class PrenotazioniDTO implements Serializable {
     private UtentiDTO utente;
     private SaleDTO sala;
 
+    private UUID salaId;
+
     public UUID getId() {
         return id;
     }
@@ -99,5 +101,21 @@ public class PrenotazioniDTO implements Serializable {
 
     public void setSala(SaleDTO sala) {
         this.sala = sala;
+    }
+
+    public Integer getNumPersone() {
+        return numPersone;
+    }
+
+    public void setNumPersone(Integer numPersone) {
+        this.numPersone = numPersone;
+    }
+
+    public UUID getSalaId() {
+        return salaId;
+    }
+
+    public void setSalaId(UUID salaId) {
+        this.salaId = salaId;
     }
 }
