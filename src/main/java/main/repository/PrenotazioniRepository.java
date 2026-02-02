@@ -2,6 +2,7 @@ package main.repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,6 +67,20 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
     @Query("SELECT p FROM Prenotazioni p WHERE p.data < :oggi ORDER BY p.data DESC, p.oraInizio DESC ")
     List<Prenotazioni> findStorico(@Param("oggi") LocalDate oggi);
 
-    @Query("SELECT p FROM Prenotazioni p WHERE p.data >= :oggi ORDER BY p.data DESC, p.oraInizio DESC ")
-    List<Prenotazioni> findOggiEFutre(@Param("oggi") LocalDate oggi);
+    @Query(
+        """
+            SELECT p
+            FROM Prenotazioni p
+            LEFT JOIN FETCH p.stato
+            LEFT JOIN FETCH p.utente
+            LEFT JOIN FETCH p.sala
+            WHERE p.utente.user.login = :login
+              AND p.data >= :oggi
+            ORDER BY p.data ASC, p.oraInizio ASC
+        """
+    )
+    List<Prenotazioni> findByUtente_User_LoginAndDataGreaterThanEqualOrderByDataAscOraInizioAsc(
+        @Param("login") String login,
+        @Param("oggi") LocalDate oggi
+    );
 }

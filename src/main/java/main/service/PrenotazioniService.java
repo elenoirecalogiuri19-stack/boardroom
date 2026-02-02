@@ -248,7 +248,12 @@ public class PrenotazioniService {
     @Transactional(readOnly = true)
     public List<PrenotazioniDTO> getPrenotazioniOdierne() {
         LocalDate oggi = LocalDate.now();
-        return prenotazioniRepository.findOggiEFutre(oggi).stream().map(prenotazioniMapper::toDto).toList();
+        String username = getAuthenticatedUsername();
+        return prenotazioniRepository
+            .findByUtente_User_LoginAndDataGreaterThanEqualOrderByDataAscOraInizioAsc(username, oggi)
+            .stream()
+            .map(prenotazioniMapper::toDto)
+            .toList();
     }
 
     /**
@@ -363,14 +368,17 @@ public class PrenotazioniService {
         validaInputRicerca(dto);
 
         Sale sala = caricaSala(dto.getSalaId());
+
         Utenti utente = caricaUtenteAutenticato();
 
         Prenotazioni pren = costruisciPrenotazioneDaRicerca(dto, sala, utente);
 
         validaPrenotazione(pren);
+
         impostaStatoIniziale(pren);
 
         Prenotazioni salvata = prenotazioniRepository.save(pren);
+
         return prenotazioniMapper.toDto(salvata);
     }
 
@@ -402,6 +410,8 @@ public class PrenotazioniService {
         pren.setData(dto.getData());
         pren.setOraInizio(dto.getOraInizio());
         pren.setOraFine(dto.getOraFine());
+        pren.setTipoEvento(dto.getTipoEvento());
+        pren.setPrezzo(dto.getPrezzo());
         return pren;
     }
 }

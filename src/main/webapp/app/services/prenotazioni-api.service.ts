@@ -4,6 +4,26 @@ import { Observable } from 'rxjs';
 
 export interface PrenotazioneDTO {
   id: string;
+  titoloEvento: string | null;
+  data: string;
+  oraInizio: string;
+  oraFine: string;
+  numPersone?: number;
+  tipoEvento?: string;
+  prezzo?: number;
+  stato?: {
+    id: string;
+    codice: string;
+  } | null;
+  utente?: {
+    id: string;
+    nome: string;
+  } | null;
+  sala?: {
+    id: string;
+    nome: string;
+  } | null;
+  salaId?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -14,5 +34,13 @@ export class PrenotazioniApiService {
 
   creaPrenotazione(payload: any): Observable<PrenotazioneDTO> {
     return this.http.post<PrenotazioneDTO>(`${this.baseUrl}/prenotta`, payload);
+  }
+
+  getMiePrenotazioni(): Observable<PrenotazioneDTO[]> {
+    return this.http.get<PrenotazioneDTO[]>(`${this.baseUrl}/odierne`);
+  }
+
+  cancellaPrenotazione(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/cancella/${id}`);
   }
 }

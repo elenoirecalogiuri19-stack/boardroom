@@ -6,6 +6,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { RicercaService } from 'app/services/ricerca.service';
 import { SaleApiService, ISalaDTO } from 'app/services/sale-api.service';
 import { PrenotazioniApiService } from 'app/services/prenotazioni-api.service';
+import { AccountService } from 'app/core/auth/account.service';
 
 export interface Sala {
   id: string;
@@ -35,8 +36,14 @@ export class RisultatiSalaComponent implements OnInit {
   private ricercaService = inject(RicercaService);
   private saleApiService = inject(SaleApiService);
   private prenotazioniApi = inject(PrenotazioniApiService);
+  private accountService = inject(AccountService);
+  private account: any;
 
   ngOnInit(): void {
+    this.accountService.identity().subscribe(acc => {
+      this.account = acc;
+    });
+
     this.route.queryParams.subscribe((params: { data?: string; ora?: string; persone?: string; salaId?: string; apriModal?: string }) => {
       this.dataRicerca = params.data ?? '';
       this.oraRicerca = params.ora ?? '';
@@ -63,23 +70,22 @@ export class RisultatiSalaComponent implements OnInit {
   }
 
   confermaEProcedi(isPubblico: boolean): void {
-    if (!this.salaSelezionata) {
-      console.error('Nessuna sala selezionata');
-      return;
-    }
-
-    const sala = this.salaSelezionata;
+    if (!this.salaSelezionata) return;
 
     this.isLoading = true;
 
+    const sala = this.salaSelezionata;
     const [oraInizio, oraFine] = this.oraRicerca.split('-').map(o => o.trim());
 
     const payload = {
-      salaId: sala.id,
       data: this.dataRicerca,
       oraInizio: this.normalizzaOra(oraInizio),
       oraFine: this.normalizzaOra(oraFine),
+      tipoEvento: isPubblico ? 'PUBBLICO' : 'PRIVATO',
+      prezzo: null,
+      salaId: sala.id,
     };
+    console.log('PAYLOAD INVIATO:', payload);
 
     this.prenotazioniApi.creaPrenotazione(payload).subscribe({
       next: pren => {
@@ -96,9 +102,7 @@ export class RisultatiSalaComponent implements OnInit {
               prenotazioneId: pren.id,
             },
           })
-          .then(() => {
-            this.isLoading = false;
-          });
+          .then(() => (this.isLoading = false));
       },
       error: err => {
         console.error('Errore creazione prenotazione:', err);

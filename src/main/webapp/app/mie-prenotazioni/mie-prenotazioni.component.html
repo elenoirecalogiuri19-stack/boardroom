@@ -1,15 +1,15 @@
 <div class="mie-prenotazioni-container">
   <div class="header-section">
-    <h1>I tuoi eventi</h1>
+    <h1>Le tue Prenotazioni</h1>
     <p>Gestisci le tue prenotazioni</p>
   </div>
 
   <div class="list-container">
-    @for (evento of eventi(); track evento.id) {
+    @for (pren of prenotazioni(); track pren.id) {
       <div class="event-card-row shadow-sm">
         <div class="action-column">
-          <button class="btn-edit" [routerLink]="['/eventi', evento.id, 'edit']" [disabled]="loadingId === evento.id">
-            @if (loadingId !== evento.id) {
+          <button class="btn-edit" [routerLink]="['/eventi', pren.id, 'edit']" [disabled]="loadingId === pren.id">
+            @if (loadingId !== pren.id) {
               <span>📝 modifica</span>
             } @else {
               <div class="loader-mini-green"></div>
@@ -19,14 +19,14 @@
 
         <div class="info-column">
           <p class="event-info-text">
-            <span class="label">Titolo:</span> {{ evento.titolo }} <span class="label">Sala:</span> {{ evento.salaNome }}
-            <span class="label">Data/Ora:</span> {{ evento.data | date: 'dd MMM yyyy' }} - {{ evento.oraInizio }} / {{ evento.oraFine }}
+            <span class="label">Titolo:</span> {{ pren.titoloEvento }} <span class="label">Sala:</span> {{ pren.sala?.nome }}
+            <span class="label">Data/Ora:</span> {{ pren.data | date: 'dd MMM yyyy' }} - {{ pren.oraInizio }} / {{ pren.oraFine }}
           </p>
         </div>
 
         <div class="action-column">
-          <button class="btn-delete" (click)="eliminaEvento(evento.id)" [disabled]="loadingId === evento.id">
-            @if (loadingId !== evento.id) {
+          <button class="btn-delete" (click)="eliminaEvento(pren.id)" [disabled]="loadingId === pren.id">
+            @if (loadingId !== pren.id) {
               <span>🗑️ elimina</span>
             } @else {
               <div class="loader-mini-red"></div>

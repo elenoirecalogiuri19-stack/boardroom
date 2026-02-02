@@ -41,11 +41,10 @@ public class Eventi implements Serializable {
     @Column(name = "prezzo", precision = 21, scale = 2)
     private BigDecimal prezzo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties(value = { "eventis", "stato", "utente", "sala" }, allowSetters = true)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "prenotazione_id")
+    @JsonIgnoreProperties(value = { "evento", "stato", "utente", "sala" }, allowSetters = true)
     private Prenotazioni prenotazione;
-
-    // jhipster-needle-entity-add-field - JHipster will add fields here
 
     public UUID getId() {
         return this.id;

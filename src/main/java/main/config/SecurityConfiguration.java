@@ -93,6 +93,7 @@ public class SecurityConfiguration {
 
 
                     //Endpoint solo per Utenti
+                    // .requestMatchers("/api/prenotazionis/odierne").authenticated()
 
                     .requestMatchers(mvc.pattern("/api/**")).authenticated()
                     .requestMatchers(mvc.pattern("/api/prenotazionis/crea")).authenticated()

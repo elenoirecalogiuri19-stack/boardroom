@@ -194,15 +194,6 @@ public class PrenotazioniResource {
      * {@code DELETE  /prenotazionis/:id} : delete the "id" prenotazioni.
      */
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUtenti(@PathVariable("id") UUID id) {
-        LOG.debug("REST request to delete Utenti : {}", id);
-        prenotazioniService.delete(id);
-        return ResponseEntity.noContent()
-            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
-            .build();
-    }
-
     @DeleteMapping("/cancella/{id}")
     public ResponseEntity<Void> deletePrenotazioni(@PathVariable("id") UUID id) {
         LOG.debug("REST request to delete Prenotazioni : {}", id);

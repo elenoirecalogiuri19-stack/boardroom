@@ -2,8 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import SharedModule from 'app/shared/shared.module';
-import { IEventi } from 'app/entities/eventi/eventi.model';
-import { EventiService } from 'app/entities/eventi/service/eventi.service';
+import { PrenotazioneDTO, PrenotazioniApiService } from '../services/prenotazioni-api.service';
 
 @Component({
   standalone: true,
@@ -13,11 +12,11 @@ import { EventiService } from 'app/entities/eventi/service/eventi.service';
   imports: [SharedModule, RouterModule, CommonModule],
 })
 export class MiePrenotazioniComponent implements OnInit {
-  eventi = signal<IEventi[]>([]);
+  prenotazioni = signal<PrenotazioneDTO[]>([]);
   isLoading = false;
   loadingId: string | null = null; // Cambiato da number a string
 
-  private eventiService = inject(EventiService);
+  private prenotazioniApi = inject(PrenotazioniApiService);
 
   ngOnInit(): void {
     this.caricaLeMiePrenotazioni();
@@ -25,9 +24,9 @@ export class MiePrenotazioniComponent implements OnInit {
 
   caricaLeMiePrenotazioni(): void {
     this.isLoading = true;
-    this.eventiService.query().subscribe({
+    this.prenotazioniApi.getMiePrenotazioni().subscribe({
       next: res => {
-        this.eventi.set(res.body ?? []);
+        this.prenotazioni.set(res);
         this.isLoading = false;
       },
       error: () => (this.isLoading = false),
@@ -35,17 +34,16 @@ export class MiePrenotazioniComponent implements OnInit {
   }
 
   eliminaEvento(id: string | undefined): void {
-    if (id !== undefined) {
-      if (confirm('Sei sicuro di voler eliminare questa prenotazione?')) {
-        this.loadingId = id;
-        this.eventiService.delete(id).subscribe({
-          next: () => {
-            this.loadingId = null;
-            this.caricaLeMiePrenotazioni();
-          },
-          error: () => (this.loadingId = null),
-        });
-      }
+    if (!id) return;
+    if (confirm('Sei sicuro di voler eliminare questa prenotazione?')) {
+      this.loadingId = id;
+      this.prenotazioniApi.cancellaPrenotazione(id).subscribe({
+        next: () => {
+          this.loadingId = null;
+          this.caricaLeMiePrenotazioni();
+        },
+        error: () => (this.loadingId = null),
+      });
     }
   }
 }

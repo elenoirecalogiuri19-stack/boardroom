@@ -12,6 +12,8 @@ public class PrenotazioniDTO implements Serializable {
 
     private UUID id;
 
+    private String titoloEvento;
+
     @NotNull
     private LocalDate data;
 
@@ -117,5 +119,13 @@ public class PrenotazioniDTO implements Serializable {
 
     public void setSalaId(UUID salaId) {
         this.salaId = salaId;
+    }
+
+    public String getTitoloEvento() {
+        return titoloEvento;
+    }
+
+    public void setTitoloEvento(String titoloEvento) {
+        this.titoloEvento = titoloEvento;
     }
 }

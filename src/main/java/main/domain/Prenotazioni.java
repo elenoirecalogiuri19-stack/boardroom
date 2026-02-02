@@ -47,9 +47,9 @@ public class Prenotazioni implements Serializable {
     @Column(name = "prezzo")
     private BigDecimal prezzo;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "prenotazione")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "prenotazione")
     @JsonIgnoreProperties(value = { "prenotazione" }, allowSetters = true)
-    private Set<Eventi> eventis = new HashSet<>();
+    private Eventi evento;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = { "prenotazionis" }, allowSetters = true)
@@ -63,7 +63,6 @@ public class Prenotazioni implements Serializable {
     @JsonIgnoreProperties(value = { "prenotazionis" }, allowSetters = true)
     private Sale sala;
 
-    // --- GETTER E SETTER ---
     public UUID getId() {
         return id;
     }
@@ -112,12 +111,12 @@ public class Prenotazioni implements Serializable {
         this.prezzo = prezzo;
     }
 
-    public Set<Eventi> getEventis() {
-        return eventis;
+    public Eventi getEvento() {
+        return evento;
     }
 
-    public void setEventis(Set<Eventi> eventis) {
-        this.eventis = eventis;
+    public void setEvento(Eventi evento) {
+        this.evento = evento;
     }
 
     public StatiPrenotazione getStato() {
@@ -172,23 +171,6 @@ public class Prenotazioni implements Serializable {
 
     public Prenotazioni prezzo(BigDecimal prezzo) {
         this.setPrezzo(prezzo);
-        return this;
-    }
-
-    public Prenotazioni eventis(Set<Eventi> eventis) {
-        this.setEventis(eventis);
-        return this;
-    }
-
-    public Prenotazioni addEventi(Eventi eventi) {
-        this.eventis.add(eventi);
-        eventi.setPrenotazione(this);
-        return this;
-    }
-
-    public Prenotazioni removeEventi(Eventi eventi) {
-        this.eventis.remove(eventi);
-        eventi.setPrenotazione(null);
         return this;
     }
 
