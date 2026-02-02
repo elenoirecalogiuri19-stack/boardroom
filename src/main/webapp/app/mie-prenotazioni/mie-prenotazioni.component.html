@@ -8,7 +8,7 @@
     @for (pren of prenotazioni(); track pren.id) {
       <div class="event-card-row shadow-sm">
         <div class="action-column">
-          <button class="btn-edit" [routerLink]="['/eventi', pren.id, 'edit']" [disabled]="loadingId === pren.id">
+          <button class="btn-edit" [routerLink]="['/eventi', pren.eventoId, 'edit']" [disabled]="loadingId === pren.id">
             @if (loadingId !== pren.id) {
               <span>📝 modifica</span>
             } @else {
@@ -21,6 +21,7 @@
           <p class="event-info-text">
             <span class="label">Titolo:</span> {{ pren.titoloEvento }} <span class="label">Sala:</span> {{ pren.sala?.nome }}
             <span class="label">Data/Ora:</span> {{ pren.data | date: 'dd MMM yyyy' }} - {{ pren.oraInizio }} / {{ pren.oraFine }}
+            <span class="label">{{ pren.stato?.descrizione }}</span>
           </p>
         </div>
 

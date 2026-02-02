@@ -20,7 +20,6 @@ public class EventiDTO implements Serializable {
     @NotNull
     private String titolo;
 
-    @NotNull
     private TipoEvento tipo;
 
     private BigDecimal prezzo;

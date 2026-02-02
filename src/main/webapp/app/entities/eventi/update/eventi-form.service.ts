@@ -19,9 +19,8 @@ type EventiFormDefaults = Pick<NewEventi, 'id'>;
 type EventiFormGroupContent = {
   id: FormControl<IEventi['id'] | NewEventi['id']>;
   titolo: FormControl<IEventi['titolo']>;
-  tipo: FormControl<IEventi['tipo']>;
+  descrizione: FormControl<IEventi['descrizione']>;
   prezzo: FormControl<IEventi['prezzo']>;
-  prenotazione: FormControl<IEventi['prenotazione']>;
 };
 
 export type EventiFormGroup = FormGroup<EventiFormGroupContent>;
@@ -44,11 +43,8 @@ export class EventiFormService {
       titolo: new FormControl(eventiRawValue.titolo, {
         validators: [Validators.required],
       }),
-      tipo: new FormControl(eventiRawValue.tipo, {
-        validators: [Validators.required],
-      }),
+      descrizione: new FormControl(eventiRawValue.descrizione),
       prezzo: new FormControl(eventiRawValue.prezzo),
-      prenotazione: new FormControl(eventiRawValue.prenotazione),
     });
   }
 
@@ -58,12 +54,10 @@ export class EventiFormService {
 
   resetForm(form: EventiFormGroup, eventi: EventiFormGroupInput): void {
     const eventiRawValue = { ...this.getFormDefaults(), ...eventi };
-    form.reset(
-      {
-        ...eventiRawValue,
-        id: { value: eventiRawValue.id, disabled: true },
-      } as any /* cast to workaround https://github.com/angular/angular/issues/46458 */,
-    );
+    form.reset({
+      ...eventiRawValue,
+      id: { value: eventiRawValue.id, disabled: true },
+    } as any);
   }
 
   private getFormDefaults(): EventiFormDefaults {

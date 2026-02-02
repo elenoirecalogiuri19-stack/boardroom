@@ -105,11 +105,16 @@ public class EventiService {
      */
     public EventiDTO update(EventiDTO eventiDTO) {
         LOG.debug("Request to update Eventi : {}", eventiDTO);
-        Eventi eventi = eventiMapper.toEntity(eventiDTO);
-        applyPrivateEventRulesEntity(eventi);
-        eventi = eventiRepository.save(eventi);
-        EventiDTO result = eventiMapper.toDto(eventi);
+
+        Eventi existing = eventiRepository.findById(eventiDTO.getId()).orElseThrow(() -> new EntityNotFoundException("Evento non trovato"));
+        existing.setTitolo(eventiDTO.getTitolo());
+        existing.setDescrizione(eventiDTO.getDescrizione());
+        existing.setPrezzo(eventiDTO.getPrezzo());
+        applyPrivateEventRulesEntity(existing);
+        Eventi saved = eventiRepository.save(existing);
+        EventiDTO result = eventiMapper.toDto(saved);
         applyPrivateEventRulesDTO(result);
+
         return result;
     }
 
@@ -121,10 +126,16 @@ public class EventiService {
 
         return eventiRepository
             .findById(eventiDTO.getId())
-            .map(existingEvent -> {
-                eventiMapper.partialUpdate(existingEvent, eventiDTO);
-                applyPrivateEventRulesEntity(existingEvent);
-                return existingEvent;
+            .map(existing -> {
+                if (eventiDTO.getTitolo() != null) {
+                    existing.setTitolo(eventiDTO.getTitolo());
+                }
+                if (eventiDTO.getDescrizione() != null) {
+                    existing.setDescrizione(eventiDTO.getDescrizione());
+                }
+
+                applyPrivateEventRulesEntity(existing);
+                return existing;
             })
             .map(eventiRepository::save)
             .map(eventiMapper::toDto)
@@ -186,13 +197,13 @@ public class EventiService {
 
     //campo prezzo di entita e dto evento inpostato a zero
     private void applyPrivateEventRulesDTO(EventiDTO dto) {
-        if (TipoEvento.PRIVATO.equals(dto.getTipo())) {
+        if (dto.getTipo() != null && dto.getTipo() == TipoEvento.PRIVATO) {
             dto.setPrezzo(BigDecimal.ZERO);
         }
     }
 
     private void applyPrivateEventRulesEntity(Eventi eventi) {
-        if (eventi != null && eventi.getTipo() == TipoEvento.PRIVATO) {
+        if (eventi != null && eventi.getTipo() != null && eventi.getTipo() == TipoEvento.PRIVATO) {
             eventi.setPrezzo(BigDecimal.ZERO);
         }
     }

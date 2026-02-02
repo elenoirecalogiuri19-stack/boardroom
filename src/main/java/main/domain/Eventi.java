@@ -33,7 +33,6 @@ public class Eventi implements Serializable {
     @Column(name = "descrizione", nullable = false)
     private String descrizione;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false)
     private TipoEvento tipo;

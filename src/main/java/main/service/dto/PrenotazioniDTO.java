@@ -33,6 +33,8 @@ public class PrenotazioniDTO implements Serializable {
 
     private UUID salaId;
 
+    private UUID eventoId;
+
     public UUID getId() {
         return id;
     }
@@ -127,5 +129,13 @@ public class PrenotazioniDTO implements Serializable {
 
     public void setTitoloEvento(String titoloEvento) {
         this.titoloEvento = titoloEvento;
+    }
+
+    public UUID getEventoId() {
+        return eventoId;
+    }
+
+    public void setEventoId(UUID eventoId) {
+        this.eventoId = eventoId;
     }
 }

@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 export interface PrenotazioneDTO {
   id: string;
   titoloEvento: string | null;
+  eventoId?: string | null;
   data: string;
   oraInizio: string;
   oraFine: string;
@@ -14,6 +15,7 @@ export interface PrenotazioneDTO {
   stato?: {
     id: string;
     codice: string;
+    descrizione: string;
   } | null;
   utente?: {
     id: string;
