@@ -14,8 +14,7 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
     @Query(
         "SELECT s " +
         "FROM Sale s " +
-        "WHERE s.capienza >= :capienzaMin " +
-        "AND (:capienzaMax IS NULL OR s.capienza <= :capienzaMax)" +
+        "WHERE(:capienzaMax IS NULL OR s.capienza <= :capienzaMax)" +
         "AND s.id NOT IN (" +
         "SELECT p.sala.id " +
         "FROM Prenotazioni p " +
@@ -26,13 +25,12 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
         "main.domain.enumeration.StatoCodice.CONFIRMED," +
         "main.domain.enumeration.StatoCodice.WAITING) " +
         ")" +
-        "ORDER BY s.capienza ASC"
+        "ORDER BY s.capienza DESC "
     )
     List<Sale> findFreeSales(
         @Param("data") LocalDate data,
         @Param("inizio") LocalTime c,
         @Param("fine") LocalTime fine,
-        @Param("capienzaMin") Integer capienzaMin,
         @Param("capienzaMax") Integer capienzaMax
     );
 }

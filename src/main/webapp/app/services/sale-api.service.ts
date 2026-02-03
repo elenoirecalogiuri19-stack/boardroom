@@ -14,12 +14,8 @@ export class SaleApiService {
 
   constructor(private http: HttpClient) {}
 
-  getSaleDisponibili(data: string, inizio: string, fine: string, capienzaMin: number, capienzaMax?: number): Observable<ISalaDTO[]> {
-    let params = new HttpParams().set('data', data).set('inizio', inizio).set('fine', fine).set('capienzaMin', capienzaMin.toString());
-
-    if (capienzaMax !== undefined) {
-      params = params.set('capienzaMax', capienzaMax.toString());
-    }
+  getSaleDisponibili(data: string, inizio: string, fine: string, capienzaMax: number): Observable<ISalaDTO[]> {
+    const params = new HttpParams().set('data', data).set('inizio', inizio).set('fine', fine).set('capienzaMax', capienzaMax.toString());
 
     return this.http.get<ISalaDTO[]>(`${this.resourceUrl}/disponibili`, { params });
   }

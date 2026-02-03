@@ -44,15 +44,15 @@ export class RisultatiSalaComponent implements OnInit {
       this.account = acc;
     });
 
-    this.route.queryParams.subscribe((params: { data?: string; ora?: string; persone?: string; salaId?: string; apriModal?: string }) => {
-      this.dataRicerca = params.data ?? '';
-      this.oraRicerca = params.ora ?? '';
-      this.capienzaRicerca = Number(params.persone ?? 0);
+    this.route.queryParams.subscribe(params => {
+      this.dataRicerca = params['data'] ?? '';
+      this.oraRicerca = params['ora'] ?? '';
+      this.capienzaRicerca = Number(params['capienzaMax'] ?? 0);
 
       this.caricaSaleDisponibili();
 
-      if (params.apriModal === 'true' && params.salaId) {
-        this.gestisciRiaperturaModal(params.salaId);
+      if (params['apriModal'] === 'true' && params['salaId']) {
+        this.gestisciRiaperturaModal(params['salaId']);
       }
     });
   }
@@ -85,7 +85,6 @@ export class RisultatiSalaComponent implements OnInit {
       prezzo: null,
       salaId: sala.id,
     };
-    console.log('PAYLOAD INVIATO:', payload);
 
     this.prenotazioniApi.creaPrenotazione(payload).subscribe({
       next: pren => {
@@ -102,7 +101,7 @@ export class RisultatiSalaComponent implements OnInit {
               prenotazioneId: pren.id,
             },
           })
-          .then(() => (this.isLoading = false));
+          .finally(() => (this.isLoading = false));
       },
       error: err => {
         console.error('Errore creazione prenotazione:', err);
@@ -154,7 +153,6 @@ export class RisultatiSalaComponent implements OnInit {
   private normalizzaOra(ora: string): string {
     const [h, m] = ora.split(':');
     const hh = h.padStart(2, '0');
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const mm = m ?? '00';
     return `${hh}:${mm}`;
   }

@@ -191,7 +191,7 @@ public class EventiService {
     @Transactional(readOnly = true)
     public List<EventiDTO> findPublicEventi() {
         LOG.debug("Request to get all Eventi");
-        List<Eventi> eventi = eventiRepository.findByTipo(TipoEvento.PUBBLICO);
+        List<Eventi> eventi = eventiRepository.findPublicConfirmed(TipoEvento.PUBBLICO, StatoCodice.CONFIRMED);
         return eventiMapper.toDto(eventi);
     }
 
