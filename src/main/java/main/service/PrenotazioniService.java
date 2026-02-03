@@ -4,6 +4,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -413,5 +416,30 @@ public class PrenotazioniService {
         pren.setTipoEvento(dto.getTipoEvento());
         pren.setPrezzo(dto.getPrezzo());
         return pren;
+    }
+
+    @Scheduled(fixedRate = 60000) // ogni minuto
+    @Transactional
+    public void aggiornaPrenotazioniScadute() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate oggi = now.toLocalDate();
+        LocalTime oraLimite = now.minusMinutes(5).toLocalTime();
+
+        // Trova tutte le prenotazioni WAITING scadute
+        List<Prenotazioni> scadute = prenotazioniRepository.findExpiredWaiting(StatoCodice.WAITING, oggi, oraLimite);
+
+        if (scadute.isEmpty()) {
+            return;
+        }
+
+        StatiPrenotazione statoRejected = statiPrenotazioneRepository
+            .findByCodice(StatoCodice.REJECTED)
+            .orElseThrow(() -> new EntityNotFoundException("Stato REJECTED non trovato"));
+
+        for (Prenotazioni p : scadute) {
+            p.setStato(statoRejected);
+        }
+
+        prenotazioniRepository.saveAll(scadute);
     }
 }

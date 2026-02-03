@@ -83,4 +83,19 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         @Param("login") String login,
         @Param("oggi") LocalDate oggi
     );
+
+    @Query(
+        """
+            SELECT p
+            FROM Prenotazioni p
+            WHERE p.stato.codice = :stato
+              AND (p.data < :oggi
+                   OR (p.data = :oggi AND p.oraInizio < :oraLimite))
+        """
+    )
+    List<Prenotazioni> findExpiredWaiting(
+        @Param("stato") StatoCodice stato,
+        @Param("oggi") LocalDate oggi,
+        @Param("oraLimite") LocalTime oraLimite
+    );
 }
