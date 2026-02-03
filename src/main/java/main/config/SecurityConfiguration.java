@@ -31,7 +31,6 @@ import tech.jhipster.config.JHipsterProperties;
 public class SecurityConfiguration {
 
     private final Environment env;
-
     private final JHipsterProperties jHipsterProperties;
 
     public SecurityConfiguration(Environment env, JHipsterProperties jHipsterProperties) {
@@ -62,53 +61,87 @@ public class SecurityConfiguration {
                     )
             )
             .authorizeHttpRequests(authz ->
-                // prettier-ignore
                 authz
-                    //Risorse statice
-                    .requestMatchers(mvc.pattern("/index.html"), mvc.pattern("/*.js"), mvc.pattern("/*.txt"), mvc.pattern("/*.json"), mvc.pattern("/*.map"), mvc.pattern("/*.css")).permitAll()
-                    .requestMatchers(mvc.pattern("/*.ico"), mvc.pattern("/*.png"), mvc.pattern("/*.svg"), mvc.pattern("/*.webapp")).permitAll()
-                    .requestMatchers(mvc.pattern("/app/**")).permitAll()
-                    .requestMatchers(mvc.pattern("/i18n/**")).permitAll()
-                    .requestMatchers(mvc.pattern("/content/**")).permitAll()
-                    .requestMatchers(mvc.pattern("/swagger-ui/**")).permitAll()
-
-                    //Endpoint publici
-                    .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/authenticate")).permitAll()
-                    .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/authenticate")).permitAll()
-                    .requestMatchers(mvc.pattern("/api/register")).permitAll()
-                    .requestMatchers(mvc.pattern("/api/activate")).permitAll()
-                    .requestMatchers(mvc.pattern("/api/account/reset-password/init")).permitAll()
-                    .requestMatchers(mvc.pattern("/api/account/reset-password/finish")).permitAll()
-                    .requestMatchers(mvc.pattern(HttpMethod.GET,"/api/eventis/pubblici")).permitAll()
-                    .requestMatchers(mvc.pattern(HttpMethod.GET,"/api/eventis/*")).permitAll() // Per Antonio: ho sistemato io questo permesso per far vedere il dettaglio eventi senza login
-                    .requestMatchers(mvc.pattern("/management/health")).permitAll()
-                    .requestMatchers(mvc.pattern("/management/health/**")).permitAll()
-                    .requestMatchers(mvc.pattern("/management/info")).permitAll()
-                    .requestMatchers(mvc.pattern("/management/prometheus")).permitAll()
-                    .requestMatchers(mvc.pattern(HttpMethod.POST,"/api/eventis")).permitAll()
-                    .requestMatchers(mvc.pattern(HttpMethod.PUT,"/api/eventis/**")).permitAll()
-                    .requestMatchers(mvc.pattern(HttpMethod.PATCH,"/api/eventis/**")).permitAll()
-                    .requestMatchers(mvc.pattern("/api/eventis/crea-pubblico")).permitAll()
-                    .requestMatchers(mvc.pattern("/api/sales/disponibili")).permitAll()
-
-
-                    //Endpoint solo per Utenti
-                    // .requestMatchers("/api/prenotazionis/odierne").authenticated()
-
-                    .requestMatchers(mvc.pattern("/api/**")).authenticated()
-                    .requestMatchers(mvc.pattern("/api/prenotazionis/crea")).authenticated()
-                    .requestMatchers(mvc.pattern("/api/prenotazionis/*/conferma")).authenticated()
-                    .requestMatchers(mvc.pattern(HttpMethod.GET,"/api/prenotazionis")).authenticated()
-                    .requestMatchers(mvc.pattern(HttpMethod.GET,"/api/prenotazionis/**")).authenticated()
-                    .requestMatchers(mvc.pattern("/api/prenotazionis/storico")).authenticated()
-                    .requestMatchers(mvc.pattern("/api/prenotazionis/odierne")).authenticated()
-
-
-
-                    //Endpoint per admin
-                    .requestMatchers(mvc.pattern("/api/admin/**")).hasAuthority(AuthoritiesConstants.ADMIN)
-                    .requestMatchers(mvc.pattern("/v3/api-docs/**")).hasAuthority(AuthoritiesConstants.ADMIN)
-                    .requestMatchers(mvc.pattern("/management/**")).hasAuthority(AuthoritiesConstants.ADMIN)
+                    // 1. Risorse statiche (Sempre permesse)
+                    .requestMatchers(
+                        mvc.pattern("/index.html"),
+                        mvc.pattern("/*.js"),
+                        mvc.pattern("/*.txt"),
+                        mvc.pattern("/*.json"),
+                        mvc.pattern("/*.map"),
+                        mvc.pattern("/*.css")
+                    )
+                    .permitAll()
+                    .requestMatchers(mvc.pattern("/*.ico"), mvc.pattern("/*.png"), mvc.pattern("/*.svg"), mvc.pattern("/*.webapp"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern("/app/**"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern("/i18n/**"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern("/content/**"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern("/swagger-ui/**"))
+                    .permitAll()
+                    // 2. Endpoint PUBBLICI (Accessibili senza login)
+                    .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/authenticate"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/authenticate"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern("/api/register"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern("/api/activate"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern("/api/account/reset-password/init"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern("/api/account/reset-password/finish"))
+                    .permitAll()
+                    // --- FOCUS EVENTI PUBBLICI ---
+                    .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/eventis/pubblici"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/eventis"))
+                    .permitAll() // Permette la lista generale
+                    .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/eventis/*"))
+                    .permitAll() // Dettaglio evento singolo
+                    .requestMatchers(mvc.pattern("/api/sales/disponibili"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern("/management/health"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern("/management/health/**"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern("/management/info"))
+                    .permitAll()
+                    .requestMatchers(mvc.pattern("/management/prometheus"))
+                    .permitAll()
+                    // 3. Endpoint per ADMIN
+                    .requestMatchers(mvc.pattern("/api/admin/**"))
+                    .hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern("/api/eventis/crea-pubblico"))
+                    .hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/eventis"))
+                    .hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern(HttpMethod.PUT, "/api/eventis/**"))
+                    .hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern(HttpMethod.PATCH, "/api/eventis/**"))
+                    .hasAuthority(AuthoritiesConstants.ADMIN)
+                    // 4. Endpoint AUTHENTICATED (Richiedono Login)
+                    .requestMatchers(mvc.pattern("/api/prenotazionis/crea"))
+                    .authenticated()
+                    .requestMatchers(mvc.pattern("/api/prenotazionis/*/conferma"))
+                    .authenticated()
+                    .requestMatchers(mvc.pattern("/api/prenotazionis/storico"))
+                    .authenticated()
+                    .requestMatchers(mvc.pattern("/api/prenotazionis/odierne"))
+                    .authenticated()
+                    .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/prenotazionis/**"))
+                    .authenticated()
+                    // Questa deve essere SEMPRE l'ultima tra le regole /api/
+                    .requestMatchers(mvc.pattern("/api/**"))
+                    .authenticated()
+                    // 5. Altre risorse (Admin)
+                    .requestMatchers(mvc.pattern("/v3/api-docs/**"))
+                    .hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern("/management/**"))
+                    .hasAuthority(AuthoritiesConstants.ADMIN)
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(exceptions ->
@@ -117,6 +150,7 @@ public class SecurityConfiguration {
                     .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()));
+
         if (env.acceptsProfiles(Profiles.of(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT))) {
             http.authorizeHttpRequests(authz -> authz.requestMatchers(antMatcher("/h2-console/**")).permitAll());
         }

@@ -5,24 +5,15 @@ import java.util.UUID;
 import main.domain.Eventi;
 import main.domain.enumeration.StatoCodice;
 import main.domain.enumeration.TipoEvento;
-import main.service.dto.EventiDTO;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-/**
- * Spring Data JPA repository for the Eventi entity.
- */
-@SuppressWarnings("unused")
 @Repository
 public interface EventiRepository extends JpaRepository<Eventi, UUID> {
-    @Query(
-        """
-            SELECT e
-            FROM Eventi e
-            WHERE e.tipo = :tipo
-              AND e.prenotazione.stato.codice = :stato
-        """
-    )
+    @Query("SELECT e FROM Eventi e WHERE e.tipo = :tipo AND e.prenotazione.stato.codice = :stato")
     List<Eventi> findPublicConfirmed(@Param("tipo") TipoEvento tipo, @Param("stato") StatoCodice stato);
+
+    // Fondamentale: recupera per tipo ignorando lo stato della prenotazione (risolve il problema della lista vuata [])
+    List<Eventi> findByTipo(TipoEvento tipo);
 }

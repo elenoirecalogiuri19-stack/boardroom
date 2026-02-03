@@ -22,8 +22,6 @@ export default class HomeComponent implements OnInit, OnDestroy {
   account = signal<Account | null>(null);
   eventi = signal<IEventi[]>([]);
 
-  caricamento = false;
-
   private readonly destroy$ = new Subject<void>();
   private readonly accountService = inject(AccountService);
   private readonly router = inject(Router);
@@ -31,12 +29,12 @@ export default class HomeComponent implements OnInit, OnDestroy {
   private readonly notificationService = inject(NotificationService);
 
   ngOnInit(): void {
+    this.caricaEventi();
+
     this.accountService
       .getAuthenticationState()
       .pipe(takeUntil(this.destroy$))
       .subscribe(account => this.account.set(account));
-
-    this.caricaEventi();
   }
 
   caricaEventi(): void {
@@ -51,10 +49,7 @@ export default class HomeComponent implements OnInit, OnDestroy {
   }
 
   vaiADettagli(evento: IEventi): void {
-    this.caricamento = true;
-    this.router.navigate(['/eventi', evento.id, 'view']).then(() => {
-      this.caricamento = false;
-    });
+    this.router.navigate(['/eventi', evento.id, 'view']);
   }
 
   login(): void {

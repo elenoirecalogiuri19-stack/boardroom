@@ -3,7 +3,6 @@ import { Router, RouterModule } from '@angular/router';
 
 import SharedModule from 'app/shared/shared.module';
 import { AccountService } from 'app/core/auth/account.service';
-import { LoginService } from 'app/login/login.service';
 import { ProfileService } from 'app/layouts/profiles/profile.service';
 import { EntityNavbarItems } from 'app/entities/entity-navbar-items';
 import { environment } from 'environments/environment';
@@ -13,6 +12,7 @@ import NavbarItem from './navbar-item.model';
   selector: 'jhi-navbar',
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
+  standalone: true,
   imports: [RouterModule, SharedModule],
 })
 export default class NavbarComponent implements OnInit {
@@ -20,14 +20,12 @@ export default class NavbarComponent implements OnInit {
   isNavbarCollapsed = signal(true);
   openAPIEnabled?: boolean;
   version = '';
-  isLoading = false;
 
   public accountService = inject(AccountService);
   account = this.accountService.trackCurrentAccount();
 
   entitiesNavbarItems: NavbarItem[] = [];
 
-  private readonly loginService = inject(LoginService);
   private readonly profileService = inject(ProfileService);
   private readonly router = inject(Router);
 
@@ -64,19 +62,7 @@ export default class NavbarComponent implements OnInit {
   }
 
   login(): void {
-    this.isLoading = true;
-    this.router.navigate(['/login']).then(() => {
-      this.isLoading = false;
-    });
-  }
-
-  logout(): void {
-    this.isLoading = true;
-    this.collapseNavbar();
-    this.loginService.logout();
-    this.router.navigate(['']).then(() => {
-      this.isLoading = false;
-    });
+    this.router.navigate(['/login']);
   }
 
   toggleNavbar(): void {

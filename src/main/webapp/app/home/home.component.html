@@ -23,13 +23,11 @@
 
               <div class="card-footer-custom">
                 <button class="btn btn-price">
-                  <span *ngIf="!caricamento">€ {{ evento.prezzo }}</span>
-                  <div *ngIf="caricamento" class="minimal-loader"></div>
+                  <span>€ {{ evento.prezzo }}</span>
                 </button>
 
-                <button class="btn btn-details" (click)="vaiADettagli(evento)" [disabled]="caricamento">
-                  <span *ngIf="!caricamento">Dettagli</span>
-                  <div *ngIf="caricamento" class="minimal-loader"></div>
+                <button class="btn btn-details" (click)="vaiADettagli(evento)">
+                  <span>Dettagli</span>
                 </button>
               </div>
             </div>

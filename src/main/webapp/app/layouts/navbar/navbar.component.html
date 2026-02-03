@@ -33,12 +33,10 @@
 
         <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <a class="nav-link" (click)="gestisciMiePrenotazioni()" style="cursor: pointer">
-            <fa-icon icon="list-alt" class="me-1"></fa-icon>
-            <span>Le mie prenotazioni</span>
+            <fa-icon icon="list" class="me-1"></fa-icon> <span>Le mie prenotazioni</span>
           </a>
         </li>
 
-        <!-- ENTITÀ: SOLO ADMIN -->
         @if (hasAnyAuthority('ROLE_ADMIN')) {
           <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" routerLinkActive="active">
             <a class="nav-link dropdown-toggle" ngbDropdownToggle href="javascript:void(0);" id="entity-menu">
@@ -47,59 +45,24 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end" ngbDropdownMenu aria-labelledby="entity-menu">
               <li>
-                <a class="dropdown-item" routerLink="/sale" (click)="collapseNavbar()"> <fa-icon icon="asterisk"></fa-icon> Sale </a>
+                <a class="dropdown-item" routerLink="/sale" (click)="collapseNavbar()"><fa-icon icon="asterisk"></fa-icon> Sale</a>
               </li>
               <li>
-                <a class="dropdown-item" routerLink="/utenti" (click)="collapseNavbar()"> <fa-icon icon="asterisk"></fa-icon> Utenti </a>
+                <a class="dropdown-item" routerLink="/utenti" (click)="collapseNavbar()"><fa-icon icon="asterisk"></fa-icon> Utenti</a>
               </li>
               <li>
-                <a class="dropdown-item" routerLink="/stati-prenotazione" (click)="collapseNavbar()">
-                  <fa-icon icon="asterisk"></fa-icon> Stati
-                </a>
+                <a class="dropdown-item" routerLink="/stati-prenotazione" (click)="collapseNavbar()"
+                  ><fa-icon icon="asterisk"></fa-icon> Stati</a
+                >
               </li>
               <li>
-                <a class="dropdown-item" routerLink="/prenotazioni" (click)="collapseNavbar()">
-                  <fa-icon icon="asterisk"></fa-icon> Prenotazioni
-                </a>
+                <a class="dropdown-item" routerLink="/prenotazioni" (click)="collapseNavbar()"
+                  ><fa-icon icon="asterisk"></fa-icon> Prenotazioni</a
+                >
               </li>
               <li>
-                <a class="dropdown-item" routerLink="/eventi" (click)="collapseNavbar()"> <fa-icon icon="asterisk"></fa-icon> Eventi </a>
+                <a class="dropdown-item" routerLink="/eventi" (click)="collapseNavbar()"><fa-icon icon="asterisk"></fa-icon> Eventi</a>
               </li>
-            </ul>
-          </li>
-        }
-
-        <!-- MENU AMMINISTRATORE -->
-        @if (hasAnyAuthority('ROLE_ADMIN')) {
-          <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" routerLinkActive="active">
-            <a class="nav-link dropdown-toggle" ngbDropdownToggle href="javascript:void(0);" id="admin-menu">
-              <fa-icon icon="users-cog" class="me-1"></fa-icon>
-              <span>Amministratore</span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" ngbDropdownMenu aria-labelledby="admin-menu">
-              <li>
-                <a class="dropdown-item" routerLink="/admin/user-management" (click)="collapseNavbar()">
-                  <fa-icon icon="users"></fa-icon> Gestione utenti
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" routerLink="/admin/metrics" (click)="collapseNavbar()">
-                  <fa-icon icon="tachometer-alt"></fa-icon> Metriche
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" routerLink="/admin/health" (click)="collapseNavbar()">
-                  <fa-icon icon="heart"></fa-icon> Integrità
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" routerLink="/admin/logs" (click)="collapseNavbar()"> <fa-icon icon="tasks"></fa-icon> Log </a>
-              </li>
-              @if (openAPIEnabled) {
-                <li>
-                  <a class="dropdown-item" routerLink="/admin/docs" (click)="collapseNavbar()"> <fa-icon icon="book"></fa-icon> API </a>
-                </li>
-              }
             </ul>
           </li>
         }

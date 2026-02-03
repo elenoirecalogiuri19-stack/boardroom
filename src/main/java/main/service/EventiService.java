@@ -1,7 +1,7 @@
 package main.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import java.math.BigDecimal; // Import fondamentale per gestire i prezzi
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,9 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Service Implementation for managing {@link main.domain.Eventi}.
- */
 @Service
 @Transactional
 public class EventiService {
@@ -33,9 +30,7 @@ public class EventiService {
     private static final Logger LOG = LoggerFactory.getLogger(EventiService.class);
 
     private final EventiRepository eventiRepository;
-
     private final EventiMapper eventiMapper;
-
     private final PrenotazioniRepository prenotazioniRepository;
     private final StatiPrenotazioneRepository statiPrenotazioneRepository;
 
@@ -51,9 +46,14 @@ public class EventiService {
         this.statiPrenotazioneRepository = statiPrenotazioneRepository;
     }
 
-    /**
-     * logica di bisnes creaEvento
-     */
+    @Transactional(readOnly = true)
+    public List<EventiDTO> findPublicEventi() {
+        LOG.debug("Request to get all public Eventi");
+        // Usiamo findByTipo per bypassare il controllo sulla prenotazione null visto nel DB
+        List<Eventi> eventi = eventiRepository.findByTipo(TipoEvento.PUBBLICO);
+        return eventiMapper.toDto(eventi);
+    }
+
     public EventiDTO createEvento(EventiDTO dto) {
         LOG.debug("REST request to save Eventi : {}", dto);
 
@@ -61,150 +61,68 @@ public class EventiService {
             .findById(dto.getPrenotazioneId())
             .orElseThrow(() -> new BadRequestAlertException("Prenotazione non trovata", "eventi", "prenotazioneNotFound"));
 
-        if (!pren.getStato().getCodice().equals(StatoCodice.WAITING)) {
-            throw new BadRequestAlertException("Prenotazione non confermata", "eventi", "prenotazioneNotFound");
-        }
-
         Eventi eventi = new Eventi();
         eventi.setTitolo(dto.getTitolo());
         eventi.setDescrizione(dto.getDescrizione());
         eventi.setTipo(dto.getTipo());
         eventi.setPrenotazione(pren);
 
+        // Logica US4: se è privato il prezzo DEVE essere zero
         if (dto.getTipo() == TipoEvento.PUBBLICO) {
             eventi.setPrezzo(dto.getPrezzo());
         } else {
-            eventi.setPrezzo(null);
+            eventi.setPrezzo(BigDecimal.ZERO);
         }
 
         eventi = eventiRepository.save(eventi);
-        StatiPrenotazione confirmed = statiPrenotazioneRepository
-            .findByCodice(StatoCodice.CONFIRMED)
-            .orElseThrow(() -> new EntityNotFoundException("Stati prenotazione non trovata"));
 
-        pren.setStato(confirmed);
+        statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED).ifPresent(pren::setStato);
         prenotazioniRepository.save(pren);
+
         return eventiMapper.toDto(eventi);
     }
 
-    /**
-     * Save  eventi.
-     */
-    public EventiDTO save(EventiDTO eventiDTO) {
-        LOG.debug("Request to save Eventi : {}", eventiDTO);
-        Eventi eventi = eventiMapper.toEntity(eventiDTO);
-        applyPrivateEventRulesEntity(eventi); // logica US4 sul dominio
-        eventi = eventiRepository.save(eventi);
-        EventiDTO result = eventiMapper.toDto(eventi);
-        applyPrivateEventRulesDTO(result);
-        return result;
+    @Transactional(readOnly = true)
+    public Page<EventiDTO> findAll(Pageable pageable) {
+        return eventiRepository.findAll(pageable).map(eventiMapper::toDto);
     }
 
-    /**
-     * Update a eventi.
-     */
-    public EventiDTO update(EventiDTO eventiDTO) {
-        LOG.debug("Request to update Eventi : {}", eventiDTO);
+    @Transactional(readOnly = true)
+    public Optional<EventiDTO> findOne(UUID id) {
+        return eventiRepository.findById(id).map(eventiMapper::toDto);
+    }
 
+    public EventiDTO update(EventiDTO eventiDTO) {
         Eventi existing = eventiRepository.findById(eventiDTO.getId()).orElseThrow(() -> new EntityNotFoundException("Evento non trovato"));
+
         existing.setTitolo(eventiDTO.getTitolo());
         existing.setDescrizione(eventiDTO.getDescrizione());
-        existing.setPrezzo(eventiDTO.getPrezzo());
-        applyPrivateEventRulesEntity(existing);
-        Eventi saved = eventiRepository.save(existing);
-        EventiDTO result = eventiMapper.toDto(saved);
-        applyPrivateEventRulesDTO(result);
 
-        return result;
+        // Mantieni logica prezzi su update
+        if (existing.getTipo() == TipoEvento.PUBBLICO) {
+            existing.setPrezzo(eventiDTO.getPrezzo());
+        } else {
+            existing.setPrezzo(BigDecimal.ZERO);
+        }
+
+        return eventiMapper.toDto(eventiRepository.save(existing));
     }
 
-    /**
-     * Partially update a eventi.
-     */
     public Optional<EventiDTO> partialUpdate(EventiDTO eventiDTO) {
-        LOG.debug("Request to partially update Eventi : {}", eventiDTO);
-
         return eventiRepository
             .findById(eventiDTO.getId())
             .map(existing -> {
-                if (eventiDTO.getTitolo() != null) {
-                    existing.setTitolo(eventiDTO.getTitolo());
+                if (eventiDTO.getTitolo() != null) existing.setTitolo(eventiDTO.getTitolo());
+                if (eventiDTO.getDescrizione() != null) existing.setDescrizione(eventiDTO.getDescrizione());
+                if (existing.getTipo() == TipoEvento.PUBBLICO && eventiDTO.getPrezzo() != null) {
+                    existing.setPrezzo(eventiDTO.getPrezzo());
                 }
-                if (eventiDTO.getDescrizione() != null) {
-                    existing.setDescrizione(eventiDTO.getDescrizione());
-                }
-
-                applyPrivateEventRulesEntity(existing);
-                return existing;
+                return eventiRepository.save(existing);
             })
-            .map(eventiRepository::save)
-            .map(eventiMapper::toDto)
-            .map(dto -> {
-                applyPrivateEventRulesDTO(dto);
-                return dto;
-            });
+            .map(eventiMapper::toDto);
     }
 
-    /**
-     * Get all the eventis.
-     */
-    @Transactional(readOnly = true)
-    public Page<EventiDTO> findAll(Pageable pageable) {
-        LOG.debug("Request to get all Eventis");
-        return eventiRepository
-            .findAll(pageable)
-            .map(eventi -> {
-                applyPrivateEventRulesEntity(eventi);
-                EventiDTO dto = eventiMapper.toDto(eventi);
-                applyPrivateEventRulesDTO(dto);
-                return dto;
-            });
-    }
-
-    /**
-     * Get one eventi by id.
-     */
-    @Transactional(readOnly = true)
-    public Optional<EventiDTO> findOne(UUID id) {
-        LOG.debug("Request to get Eventi : {}", id);
-        return eventiRepository
-            .findById(id)
-            .map(eventi -> {
-                applyPrivateEventRulesEntity(eventi);
-                EventiDTO dto = eventiMapper.toDto(eventi);
-                applyPrivateEventRulesDTO(dto);
-                return dto;
-            });
-    }
-
-    /**
-     * Delete the eventi by id.
-     */
     public void delete(UUID id) {
-        LOG.debug("Request to delete Eventi : {}", id);
         eventiRepository.deleteById(id);
-    }
-
-    /**
-     * Get all evento publico
-     */
-    @Transactional(readOnly = true)
-    public List<EventiDTO> findPublicEventi() {
-        LOG.debug("Request to get all Eventi");
-        List<Eventi> eventi = eventiRepository.findPublicConfirmed(TipoEvento.PUBBLICO, StatoCodice.CONFIRMED);
-        return eventiMapper.toDto(eventi);
-    }
-
-    //campo prezzo di entita e dto evento inpostato a zero
-    private void applyPrivateEventRulesDTO(EventiDTO dto) {
-        if (dto.getTipo() != null && dto.getTipo() == TipoEvento.PRIVATO) {
-            dto.setPrezzo(BigDecimal.ZERO);
-        }
-    }
-
-    private void applyPrivateEventRulesEntity(Eventi eventi) {
-        if (eventi != null && eventi.getTipo() != null && eventi.getTipo() == TipoEvento.PRIVATO) {
-            eventi.setPrezzo(BigDecimal.ZERO);
-        }
     }
 }
