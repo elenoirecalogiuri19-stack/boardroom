@@ -12,7 +12,6 @@ export interface PrenotazioneDTO {
   stato?: {
     id: string;
     codice: string;
-    descrizione: string;
   } | null;
   utente?: {
     id: string;
@@ -27,6 +26,7 @@ export interface PrenotazioneDTO {
     titolo: string;
     tipo: string;
     prezzo: number;
+    descrizione: string;
   };
 }
 

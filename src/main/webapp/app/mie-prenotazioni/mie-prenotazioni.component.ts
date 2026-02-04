@@ -14,7 +14,7 @@ import { PrenotazioneDTO, PrenotazioniApiService } from '../services/prenotazion
 export class MiePrenotazioniComponent implements OnInit {
   prenotazioni = signal<PrenotazioneDTO[]>([]);
   isLoading = false;
-  loadingId: string | null = null; // Cambiato da number a string
+  expandedRows = signal<Set<string>>(new Set());
 
   private prenotazioniApi = inject(PrenotazioniApiService);
 
@@ -33,16 +33,26 @@ export class MiePrenotazioniComponent implements OnInit {
     });
   }
 
+  toggleDetails(id: string | undefined): void {
+    if (!id) return;
+    const newSet = new Set(this.expandedRows());
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    this.expandedRows.set(newSet);
+  }
+
+  isExpanded(id: string | undefined): boolean {
+    return !!id && this.expandedRows().has(id);
+  }
+
   eliminaEvento(id: string | undefined): void {
     if (!id) return;
     if (confirm('Sei sicuro di voler eliminare questa prenotazione?')) {
-      this.loadingId = id;
       this.prenotazioniApi.cancellaPrenotazione(id).subscribe({
-        next: () => {
-          this.loadingId = null;
-          this.caricaLeMiePrenotazioni();
-        },
-        error: () => (this.loadingId = null),
+        next: () => this.caricaLeMiePrenotazioni(),
       });
     }
   }

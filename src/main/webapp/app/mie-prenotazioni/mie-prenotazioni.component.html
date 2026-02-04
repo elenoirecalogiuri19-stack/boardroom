@@ -1,63 +1,94 @@
 <div class="mie-prenotazioni-container">
   <div class="header-section">
     <h1>Le tue Prenotazioni</h1>
-    <p>Gestisci e monitora lo stato delle tue richieste</p>
+    <p>Gestisci e monitora lo stato delle tue prenotazioni con eleganza.</p>
   </div>
 
-  <div class="list-container">
-    @for (pren of prenotazioni(); track pren.id) {
-      <div class="event-card-row shadow-sm">
-        <div class="action-column">
-          <button class="btn-edit" [routerLink]="['/eventi', pren.eventoId, 'edit']" [disabled]="loadingId === pren.id">
-            @if (loadingId !== pren.id) {
-              <span>📝 Modifica</span>
-            } @else {
-              <div class="loader-mini-green"></div>
-            }
-          </button>
-        </div>
+  @if (isLoading) {
+    <div class="loader-container">
+      <div class="spinner-boardroom"></div>
+      <p>Caricamento in corso...</p>
+    </div>
+  } @else {
+    <div class="list-container">
+      @for (pren of prenotazioni(); track pren.id) {
+        <div class="event-card-wrapper" [class.is-expanded]="isExpanded(pren.id)">
+          <div class="event-card-row">
+            <div class="action-column">
+              <button class="btn-action btn-edit" [routerLink]="['/eventi', pren.eventoId, 'edit']">
+                <span>📝 Modifica</span>
+              </button>
+              <button class="btn-action btn-delete" (click)="eliminaEvento(pren.id)">
+                <span>🗑️ Elimina</span>
+              </button>
+            </div>
 
-        <div class="info-grid">
-          <div class="info-group main-info">
-            <span class="label">Titolo Evento</span>
-            <span class="value event-title">{{ pren.evento?.titolo || 'Titolo non presente' }}</span>
-          </div>
+            <div class="info-grid">
+              <div class="info-group">
+                <span class="label">Evento</span>
+                <span class="value title-highlight">{{ pren.evento?.titolo || 'N/A' }}</span>
+              </div>
 
-          <div class="info-group">
-            <span class="label">Sala</span>
-            <span class="value">{{ pren.sala?.nome || 'N/A' }}</span>
-          </div>
+              <div class="info-group">
+                <span class="label">Location</span>
+                <span class="value">📍 {{ pren.sala?.nome || 'N/A' }}</span>
+              </div>
 
-          <div class="info-group">
-            <span class="label">Data e Orario</span>
-            <div class="value">
-              <span class="date-text">{{ pren.data | date: 'dd/MM/yyyy' }}</span>
-              <span class="time-text">{{ pren.oraInizio }} - {{ pren.oraFine }}</span>
+              <div class="info-group">
+                <span class="label">Data e Ora</span>
+                <div class="value">
+                  <span class="d-block">{{ pren.data | date: 'dd MMM yyyy' }}</span>
+                  <span class="time-sub">{{ pren.oraInizio }} - {{ pren.oraFine }}</span>
+                </div>
+              </div>
+
+              <div class="info-group">
+                <span class="label">Stato</span>
+                <span class="status-pill" [attr.data-status]="pren.stato?.codice?.toLowerCase()">
+                  {{ pren.stato?.codice || 'N/D' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="arrow-column" (click)="toggleDetails(pren.id)">
+              <div class="arrow-circle" [class.rotated]="isExpanded(pren.id)">
+                <span class="arrow-icon">▼</span>
+              </div>
             </div>
           </div>
 
-          <div class="info-group">
-            <span class="label">Stato</span>
-            <span class="status-badge" [attr.data-status]="pren.stato?.descrizione?.toLowerCase()">
-              {{ pren.stato?.descrizione }}
-            </span>
-          </div>
-        </div>
+          @if (isExpanded(pren.id)) {
+            <div class="details-drawer">
+              <div class="drawer-inner">
+                <div class="detail-block">
+                  <span class="label">Descrizione Evento</span>
+                  <p class="description-text">
+                    {{ pren.evento?.descrizione || 'Nessuna descrizione disponibile per questo evento.' }}
+                  </p>
+                </div>
 
-        <div class="action-column">
-          <button class="btn-delete" (click)="eliminaEvento(pren.id)" [disabled]="loadingId === pren.id">
-            @if (loadingId !== pren.id) {
-              <span>🗑️ Elimina</span>
-            } @else {
-              <div class="loader-mini-red"></div>
-            }
-          </button>
+                <div class="meta-footer">
+                  <div class="meta-item">
+                    <span class="label">Tipologia</span>
+                    <span class="badge-type">{{ pren.evento?.tipo || 'PRIVATO' }}</span>
+                  </div>
+
+                  @if (pren.evento?.tipo === 'PUBBLICO' || (pren.evento?.prezzo ?? 0) > 0) {
+                    <div class="meta-item">
+                      <span class="label">Prezzo</span>
+                      <span class="price-tag">€ {{ pren.evento?.prezzo | number: '1.2-2' }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
         </div>
-      </div>
-    } @empty {
-      <div class="empty-state">
-        <p>Nessuna prenotazione trovata.</p>
-      </div>
-    }
-  </div>
+      } @empty {
+        <div class="empty-state">
+          <p>Nessuna prenotazione trovata nel tuo archivio.</p>
+        </div>
+      }
+    </div>
+  }
 </div>
