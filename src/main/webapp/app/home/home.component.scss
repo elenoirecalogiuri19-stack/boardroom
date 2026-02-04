@@ -1,144 +1,208 @@
-$br-primary: #4a8c40;
+$br-green: #4a8c40;
 $br-dark: #2c3e50;
+$br-bg: #fdfdfd;
 
 :host {
   display: block;
-  margin-top: -15px;
+  background: $br-bg;
 }
 
 .home-container {
-  overflow-x: hidden;
-  padding-bottom: 50px;
-  background-color: #ffffff;
+  padding: 60px 0;
 }
 
 .hero-section {
-  padding: 5px 0 30px;
+  margin-bottom: 50px;
   h1 {
     font-weight: 800;
     color: $br-dark;
-    margin-top: 0;
-    margin-bottom: 5px;
+    font-size: 2.6rem;
+    letter-spacing: -1px;
+    strong {
+      color: $br-green;
+    }
   }
   .subtitle-verde {
-    color: $br-primary !important;
+    color: $br-green;
     font-weight: 600;
-    font-size: 0.95rem;
-    margin-top: 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
   }
 }
 
 .carousel-wrapper {
   position: relative;
-  padding: 0 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 50px;
 }
 
-.event-scroll-container {
+.event-scroll-viewport {
   display: flex;
   overflow-x: auto;
   scroll-behavior: smooth;
   gap: 25px;
-  padding: 35px 10px;
+  padding: 20px 5px 40px;
   scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;
   }
 }
 
-.event-card-item {
+.event-card {
   min-width: 280px;
-  flex: 0 0 auto;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba($br-green, 0.1);
+    border-color: $br-green;
+
+    .br-btn-action {
+      background: $br-green;
+      color: white;
+    }
+  }
 }
 
-.event-card {
-  border: 1px solid #f0f0f0;
-  border-radius: 20px;
+.card-header-luxury {
+  height: 80px;
+  background: rgba($br-green, 0.08);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::after {
+    content: 'BOARDROOM';
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: $br-green;
+    opacity: 0.6;
+    letter-spacing: 5px;
+  }
+
+  .price-tag {
+    position: absolute;
+    bottom: -15px;
+    right: 20px;
+    background: $br-green;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba($br-green, 0.2);
+    z-index: 2;
+  }
+}
+
+.card-body-luxury {
+  padding: 35px 25px 25px;
+  text-align: left;
+
+  .event-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: $br-dark;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sala-name {
+    font-size: 0.8rem;
+    color: $br-green;
+    font-weight: 600;
+    margin-bottom: 20px;
+    i {
+      margin-right: 5px;
+    }
+  }
+}
+
+.info-grid {
+  margin-bottom: 25px;
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    color: lighten($br-dark, 10%);
+    i {
+      color: $br-green;
+      opacity: 0.8;
+    }
+  }
+}
+
+.br-btn-action {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid $br-green;
   background: white;
-  transition:
-    transform 0.3s ease-out,
-    box-shadow 0.3s ease-out;
+  color: $br-green;
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
   cursor: pointer;
 
   &:hover {
-    transform: translateY(-8px) scale(1.03);
-    box-shadow: 0 12px 24px rgba(44, 62, 80, 0.08) !important;
-  }
-
-  .card-body {
-    padding: 25px;
-    text-align: center;
-  }
-
-  .card-title {
-    font-weight: 700;
-    color: $br-dark;
-    font-size: 1.1rem;
-  }
-
-  .sala-text {
-    font-size: 0.8rem;
-    color: #999;
-    margin-bottom: 15px;
+    background: $br-green;
+    color: white;
+    box-shadow: 0 5px 15px rgba($br-green, 0.2);
   }
 }
 
-.date-badge {
-  background: rgba(74, 140, 64, 0.05);
-  padding: 12px;
-  border-radius: 15px;
-  margin-bottom: 20px;
-
-  .event-date {
-    color: $br-primary;
-    font-weight: 800;
-    font-size: 0.85rem;
-    display: block;
-  }
-
-  .event-time {
-    font-size: 0.75rem;
-    color: $br-primary;
-    margin: 0;
-    opacity: 0.8;
-  }
-}
-
-.card-footer-custom {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-price {
-  background-color: $br-primary !important;
-  color: white !important;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.8rem;
-  padding: 8px !important;
-  flex: 1;
-}
-
-.btn-details {
-  background: transparent;
-  border: 1px solid $br-dark;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 0.8rem;
-  padding: 8px !important;
-  flex: 1.2;
-  color: $br-dark;
-}
-
-.fake-arrow {
+.nav-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 1.5rem;
-  color: #ddd;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #eee;
+  background: white;
+  color: $br-green;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+
+  &:hover {
+    background: $br-green;
+    color: white;
+    border-color: $br-green;
+  }
   &.left {
-    left: 10px;
+    left: 5px;
   }
   &.right {
-    right: 10px;
+    right: 5px;
+  }
+}
+
+.mio-loader {
+  width: 45px;
+  height: 45px;
+  border: 3px solid rgba($br-green, 0.1);
+  border-radius: 50%;
+  border-top-color: $br-green;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
