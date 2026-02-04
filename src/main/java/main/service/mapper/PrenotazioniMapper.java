@@ -13,7 +13,6 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", uses = { UtentiMapper.class, SaleMapper.class, StatiPrenotazioneMapper.class })
 public interface PrenotazioniMapper extends EntityMapper<PrenotazioniDTO, Prenotazioni> {
     @Override
-    @Mapping(target = "titoloEvento", source = "evento.titolo")
     @Mapping(target = "data", source = "data")
     @Mapping(target = "oraInizio", source = "oraInizio")
     @Mapping(target = "oraFine", source = "oraFine")

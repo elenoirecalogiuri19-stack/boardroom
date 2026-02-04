@@ -75,8 +75,6 @@ public class PrenotazioniService {
     public PrenotazioniDTO save(PrenotazioniDTO dto) {
         LOG.debug("Request to save Prenotazioni : {}", dto);
 
-        applyPrivateEventRules(dto);
-
         Prenotazioni entity = prenotazioniMapper.toEntity(dto);
         applyDefaultConfirmedState(entity);
 
@@ -92,7 +90,6 @@ public class PrenotazioniService {
      */
     public PrenotazioniDTO update(PrenotazioniDTO dto) {
         LOG.debug("Request to update Prenotazioni : {}", dto);
-        applyPrivateEventRules(dto);
         Prenotazioni entity = prenotazioniMapper.toEntity(dto);
         entity = prenotazioniRepository.save(entity);
         return prenotazioniMapper.toDto(entity);
@@ -111,7 +108,6 @@ public class PrenotazioniService {
             .findById(dto.getId())
             .map(existing -> {
                 prenotazioniMapper.partialUpdate(existing, dto);
-                applyPrivateEventRulesEntity(existing);
                 return existing;
             })
             .map(prenotazioniRepository::save)
@@ -273,20 +269,8 @@ public class PrenotazioniService {
         }
     }
 
-    private void applyPrivateEventRules(PrenotazioniDTO dto) {
-        if (TipoEvento.PRIVATO.equals(dto.getTipoEvento())) {
-            dto.setPrezzo(null);
-        }
-    }
-
     private void applyDefaultConfirmedState(Prenotazioni prenotazioni) {
         statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED).ifPresent(prenotazioni::setStato);
-    }
-
-    private void applyPrivateEventRulesEntity(Prenotazioni entity) {
-        if ("PRIVATO".equals(entity.getTipoEvento())) {
-            entity.setPrezzo(null);
-        }
     }
 
     private String getAuthenticatedUsername() {
@@ -403,7 +387,7 @@ public class PrenotazioniService {
 
     private Utenti caricaUtenteAutenticato() {
         String username = getAuthenticatedUsername();
-        return utentiRepository.findByUser_Login(username).orElseThrow(() -> new EntityNotFoundException("Utente non trovato"));
+        return utentiRepository.findByUser_Login(username);
     }
 
     private Prenotazioni costruisciPrenotazioneDaRicerca(PrenotazioniDTO dto, Sale sala, Utenti utente) {
@@ -413,8 +397,6 @@ public class PrenotazioniService {
         pren.setData(dto.getData());
         pren.setOraInizio(dto.getOraInizio());
         pren.setOraFine(dto.getOraFine());
-        pren.setTipoEvento(dto.getTipoEvento());
-        pren.setPrezzo(dto.getPrezzo());
         return pren;
     }
 

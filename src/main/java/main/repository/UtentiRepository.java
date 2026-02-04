@@ -12,5 +12,5 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface UtentiRepository extends JpaRepository<Utenti, UUID> {
-    Optional<Utenti> findByUser_Login(String login);
+    Utenti findByUser_Login(String login);
 }

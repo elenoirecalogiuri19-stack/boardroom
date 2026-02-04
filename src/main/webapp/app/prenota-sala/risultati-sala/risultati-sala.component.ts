@@ -81,8 +81,6 @@ export class RisultatiSalaComponent implements OnInit {
       data: this.dataRicerca,
       oraInizio: this.normalizzaOra(oraInizio),
       oraFine: this.normalizzaOra(oraFine),
-      tipoEvento: isPubblico ? 'PUBBLICO' : 'PRIVATO',
-      prezzo: null,
       salaId: sala.id,
     };
 

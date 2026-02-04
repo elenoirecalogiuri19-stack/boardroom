@@ -12,8 +12,6 @@ public class PrenotazioniDTO implements Serializable {
 
     private UUID id;
 
-    private String titoloEvento;
-
     @NotNull
     private LocalDate data;
 
@@ -25,7 +23,6 @@ public class PrenotazioniDTO implements Serializable {
 
     private Integer numPersone;
 
-    private TipoEvento tipoEvento;
     private BigDecimal prezzo;
     private StatiPrenotazioneDTO stato;
     private UtentiDTO utente;
@@ -65,14 +62,6 @@ public class PrenotazioniDTO implements Serializable {
 
     public void setOraFine(LocalTime oraFine) {
         this.oraFine = oraFine;
-    }
-
-    public TipoEvento getTipoEvento() {
-        return tipoEvento;
-    }
-
-    public void setTipoEvento(TipoEvento tipoEvento) {
-        this.tipoEvento = tipoEvento;
     }
 
     public BigDecimal getPrezzo() {
@@ -121,14 +110,6 @@ public class PrenotazioniDTO implements Serializable {
 
     public void setSalaId(UUID salaId) {
         this.salaId = salaId;
-    }
-
-    public String getTitoloEvento() {
-        return titoloEvento;
-    }
-
-    public void setTitoloEvento(String titoloEvento) {
-        this.titoloEvento = titoloEvento;
     }
 
     public UUID getEventoId() {

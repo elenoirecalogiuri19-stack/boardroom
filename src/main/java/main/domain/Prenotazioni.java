@@ -41,12 +41,6 @@ public class Prenotazioni implements Serializable {
     @Column(name = "ora_fine", nullable = false)
     private LocalTime oraFine;
 
-    @Column(name = "tipo_evento")
-    private TipoEvento tipoEvento;
-
-    @Column(name = "prezzo")
-    private BigDecimal prezzo;
-
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "prenotazione")
     @JsonIgnoreProperties(value = { "prenotazione" }, allowSetters = true)
     private Eventi evento;
@@ -93,22 +87,6 @@ public class Prenotazioni implements Serializable {
 
     public void setOraFine(LocalTime oraFine) {
         this.oraFine = oraFine;
-    }
-
-    public TipoEvento getTipoEvento() {
-        return tipoEvento;
-    }
-
-    public void setTipoEvento(TipoEvento tipoEvento) {
-        this.tipoEvento = tipoEvento;
-    }
-
-    public BigDecimal getPrezzo() {
-        return prezzo;
-    }
-
-    public void setPrezzo(BigDecimal prezzo) {
-        this.prezzo = prezzo;
     }
 
     public Eventi getEvento() {
@@ -161,16 +139,6 @@ public class Prenotazioni implements Serializable {
 
     public Prenotazioni oraFine(LocalTime oraFine) {
         this.setOraFine(oraFine);
-        return this;
-    }
-
-    public Prenotazioni tipoEvento(TipoEvento tipoEvento) {
-        this.setTipoEvento(tipoEvento);
-        return this;
-    }
-
-    public Prenotazioni prezzo(BigDecimal prezzo) {
-        this.setPrezzo(prezzo);
         return this;
     }
 
