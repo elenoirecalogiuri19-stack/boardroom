@@ -1,39 +1,50 @@
 <div class="home-container">
   <div class="container text-center hero-section">
     <h1 class="display-5 fw-bold mt-3">Eventi in programma</h1>
-    <p class="subtitle-verde">Scorri per vedere i prossimi eventi in <span>Boardroom</span></p>
+    <p class="subtitle-verde">
+      Scorri per vedere i prossimi eventi in <span style="cursor: pointer" (click)="vaiAlleMiePrenotazioni()">Boardroom</span>
+    </p>
   </div>
 
-  <div class="container carousel-wrapper">
-    <div class="fake-arrow left"><i class="bi bi-chevron-left"></i></div>
-    <div class="fake-arrow right"><i class="bi bi-chevron-right"></i></div>
+  @if (isLoading()) {
+    <div class="text-center my-5">
+      <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem">
+        <span class="visually-hidden">Caricamento...</span>
+      </div>
+      <p class="mt-2 text-success">Stiamo preparando la Boardroom...</p>
+    </div>
+  } @else {
+    <div class="container carousel-wrapper">
+      <div class="fake-arrow left"><i class="bi bi-chevron-left"></i></div>
+      <div class="fake-arrow right"><i class="bi bi-chevron-right"></i></div>
 
-    <div class="event-scroll-container">
-      @for (evento of eventi(); track evento.id) {
-        <div class="event-card-item">
-          <div class="card event-card">
-            <div class="card-body">
-              <h5 class="card-title">{{ evento.titolo }}</h5>
-              <p class="sala-text">{{ evento.salaNome }}</p>
+      <div class="event-scroll-container">
+        @for (evento of eventi(); track evento.id) {
+          <div class="event-card-item">
+            <div class="card event-card">
+              <div class="card-body">
+                <h5 class="card-title">{{ evento.titolo }}</h5>
+                <p class="sala-text">{{ evento.salaNome }}</p>
 
-              <div class="date-badge">
-                <span class="event-date">{{ evento.data | date: 'dd MMM yyyy' }}</span>
-                <p class="event-time">{{ evento.oraInizio }} - {{ evento.oraFine }}</p>
-              </div>
+                <div class="date-badge">
+                  <span class="event-date">{{ evento.data | date: 'dd MMM yyyy' }}</span>
+                  <p class="event-time">{{ evento.oraInizio }} - {{ evento.oraFine }}</p>
+                </div>
 
-              <div class="card-footer-custom">
-                <button class="btn btn-price">
-                  <span>€ {{ evento.prezzo }}</span>
-                </button>
+                <div class="card-footer-custom">
+                  <button class="btn btn-price">
+                    <span>€ {{ evento.prezzo }}</span>
+                  </button>
 
-                <button class="btn btn-details" (click)="vaiADettagli(evento)">
-                  <span>Dettagli</span>
-                </button>
+                  <button class="btn btn-details" (click)="vaiADettagli(evento)">
+                    <span>Dettagli</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      }
+        }
+      </div>
     </div>
-  </div>
+  }
 </div>

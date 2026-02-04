@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnInit, inject, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router'; // Aggiunto ActivatedRoute
 
 import SharedModule from 'app/shared/shared.module';
 import { LoginService } from 'app/login/login.service';
@@ -15,9 +15,7 @@ import { AccountService } from 'app/core/auth/account.service';
 })
 export default class LoginComponent implements OnInit, AfterViewInit {
   username = viewChild.required<ElementRef>('username');
-
   authenticationError = signal(false);
-
   isLoading = false;
 
   loginForm = new FormGroup({
@@ -29,11 +27,12 @@ export default class LoginComponent implements OnInit, AfterViewInit {
   private readonly accountService = inject(AccountService);
   private readonly loginService = inject(LoginService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute); // Iniettiamo la rotta per leggere i parametri
 
   ngOnInit(): void {
     this.accountService.identity().subscribe(() => {
       if (this.accountService.isAuthenticated()) {
-        this.router.navigate(['']);
+        this.eseguiRedirect();
       }
     });
   }
@@ -49,14 +48,17 @@ export default class LoginComponent implements OnInit, AfterViewInit {
     this.loginService.login(this.loginForm.getRawValue()).subscribe({
       next: () => {
         this.isLoading = false;
-        if (!this.router.getCurrentNavigation()) {
-          this.router.navigate(['']);
-        }
+        this.eseguiRedirect();
       },
       error: () => {
         this.isLoading = false;
         this.authenticationError.set(true);
       },
     });
+  }
+
+  private eseguiRedirect(): void {
+    const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    this.router.navigateByUrl(returnUrl);
   }
 }
