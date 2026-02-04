@@ -6,33 +6,53 @@ $boardroom-green: #4a8c40;
   min-height: calc(100vh - 120px);
 }
 
+::ng-deep {
+  jhi-loading-indicator,
+  .spinner-border,
+  .mio-loader,
+  .loading,
+  .fa-spin,
+  .fa-spinner {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+}
+
 .login-wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 80px;
-  margin-bottom: 80px;
+  padding: 100px 20px;
 }
 
 .login-card {
   background: #ffffff;
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
   padding: 50px 40px;
   border-radius: 24px;
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.05);
   text-align: center;
   border: 1px solid #f2f2f2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-form {
+  width: 100%;
 }
 
 .input-group {
+  width: 100%;
   margin-bottom: 20px;
 }
 
 .figma-input {
   width: 100%;
   padding: 16px;
-  border: 1px solid #e0e0e0;
+  border: 1.5px solid #edf2f7;
   border-radius: 12px;
   font-size: 15px;
   text-align: center;
@@ -41,8 +61,8 @@ $boardroom-green: #4a8c40;
 
   &:focus {
     outline: none;
-    border-color: $boardroom-green !important;
-    box-shadow: 0 0 0 4px rgba(74, 140, 64, 0.1) !important;
+    border-color: $boardroom-green;
+    box-shadow: 0 0 0 4px rgba(74, 140, 64, 0.1);
   }
 }
 
@@ -51,45 +71,14 @@ $boardroom-green: #4a8c40;
   color: white !important;
   border: none !important;
   border-radius: 50px;
-  min-width: 180px;
-  min-height: 50px;
-  font-size: 15px;
-  font-weight: 600;
-  margin-top: 25px;
+  width: 100%;
+  height: 54px;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 10px;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
   transition: all 0.3s;
-  box-shadow: 0 8px 20px rgba(74, 140, 64, 0.25) !important;
-
-  // --- TECNICA ANTI-DOPPIO LOADER ---
-  // Se JHipster inietta icone, spinner o indicatori, li nascondiamo tutti
-  // Tranne il nostro elemento che ha la classe .mio-loader
-  * {
-    &:not(.mio-loader):not(.btn-text) {
-      display: none !important;
-    }
-  }
-
-  // Nasconde specificamente icone FontAwesome e indicatori JHipster comuni
-  fa-icon,
-  .spinner-border,
-  .loading,
-  jhi-loading-indicator {
-    display: none !important;
-  }
-
-  .btn-text {
-    color: white !important;
-    display: block;
-  }
-
-  &:hover:not(:disabled) {
-    background-color: darken($boardroom-green, 5%) !important;
-    transform: translateY(-2px);
-  }
+  box-shadow: 0 8px 20px rgba(74, 140, 64, 0.2);
 
   &:disabled {
     opacity: 0.8;
@@ -97,37 +86,31 @@ $boardroom-green: #4a8c40;
   }
 }
 
-.mio-loader {
-  width: 22px;
-  height: 22px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: #ffffff;
-  animation: spin 0.8s linear infinite;
-  display: block !important;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .figma-footer {
   margin-top: 35px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
   .green-link {
     color: $boardroom-green !important;
-    font-weight: 500;
-    font-size: 13px;
+    font-weight: 600;
     text-decoration: none;
+    font-size: 14px;
     &:hover {
       text-decoration: underline;
     }
   }
 }
 
+.register-section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 .small-text {
   font-size: 13px;
-  color: #666;
-  margin-top: 10px;
+  color: #64748b;
 }

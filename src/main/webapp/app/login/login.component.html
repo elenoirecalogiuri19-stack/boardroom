@@ -4,7 +4,7 @@
       <div class="alert alert-danger">Email o password errati.</div>
     }
 
-    <form (ngSubmit)="login()" [formGroup]="loginForm">
+    <form (ngSubmit)="login()" [formGroup]="loginForm" class="login-form">
       <div class="input-group">
         <input #username type="text" class="figma-input" placeholder="Username" formControlName="username" />
       </div>
@@ -14,19 +14,16 @@
       </div>
 
       <button type="submit" class="figma-btn" [disabled]="isLoading">
-        @if (!isLoading) {
-          <span class="btn-text">Accedi</span>
-        } @else {
-          <div class="mio-loader"></div>
-        }
+        <span class="btn-text">{{ isLoading ? 'Accesso in corso...' : 'Accedi' }}</span>
       </button>
     </form>
 
     <div class="figma-footer">
       <a routerLink="/account/reset/request" class="green-link">Password dimenticata?</a>
-      <p class="small-text">
-        Non hai un account? <a routerLink="/account/register" class="green-link"><strong>Crea un account</strong></a>
-      </p>
+      <div class="register-section">
+        <span class="small-text">Non hai un account?</span>
+        <a routerLink="/account/register" class="green-link"><strong>Crea un account</strong></a>
+      </div>
     </div>
   </div>
 </div>
