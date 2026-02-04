@@ -47,7 +47,7 @@ export class RisultatiSalaComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       this.dataRicerca = params['data'] ?? '';
       this.oraRicerca = params['ora'] ?? '';
-      this.capienzaRicerca = Number(params['capienzaMax'] ?? 0);
+      this.capienzaRicerca = Number(params['capienza'] ?? 0);
 
       this.caricaSaleDisponibili();
 

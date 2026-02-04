@@ -14,7 +14,7 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
     @Query(
         "SELECT s " +
         "FROM Sale s " +
-        "WHERE(:capienzaMax IS NULL OR s.capienza <= :capienzaMax)" +
+        "WHERE(:capienza IS NULL OR s.capienza >= :capienza)" +
         "AND s.id NOT IN (" +
         "SELECT p.sala.id " +
         "FROM Prenotazioni p " +
@@ -31,6 +31,6 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
         @Param("data") LocalDate data,
         @Param("inizio") LocalTime c,
         @Param("fine") LocalTime fine,
-        @Param("capienzaMax") Integer capienzaMax
+        @Param("capienza") Integer capienza
     );
 }

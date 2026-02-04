@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
-import main.domain.enumeration.TipoEvento;
 
 public class PrenotazioniDTO implements Serializable {
 

@@ -5,7 +5,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import main.domain.Sale;
 import main.repository.SaleRepository;
 import main.service.dto.SaleDTO;
@@ -31,14 +30,11 @@ public class SaleService {
         this.saleMapper = saleMapper;
     }
 
-    /**
-     * US2 – Visualizza sale disponibili in una data e fascia oraria.
-     */
     @Transactional(readOnly = true)
-    public List<SaleDTO> findAllFreeSales(LocalDate data, LocalTime inizio, LocalTime fine, Integer capienzaMax) {
-        LOG.debug("Request to get free sales for {} from {} to {}", data, inizio, fine, capienzaMax);
+    public List<SaleDTO> findAllFreeSales(LocalDate data, LocalTime inizio, LocalTime fine, Integer capienza) {
+        LOG.debug("Request to get free sales for {} from {} to {}", data, inizio, fine, capienza);
 
-        return saleRepository.findFreeSales(data, inizio, fine, capienzaMax).stream().map(saleMapper::toDto).toList();
+        return saleRepository.findFreeSales(data, inizio, fine, capienza).stream().map(saleMapper::toDto).toList();
     }
 
     public SaleDTO save(SaleDTO saleDTO) {

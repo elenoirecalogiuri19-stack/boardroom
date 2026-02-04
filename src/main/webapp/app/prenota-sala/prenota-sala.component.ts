@@ -31,7 +31,7 @@ export default class PrenotaSalaComponent implements OnInit {
     if (salvati.data) {
       this.dataSelezionata = salvati.data;
       this.oraSelezionata = salvati.ora;
-      this.capienza = salvati.capienzaMax ?? 0;
+      this.capienza = salvati.capienza ?? 0;
     }
   }
 
@@ -49,7 +49,7 @@ export default class PrenotaSalaComponent implements OnInit {
     this.ricercaService.salvaRicerca({
       data: this.dataSelezionata,
       ora: this.oraSelezionata,
-      capienzaMax: this.capienza,
+      capienza: this.capienza,
     });
 
     setTimeout(() => {
@@ -58,7 +58,7 @@ export default class PrenotaSalaComponent implements OnInit {
           queryParams: {
             data: this.dataSelezionata,
             ora: this.oraSelezionata,
-            capienzaMax: this.capienza,
+            capienza: this.capienza,
           },
         })
         .finally(() => {

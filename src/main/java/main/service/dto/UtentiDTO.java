@@ -3,12 +3,12 @@ package main.service.dto;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.UUID; // Reintrodotto UUID
+import java.util.UUID;
 
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class UtentiDTO implements Serializable {
 
-    private UUID id; // Tornato a UUID
+    private UUID id;
 
     @NotNull
     private String nome;

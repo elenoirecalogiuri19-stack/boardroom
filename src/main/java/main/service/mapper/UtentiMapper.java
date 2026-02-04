@@ -5,6 +5,4 @@ import main.service.dto.UtentiDTO;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
-public interface UtentiMapper extends EntityMapper<UtentiDTO, Utenti> {
-    // Metodi di conversione Long/UUID rimossi perché non più necessari
-}
+public interface UtentiMapper extends EntityMapper<UtentiDTO, Utenti> {}

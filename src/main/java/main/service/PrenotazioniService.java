@@ -1,7 +1,6 @@
 package main.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,13 +8,11 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import main.domain.Prenotazioni;
 import main.domain.Sale;
 import main.domain.StatiPrenotazione;
 import main.domain.Utenti;
 import main.domain.enumeration.StatoCodice;
-import main.domain.enumeration.TipoEvento;
 import main.repository.PrenotazioniRepository;
 import main.repository.SaleRepository;
 import main.repository.StatiPrenotazioneRepository;
@@ -189,13 +186,6 @@ public class PrenotazioniService {
         LOG.debug("Prenotazione {} annulaa con sucesso");
     }
 
-    /**
-     *
-     * Metodo nuova prenotazione che
-     * ne verifica la disponibilita
-     * e gestisce lo stato
-     *
-     */
     public PrenotazioniDTO creaPrenotazione(PrenotazioniDTO dto) {
         LOG.debug("Request to create Prenotazioni : {}", dto);
 
@@ -400,14 +390,13 @@ public class PrenotazioniService {
         return pren;
     }
 
-    @Scheduled(fixedRate = 60000) // ogni minuto
+    @Scheduled(fixedRate = 60000)
     @Transactional
     public void aggiornaPrenotazioniScadute() {
         LocalDateTime now = LocalDateTime.now();
         LocalDate oggi = now.toLocalDate();
         LocalTime oraLimite = now.minusMinutes(5).toLocalTime();
 
-        // Trova tutte le prenotazioni WAITING scadute
         List<Prenotazioni> scadute = prenotazioniRepository.findExpiredWaiting(StatoCodice.WAITING, oggi, oraLimite);
 
         if (scadute.isEmpty()) {

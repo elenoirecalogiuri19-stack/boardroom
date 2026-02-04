@@ -3,11 +3,8 @@ package main.web.rest;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.AccessDeniedException;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -52,16 +48,9 @@ public class PrenotazioniResource {
 
     private final PrenotazioniRepository prenotazioniRepository;
 
-    private final PrenotazioniMapper prenotazioniMapper;
-
-    public PrenotazioniResource(
-        PrenotazioniService prenotazioniService,
-        PrenotazioniRepository prenotazioniRepository,
-        PrenotazioniMapper prenotazioniMapper
-    ) {
+    public PrenotazioniResource(PrenotazioniService prenotazioniService, PrenotazioniRepository prenotazioniRepository) {
         this.prenotazioniService = prenotazioniService;
         this.prenotazioniRepository = prenotazioniRepository;
-        this.prenotazioniMapper = prenotazioniMapper;
     }
 
     @PostMapping

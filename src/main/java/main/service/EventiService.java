@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.UUID;
 import main.domain.Eventi;
 import main.domain.Prenotazioni;
-import main.domain.StatiPrenotazione;
 import main.domain.enumeration.StatoCodice;
 import main.domain.enumeration.TipoEvento;
 import main.repository.EventiRepository;
@@ -49,7 +48,6 @@ public class EventiService {
     @Transactional(readOnly = true)
     public List<EventiDTO> findPublicEventi() {
         LOG.debug("Request to get all public Eventi");
-        // Usiamo findByTipo per bypassare il controllo sulla prenotazione null visto nel DB
         List<Eventi> eventi = eventiRepository.findByTipo(TipoEvento.PUBBLICO);
         return eventiMapper.toDto(eventi);
     }
@@ -67,7 +65,6 @@ public class EventiService {
         eventi.setTipo(dto.getTipo());
         eventi.setPrenotazione(pren);
 
-        // Logica US4: se è privato il prezzo DEVE essere zero
         if (dto.getTipo() == TipoEvento.PUBBLICO) {
             eventi.setPrezzo(dto.getPrezzo());
         } else {
@@ -98,7 +95,6 @@ public class EventiService {
         existing.setTitolo(eventiDTO.getTitolo());
         existing.setDescrizione(eventiDTO.getDescrizione());
 
-        // Mantieni logica prezzi su update
         if (existing.getTipo() == TipoEvento.PUBBLICO) {
             existing.setPrezzo(eventiDTO.getPrezzo());
         } else {

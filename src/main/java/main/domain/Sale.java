@@ -145,14 +145,21 @@ public class Sale implements Serializable {
         return getClass().hashCode();
     }
 
-    // prettier-ignore
     @Override
     public String toString() {
-        return "Sale{" +
-            "id=" + getId() +
-            ", nome='" + getNome() + "'" +
-            ", capienza=" + getCapienza() +
-            ", descrizione='" + getDescrizione() + "'" +
-            "}";
+        return (
+            "Sale{" +
+            "id=" +
+            getId() +
+            ", nome='" +
+            getNome() +
+            "'" +
+            ", capienza=" +
+            getCapienza() +
+            ", descrizione='" +
+            getDescrizione() +
+            "'" +
+            "}"
+        );
     }
 }

@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 export interface IRicercaSale {
   data: string;
   ora: string;
-  capienzaMax: number;
+  capienza: number | null;
 }
 
 @Injectable({
@@ -13,7 +13,7 @@ export class RicercaService {
   private datiRicerca: IRicercaSale = {
     data: '',
     ora: '',
-    capienzaMax: 0,
+    capienza: null,
   };
 
   salvaRicerca(nuoviDati: IRicercaSale): void {
@@ -30,7 +30,7 @@ export class RicercaService {
     this.datiRicerca = {
       data: '',
       ora: '',
-      capienzaMax: 0,
+      capienza: null,
     };
   }
 }

@@ -62,7 +62,7 @@ public class SecurityConfiguration {
             )
             .authorizeHttpRequests(authz ->
                 authz
-                    // 1. Risorse statiche (Sempre permesse)
+                    //Risorse statiche
                     .requestMatchers(
                         mvc.pattern("/index.html"),
                         mvc.pattern("/*.js"),
@@ -82,7 +82,7 @@ public class SecurityConfiguration {
                     .permitAll()
                     .requestMatchers(mvc.pattern("/swagger-ui/**"))
                     .permitAll()
-                    // 2. Endpoint PUBBLICI (Accessibili senza login)
+                    // Endpoint PUBBLICI
                     .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/authenticate"))
                     .permitAll()
                     .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/authenticate"))
@@ -95,13 +95,13 @@ public class SecurityConfiguration {
                     .permitAll()
                     .requestMatchers(mvc.pattern("/api/account/reset-password/finish"))
                     .permitAll()
-                    // --- FOCUS EVENTI PUBBLICI ---
+                    // Endpoint UTENTE REGISTRATO
                     .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/eventis/pubblici"))
                     .permitAll()
                     .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/eventis"))
-                    .permitAll() // Permette la lista generale
+                    .permitAll()
                     .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/eventis/*"))
-                    .permitAll() // Dettaglio evento singolo
+                    .permitAll()
                     .requestMatchers(mvc.pattern("/api/sales/disponibili"))
                     .permitAll()
                     .requestMatchers(mvc.pattern("/management/health"))
@@ -112,18 +112,6 @@ public class SecurityConfiguration {
                     .permitAll()
                     .requestMatchers(mvc.pattern("/management/prometheus"))
                     .permitAll()
-                    // 3. Endpoint per ADMIN
-                    .requestMatchers(mvc.pattern("/api/admin/**"))
-                    .hasAuthority(AuthoritiesConstants.ADMIN)
-                    .requestMatchers(mvc.pattern("/api/eventis/crea-pubblico"))
-                    .authenticated()
-                    .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/eventis"))
-                    .authenticated()
-                    .requestMatchers(mvc.pattern(HttpMethod.PUT, "/api/eventis/**"))
-                    .authenticated()
-                    .requestMatchers(mvc.pattern(HttpMethod.PATCH, "/api/eventis/**"))
-                    .authenticated()
-                    // 4. Endpoint AUTHENTICATED (Richiedono Login)
                     .requestMatchers(mvc.pattern("/api/prenotazionis/crea"))
                     .authenticated()
                     .requestMatchers(mvc.pattern("/api/prenotazionis/*/conferma"))
@@ -134,10 +122,19 @@ public class SecurityConfiguration {
                     .authenticated()
                     .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/prenotazionis/**"))
                     .authenticated()
-                    // Questa deve essere SEMPRE l'ultima tra le regole /api/
                     .requestMatchers(mvc.pattern("/api/**"))
                     .authenticated()
-                    // 5. Altre risorse (Admin)
+                    .requestMatchers(mvc.pattern("/api/admin/**"))
+                    .hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern("/api/eventis/crea-pubblico"))
+                    .authenticated()
+                    .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/eventis"))
+                    .authenticated()
+                    .requestMatchers(mvc.pattern(HttpMethod.PUT, "/api/eventis/**"))
+                    .authenticated()
+                    .requestMatchers(mvc.pattern(HttpMethod.PATCH, "/api/eventis/**"))
+                    .authenticated()
+                    // Endpoint ADMIN
                     .requestMatchers(mvc.pattern("/v3/api-docs/**"))
                     .hasAuthority(AuthoritiesConstants.ADMIN)
                     .requestMatchers(mvc.pattern("/management/**"))

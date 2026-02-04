@@ -23,11 +23,6 @@ public interface EventiMapper extends EntityMapper<EventiDTO, Eventi> {
 
     List<EventiDTO> toDto(List<Eventi> eventiList);
 
-    @Named("prenotazioniId")
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    PrenotazioniDTO toDtoPrenotazioniId(Prenotazioni prenotazioni);
-
     default String map(UUID value) {
         return Objects.toString(value, null);
     }

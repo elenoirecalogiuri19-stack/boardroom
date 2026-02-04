@@ -121,7 +121,6 @@ public class Prenotazioni implements Serializable {
         this.sala = sala;
     }
 
-    // --- METODI FLUENTI ---
     public Prenotazioni id(UUID id) {
         this.setId(id);
         return this;
@@ -157,7 +156,6 @@ public class Prenotazioni implements Serializable {
         return this;
     }
 
-    // --- equals & hashCode ---
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

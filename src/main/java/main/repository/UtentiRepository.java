@@ -1,6 +1,5 @@
 package main.repository;
 
-import java.util.Optional;
 import java.util.UUID;
 import main.domain.Utenti;
 import org.springframework.data.jpa.repository.*;
