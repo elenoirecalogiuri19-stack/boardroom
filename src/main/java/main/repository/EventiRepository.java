@@ -13,6 +13,4 @@ import org.springframework.stereotype.Repository;
 public interface EventiRepository extends JpaRepository<Eventi, UUID> {
     @Query("SELECT e FROM Eventi e WHERE e.tipo = :tipo AND e.prenotazione.stato.codice = :stato")
     List<Eventi> findPublicConfirmed(@Param("tipo") TipoEvento tipo, @Param("stato") StatoCodice stato);
-
-    List<Eventi> findByTipo(TipoEvento tipo);
 }
