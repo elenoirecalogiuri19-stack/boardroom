@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, finalize } from 'rxjs/operators';
 
 import { EventiService } from 'app/entities/eventi/service/eventi.service';
 import { IEventi } from 'app/entities/eventi/eventi.model';
@@ -22,6 +22,8 @@ export default class HomeComponent implements OnInit, OnDestroy {
   account = signal<Account | null>(null);
   eventi = signal<IEventi[]>([]);
 
+  isLoading = signal<boolean>(true);
+
   private readonly destroy$ = new Subject<void>();
   private readonly accountService = inject(AccountService);
   private readonly router = inject(Router);
@@ -38,14 +40,34 @@ export default class HomeComponent implements OnInit, OnDestroy {
   }
 
   caricaEventi(): void {
-    this.eventiService.getEventiPubblici().subscribe({
-      next: data => {
-        this.eventi.set(data);
-      },
-      error: () => {
-        this.notificationService.show('Errore nel caricamento degli eventi pubblici', 'error');
-      },
-    });
+    this.isLoading.set(true);
+    this.eventiService
+      .getEventiPubblici()
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: data => {
+          this.eventi.set(data);
+        },
+        error: () => {
+          this.notificationService.show('Errore nel caricamento degli eventi pubblici', 'error');
+        },
+      });
+  }
+
+  vaiAlleMiePrenotazioni(): void {
+    this.gestisciNavigazioneProtetta('/mie-prenotazioni');
+  }
+
+  vaiAPrenotaSala(): void {
+    this.gestisciNavigazioneProtetta('/prenota-sala');
+  }
+
+  private gestisciNavigazioneProtetta(destinazione: string): void {
+    if (this.account() === null) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: destinazione } });
+    } else {
+      this.router.navigate([destinazione]);
+    }
   }
 
   vaiADettagli(evento: IEventi): void {

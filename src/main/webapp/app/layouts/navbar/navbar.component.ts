@@ -52,20 +52,20 @@ export default class NavbarComponent implements OnInit {
     this.isNavbarCollapsed.set(true);
   }
 
-  gestisciMiePrenotazioni(): void {
+  toggleNavbar(): void {
+    this.isNavbarCollapsed.update(isNavbarCollapsed => !isNavbarCollapsed);
+  }
+
+  navigazioneProtetta(destinazione: string): void {
     this.collapseNavbar();
     if (this.accountService.isAuthenticated()) {
-      this.router.navigate(['/mie-prenotazioni']);
+      this.router.navigate([destinazione]);
     } else {
-      this.login();
+      this.router.navigate(['/login'], { queryParams: { returnUrl: destinazione } });
     }
   }
 
   login(): void {
     this.router.navigate(['/login']);
-  }
-
-  toggleNavbar(): void {
-    this.isNavbarCollapsed.update(isNavbarCollapsed => !isNavbarCollapsed);
   }
 }

@@ -25,14 +25,14 @@
         </li>
 
         <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <a class="nav-link" routerLink="/prenota-sala" (click)="collapseNavbar()">
+          <a class="nav-link" (click)="navigazioneProtetta('/prenota-sala')" style="cursor: pointer">
             <fa-icon icon="calendar-alt" class="me-1"></fa-icon>
             <span>Prenota sala</span>
           </a>
         </li>
 
         <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <a class="nav-link" (click)="gestisciMiePrenotazioni()" style="cursor: pointer">
+          <a class="nav-link" (click)="navigazioneProtetta('/mie-prenotazioni')" style="cursor: pointer">
             <fa-icon icon="list" class="me-1"></fa-icon> <span>Le mie prenotazioni</span>
           </a>
         </li>
