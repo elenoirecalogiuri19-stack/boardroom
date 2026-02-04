@@ -66,14 +66,12 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
 
     @Query(
         """
-            SELECT p
-            FROM Prenotazioni p
-            LEFT JOIN FETCH p.stato
-            LEFT JOIN FETCH p.utente
-            LEFT JOIN FETCH p.sala
-            WHERE p.utente.user.login = :login
-              AND p.data >= :oggi
-            ORDER BY p.data ASC, p.oraInizio ASC
+        SELECT p FROM Prenotazioni p
+        LEFT JOIN FETCH p.evento e
+        LEFT JOIN FETCH e.prenotazione
+        WHERE p.utente.user.login = :login
+        AND p.data >= :oggi
+        ORDER BY p.data ASC, p.oraInizio ASC
         """
     )
     List<Prenotazioni> findByUtente_User_LoginAndDataGreaterThanEqualOrderByDataAscOraInizioAsc(

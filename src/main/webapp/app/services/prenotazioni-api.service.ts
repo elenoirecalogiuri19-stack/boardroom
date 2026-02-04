@@ -4,14 +4,11 @@ import { Observable } from 'rxjs';
 
 export interface PrenotazioneDTO {
   id: string;
-  titoloEvento: string | null;
   eventoId?: string | null;
   data: string;
   oraInizio: string;
   oraFine: string;
   numPersone?: number;
-  tipoEvento?: string;
-  prezzo?: number;
   stato?: {
     id: string;
     codice: string;
@@ -26,6 +23,11 @@ export interface PrenotazioneDTO {
     nome: string;
   } | null;
   salaId?: string;
+  evento?: {
+    titolo: string;
+    tipo: string;
+    prezzo: number;
+  };
 }
 
 @Injectable({ providedIn: 'root' })

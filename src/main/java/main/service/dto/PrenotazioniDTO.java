@@ -26,6 +26,7 @@ public class PrenotazioniDTO implements Serializable {
     private StatiPrenotazioneDTO stato;
     private UtentiDTO utente;
     private SaleDTO sala;
+    private EventiDTO evento;
 
     private UUID salaId;
 
@@ -117,5 +118,13 @@ public class PrenotazioniDTO implements Serializable {
 
     public void setEventoId(UUID eventoId) {
         this.eventoId = eventoId;
+    }
+
+    public EventiDTO getEvento() {
+        return evento;
+    }
+
+    public void setEvento(EventiDTO evento) {
+        this.evento = evento;
     }
 }
