@@ -1,4 +1,10 @@
-<div class="profile-container">
+@if (isLoading) {
+  <div class="global-loader-overlay">
+    <div class="spinner-boardroom"></div>
+  </div>
+}
+
+<div class="profile-container" [class.blur-content]="isLoading">
   <div class="profile-card">
     <div class="profile-header">
       <div class="avatar-column">

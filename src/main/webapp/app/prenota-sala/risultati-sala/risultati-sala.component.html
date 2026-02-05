@@ -1,10 +1,10 @@
-<div class="results-container" [class.blur-background]="showPrivacyModal">
-  @if (isLoading) {
-    <div class="global-loader-overlay">
-      <div class="spinner-boardroom"></div>
-    </div>
-  }
+@if (isLoading) {
+  <div class="global-loader-overlay">
+    <div class="spinner-boardroom"></div>
+  </div>
+}
 
+<div class="results-container" [class.blur-background]="showPrivacyModal">
   <aside class="sidebar">
     <button class="btn-back" (click)="tornaIndietro()" [disabled]="isLoading">
       <fa-icon icon="arrow-left" *ngIf="!isLoading"></fa-icon>
@@ -37,7 +37,9 @@
           <div class="card-content">
             <h3 class="room-name">{{ item.nome }}</h3>
             <div class="room-meta">
-              <div class="avatar-circle"></div>
+              <div class="avatar-circle">
+                <fa-icon icon="door-open"></fa-icon>
+              </div>
               <div class="text-info">
                 <span class="info-title">Capienza: {{ item.capienza }} persone</span>
                 <span class="info-desc">Disponibile nella fascia selezionata</span>
@@ -46,8 +48,11 @@
           </div>
           <div class="card-action">
             <button class="btn-book" (click)="apriSceltaPrivacy(item)" [disabled]="isLoading">
-              <div class="loader-button" *ngIf="isLoading"></div>
-              {{ isLoading ? '' : 'Prenota' }}
+              @if (isLoading) {
+                <div class="loader-button"></div>
+              } @else {
+                Prenota
+              }
             </button>
           </div>
         </div>
@@ -72,8 +77,11 @@
             <strong>Evento Pubblico</strong>
           </div>
           <div class="action-zone">
-            <span *ngIf="!isLoading" class="arrow-icon">→</span>
-            <div *ngIf="isLoading" class="minimal-spinner"></div>
+            @if (isLoading) {
+              <div class="minimal-spinner"></div>
+            } @else {
+              <span class="arrow-icon">→</span>
+            }
           </div>
         </div>
 
@@ -82,8 +90,11 @@
             <strong>Evento Privato</strong>
           </div>
           <div class="action-zone">
-            <span *ngIf="!isLoading" class="arrow-icon">→</span>
-            <div *ngIf="isLoading" class="minimal-spinner"></div>
+            @if (isLoading) {
+              <div class="minimal-spinner"></div>
+            } @else {
+              <span class="arrow-icon">→</span>
+            }
           </div>
         </div>
       </div>

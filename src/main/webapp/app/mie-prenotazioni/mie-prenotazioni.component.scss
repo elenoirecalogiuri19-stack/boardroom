@@ -12,14 +12,14 @@ $bg-white: #ffffff;
     text-align: center;
     margin-bottom: 50px;
     h1 {
-      font-size: 2.5rem;
+      font-size: 2.2rem;
       font-weight: 800;
       color: $br-dark;
       letter-spacing: -1px;
     }
     p {
       color: $text-muted;
-      font-size: 1.1rem;
+      font-size: 1rem;
     }
   }
 }
@@ -29,20 +29,15 @@ $bg-white: #ffffff;
   border-radius: 20px;
   margin-bottom: 20px;
   border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
-
+  transition: all 0.4s ease;
   overflow: hidden;
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-    border-color: rgba($br-success, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
   }
 
   &.is-expanded {
     border-color: $br-success;
-    border-width: 1.5px;
   }
 }
 
@@ -58,53 +53,82 @@ $bg-white: #ffffff;
   grid-template-columns: 1.5fr 1fr 1.2fr 1fr;
   gap: 25px;
   padding: 0 30px;
-  border-left: 1px solid #eee;
+  border-left: 1px solid #f1f5f9;
 
   .info-group {
     display: flex;
     flex-direction: column;
     .label {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: 700;
       color: $text-muted;
       text-transform: uppercase;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
     .value {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: $br-dark;
     }
     .title-highlight {
       color: $br-success;
-      font-size: 1.1rem;
       font-weight: 700;
     }
     .time-sub {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: $text-muted;
-      font-weight: 400;
     }
+  }
+}
+
+.status-pill {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  width: fit-content;
+
+  background: #f1f5f9;
+  color: #64748b;
+
+  &[data-status='confirmed'],
+  &[data-status='confermata'] {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &[data-status='cancelled'],
+  &[data-status='annullata'] {
+    background: #fdecea;
+    color: #d32f2f;
+  }
+
+  &[data-status='rejected'],
+  &[data-status='rifiutata'] {
+    background: #fff9c4;
+    color: #f57f17;
   }
 }
 
 .action-column {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 
   .btn-action {
-    padding: 8px 15px;
-    border-radius: 10px;
-    font-size: 0.8rem;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
     font-weight: 700;
-    border: 1.5px solid transparent;
-    transition: 0.3s;
+    cursor: pointer;
     background: transparent;
+    transition: 0.2s;
+    border: 1px solid transparent;
 
     &.btn-edit {
       color: $br-success;
-      border-color: $br-success;
+      border-color: rgba($br-success, 0.2);
       &:hover {
         background: $br-success;
         color: white;
@@ -112,7 +136,7 @@ $bg-white: #ffffff;
     }
     &.btn-delete {
       color: #e74c3c;
-      border-color: #e74c3c;
+      border-color: rgba(#e74c3c, 0.2);
       &:hover {
         background: #e74c3c;
         color: white;
@@ -121,106 +145,52 @@ $bg-white: #ffffff;
   }
 }
 
-.status-pill {
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: #f1f5f9;
-  width: fit-content;
-
-  &[data-status='confermata'] {
-    background: #e8f5e9;
-    color: #2e7d32;
-  }
-  &[data-status='in attesa'] {
-    background: #fffde7;
-    color: #f9a825;
-  }
-}
-
 .arrow-column {
   display: flex;
   justify-content: center;
   cursor: pointer;
-
   .arrow-circle {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.4s ease;
-    color: $text-muted;
-
+    transition: 0.3s;
     .arrow-icon {
-      font-size: 0.8rem;
-      transition: transform 0.4s ease;
+      font-size: 0.7rem;
+      transition: 0.3s;
     }
-
     &.rotated {
       background: $br-success;
-      border-color: $br-success;
       color: white;
       .arrow-icon {
         transform: rotate(180deg);
       }
     }
-
-    &:hover {
-      border-color: $br-success;
-      color: $br-success;
-    }
   }
 }
 
 .details-drawer {
-  background: #fcfdfe;
+  background: #fafbfc;
   border-top: 1px solid #f1f5f9;
-  padding: 30px;
-  animation: slideDown 0.4s ease;
-
-  .description-text {
-    font-size: 1rem;
-    color: #444;
-    line-height: 1.6;
-  }
-
-  .meta-footer {
-    margin-top: 20px;
-    display: flex;
-    gap: 50px;
-    padding-top: 20px;
-    border-top: 1px dashed #ddd;
-  }
-
-  .price-tag {
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: $br-success;
-  }
-
-  .badge-type {
-    font-weight: 700;
-    color: $br-dark;
-    text-transform: uppercase;
-  }
+  padding: 25px 30px;
+  animation: slideDown 0.3s ease-out;
 }
 
 .loader-container {
   text-align: center;
-  padding: 100px;
+  padding: 80px;
   .spinner-boardroom {
-    width: 50px;
-    height: 50px;
-    border: 3px solid rgba($br-success, 0.2);
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba($br-success, 0.1);
     border-top-color: $br-success;
     border-radius: 50%;
     animation: spin 1s infinite linear;
-    margin: 0 auto 20px;
+    margin: 0 auto 15px;
   }
 }
 
@@ -232,7 +202,7 @@ $bg-white: #ffffff;
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-15px);
+    transform: translateY(-5px);
   }
   to {
     opacity: 1;
