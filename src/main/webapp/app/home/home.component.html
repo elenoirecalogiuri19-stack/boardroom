@@ -4,48 +4,41 @@
     <p class="subtitle-verde">Scopri le prossime esperienze uniche</p>
   </div>
 
-  @if (isLoading()) {
-    <div class="loader-home-container text-center py-5">
-      <div class="mio-loader mx-auto"></div>
-      <p class="mt-3 text-muted small fw-bold" style="letter-spacing: 2px">RICERCA IN CORSO...</p>
-    </div>
-  } @else {
-    <div class="carousel-wrapper">
-      <button class="nav-arrow left" (click)="scroll(-320)">
-        <i class="bi bi-chevron-left"></i>
-      </button>
+  <div class="carousel-wrapper">
+    <button class="nav-arrow left" (click)="scroll(-320)">
+      <i class="bi bi-chevron-left"></i>
+    </button>
 
-      <div class="event-scroll-viewport" #carousel>
-        @for (evento of eventi(); track evento.id) {
-          <div class="event-card">
-            <div class="card-header-luxury">
-              <span class="price-tag">€ {{ evento.prezzo }}</span>
-            </div>
-
-            <div class="card-body-luxury">
-              <h3 class="event-title" [title]="evento.titolo">{{ evento.titolo }}</h3>
-              <p class="sala-name"><i class="bi bi-geo-alt-fill"></i> {{ evento.salaNome }}</p>
-
-              <div class="info-grid">
-                <div class="info-item">
-                  <i class="bi bi-calendar-check"></i>
-                  <span>{{ evento.data | date: 'dd MMM yyyy' }}</span>
-                </div>
-                <div class="info-item">
-                  <i class="bi bi-clock-history"></i>
-                  <span>{{ evento.oraInizio }} - {{ evento.oraFine }}</span>
-                </div>
-              </div>
-
-              <button class="br-btn-action" (click)="vaiADettagli(evento)">Dettagli Evento</button>
-            </div>
+    <div class="event-scroll-viewport" #carousel>
+      @for (evento of eventi(); track evento.id) {
+        <div class="event-card">
+          <div class="card-header-luxury">
+            <span class="price-tag">€ {{ evento.prezzo }}</span>
           </div>
-        }
-      </div>
 
-      <button class="nav-arrow right" (click)="scroll(320)">
-        <i class="bi bi-chevron-right"></i>
-      </button>
+          <div class="card-body-luxury">
+            <h3 class="event-title" [title]="evento.titolo">{{ evento.titolo }}</h3>
+            <p class="sala-name"><i class="bi bi-geo-alt-fill"></i> {{ evento.salaNome }}</p>
+
+            <div class="info-grid">
+              <div class="info-item">
+                <i class="bi bi-calendar-check"></i>
+                <span>{{ evento.data | date: 'dd MMM yyyy' }}</span>
+              </div>
+              <div class="info-item">
+                <i class="bi bi-clock-history"></i>
+                <span>{{ evento.oraInizio }} - {{ evento.oraFine }}</span>
+              </div>
+            </div>
+
+            <button class="br-btn-action" (click)="vaiADettagli(evento)">Dettagli Evento</button>
+          </div>
+        </div>
+      }
     </div>
-  }
+
+    <button class="nav-arrow right" (click)="scroll(320)">
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
 </div>

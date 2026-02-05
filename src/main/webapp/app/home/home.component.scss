@@ -8,10 +8,10 @@ $br-bg: #fdfdfd;
 }
 
 .home-container {
-  padding: 180px 0 60px;
+  padding: 40px 0 60px;
 
   @media (max-width: 768px) {
-    padding-top: 130px;
+    padding-top: 20px;
   }
 }
 
@@ -208,15 +208,6 @@ $br-bg: #fdfdfd;
   &.right {
     right: 10px;
   }
-}
-
-.mio-loader {
-  width: 50px;
-  height: 50px;
-  border: 3px solid rgba($br-green, 0.1);
-  border-radius: 50%;
-  border-top-color: $br-green;
-  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {

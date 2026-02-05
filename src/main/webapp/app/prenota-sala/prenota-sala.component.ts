@@ -61,7 +61,7 @@ export default class PrenotaSalaComponent implements OnInit {
             capienza: this.capienza,
           },
         })
-        .finally(() => {
+        .then(() => {
           this.caricamento = false;
         });
     }, 800);

@@ -6,8 +6,34 @@ $br-border-lux: #e2e8f0;
 $input-bg-soft: #fcfdfe;
 $bg-global: #ffffff;
 
+.global-loader-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.spinner-boardroom {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba($br-green, 0.1);
+  border-top-color: $br-green;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .booking-container {
-  padding: 160px 20px 80px;
+  padding: 40px 20px 80px;
   background-color: $bg-global;
   min-height: 100vh;
   display: flex;
@@ -56,6 +82,13 @@ $bg-global: #ffffff;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.03);
   border: 1px solid rgba($br-border-lux, 0.6);
   width: fit-content;
+
+  @media (max-width: 992px) {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 500px;
+  }
 }
 
 .input-group-custom {
@@ -185,30 +218,6 @@ $bg-global: #ffffff;
     background-color: #cbd5e1;
     cursor: not-allowed;
     transform: none;
-  }
-}
-
-.global-loader-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 99999;
-}
-
-.spinner-boardroom {
-  width: 48px;
-  height: 48px;
-  border: 4px solid #f1f5f9;
-  border-top-color: $br-green;
-  border-radius: 50%;
-  animation: spin 0.9s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+    opacity: 0.7;
   }
 }
