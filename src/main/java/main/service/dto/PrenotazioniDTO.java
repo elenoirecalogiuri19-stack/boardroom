@@ -22,7 +22,6 @@ public class PrenotazioniDTO implements Serializable {
 
     private Integer numPersone;
 
-    private BigDecimal prezzo;
     private StatiPrenotazioneDTO stato;
     private UtentiDTO utente;
     private SaleDTO sala;
@@ -62,14 +61,6 @@ public class PrenotazioniDTO implements Serializable {
 
     public void setOraFine(LocalTime oraFine) {
         this.oraFine = oraFine;
-    }
-
-    public BigDecimal getPrezzo() {
-        return prezzo;
-    }
-
-    public void setPrezzo(BigDecimal prezzo) {
-        this.prezzo = prezzo;
     }
 
     public StatiPrenotazioneDTO getStato() {

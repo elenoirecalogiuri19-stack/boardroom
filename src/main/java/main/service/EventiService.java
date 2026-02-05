@@ -59,22 +59,12 @@ public class EventiService {
             .findById(dto.getPrenotazioneId())
             .orElseThrow(() -> new BadRequestAlertException("Prenotazione non trovata", "eventi", "prenotazioneNotFound"));
 
-        Eventi eventi = new Eventi();
-        eventi.setTitolo(dto.getTitolo());
-        eventi.setDescrizione(dto.getDescrizione());
-        eventi.setTipo(dto.getTipo());
-        eventi.setPrenotazione(pren);
-
-        if (dto.getTipo() == TipoEvento.PUBBLICO) {
-            eventi.setPrezzo(dto.getPrezzo());
-        } else {
-            eventi.setPrezzo(BigDecimal.ZERO);
-        }
+        Eventi eventi = buildEventoFromDto(dto, pren);
+        setPrezzoInBaseAlTipo(dto, eventi);
 
         eventi = eventiRepository.save(eventi);
 
-        statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED).ifPresent(pren::setStato);
-        prenotazioniRepository.save(pren);
+        aggiornaStatoPrenotazioneConfermata(pren);
 
         return eventiMapper.toDto(eventi);
     }
@@ -95,11 +85,7 @@ public class EventiService {
         existing.setTitolo(eventiDTO.getTitolo());
         existing.setDescrizione(eventiDTO.getDescrizione());
 
-        if (existing.getTipo() == TipoEvento.PUBBLICO) {
-            existing.setPrezzo(eventiDTO.getPrezzo());
-        } else {
-            existing.setPrezzo(BigDecimal.ZERO);
-        }
+        setPrezzoInBaseAlTipo(eventiDTO, existing);
 
         return eventiMapper.toDto(eventiRepository.save(existing));
     }
@@ -120,5 +106,28 @@ public class EventiService {
 
     public void delete(UUID id) {
         eventiRepository.deleteById(id);
+    }
+
+    private Eventi buildEventoFromDto(EventiDTO dto, Prenotazioni prenotazione) {
+        Eventi evento = new Eventi();
+        evento.setTitolo(dto.getTitolo());
+        evento.setDescrizione(dto.getDescrizione());
+        evento.setTipo(dto.getTipo());
+        evento.setPrenotazione(prenotazione);
+        return evento;
+    }
+
+    private void setPrezzoInBaseAlTipo(EventiDTO dto, Eventi evento) {
+        if (dto.getTipo() == TipoEvento.PUBBLICO) {
+            evento.setPrezzo(dto.getPrezzo());
+        } else {
+            evento.setPrezzo(BigDecimal.ZERO);
+        }
+    }
+
+    private void aggiornaStatoPrenotazioneConfermata(Prenotazioni prenotazione) {
+        statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED).ifPresent(prenotazione::setStato);
+
+        prenotazioniRepository.save(prenotazione);
     }
 }
