@@ -38,7 +38,7 @@
         @if (hasAnyAuthority('ROLE_ADMIN')) {
           <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" routerLinkActive="active">
             <a class="nav-link dropdown-toggle admin-link" ngbDropdownToggle href="javascript:void(0);" id="entity-menu">
-              <span>Amministrazione</span>
+              <span>Gestione</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow-lg" ngbDropdownMenu aria-labelledby="entity-menu">
               <li><a class="dropdown-item" routerLink="/sale" (click)="collapseNavbar()">Sale</a></li>
@@ -46,6 +46,50 @@
               <li><a class="dropdown-item" routerLink="/stati-prenotazione" (click)="collapseNavbar()">Stati</a></li>
               <li><a class="dropdown-item" routerLink="/prenotazioni" (click)="collapseNavbar()">Prenotazioni</a></li>
               <li><a class="dropdown-item" routerLink="/eventi" (click)="collapseNavbar()">Eventi</a></li>
+            </ul>
+          </li>
+
+          <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" routerLinkActive="active">
+            <a class="nav-link dropdown-toggle admin-link" ngbDropdownToggle href="javascript:void(0);" id="admin-menu">
+              <span>Amministrazione</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg" ngbDropdownMenu aria-labelledby="admin-menu">
+              <li>
+                <a class="dropdown-item" routerLink="/admin/user-management" (click)="collapseNavbar()">
+                  <fa-icon icon="users" [fixedWidth]="true"></fa-icon> <span>Gestione utenti</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/admin/metrics" (click)="collapseNavbar()">
+                  <fa-icon icon="tachometer-alt" [fixedWidth]="true"></fa-icon> <span>Metriche</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/admin/health" (click)="collapseNavbar()">
+                  <fa-icon icon="heart" [fixedWidth]="true"></fa-icon> <span>Integrità</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/admin/configuration" (click)="collapseNavbar()">
+                  <fa-icon icon="cogs" [fixedWidth]="true"></fa-icon> <span>Configurazione</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/admin/logs" (click)="collapseNavbar()">
+                  <fa-icon icon="tasks" [fixedWidth]="true"></fa-icon> <span>Log</span>
+                </a>
+              </li>
+              <li *ngIf="openAPIEnabled">
+                <a class="dropdown-item" routerLink="/admin/docs" (click)="collapseNavbar()">
+                  <fa-icon icon="book" [fixedWidth]="true"></fa-icon> <span>API</span>
+                </a>
+              </li>
+              <li class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" href="./h2-console/" target="_blank" (click)="collapseNavbar()">
+                  <fa-icon icon="database" [fixedWidth]="true"></fa-icon> <span>Database</span>
+                </a>
+              </li>
             </ul>
           </li>
         }

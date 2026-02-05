@@ -4,13 +4,6 @@
     <p>Gestisci e monitora lo stato delle tue prenotazioni con eleganza.</p>
   </div>
 
-  @if (isLoading) {
-    <div class="loader-overlay">
-      <div class="spinner-boardroom"></div>
-      <p>Caricamento in corso...</p>
-    </div>
-  }
-
   <div class="list-container">
     @for (pren of prenotazioni(); track pren.id) {
       <div class="event-card-wrapper" [class.is-expanded]="isExpanded(pren.id)">

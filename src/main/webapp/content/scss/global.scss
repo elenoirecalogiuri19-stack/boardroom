@@ -28,10 +28,20 @@ a:hover {
 /* ==========================================================================
    Generic Styles
    ========================================================================== */
+
 .jh-card {
-  padding: 1.5%;
-  margin-top: 20px;
-  border: none;
+  padding: 2rem;
+  /* Aumentato a 140px per "uscire" da sotto la Navbar da 120px */
+  margin-top: 140px !important;
+  border: 1px solid #f0f0f0;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+}
+
+.entity-container h2 {
+  margin-top: 140px;
+  padding-left: 1rem;
 }
 
 .error {
@@ -88,7 +98,7 @@ a:hover {
     position: fixed;
     width: 100%;
     &.top {
-      top: 55px;
+      top: 130px;
     }
     &.bottom {
       bottom: 55px;
@@ -146,7 +156,7 @@ a:hover {
     position: absolute;
     width: 20px;
     height: 20px;
-    top: calc(50% - 100px / 10); /* Centrato verticalmente */
+    top: calc(50% - 10px);
     left: calc(50% - 10px);
     border: 3px solid rgba(255, 255, 255, 0.3);
     border-top-color: #ffffff;
@@ -172,4 +182,8 @@ a:hover {
   to {
     transform: rotate(360deg);
   }
+}
+
+#jhi-load-bar {
+  display: none !important;
 }
