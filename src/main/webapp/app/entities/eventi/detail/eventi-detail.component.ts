@@ -27,6 +27,8 @@ export class EventiDetailComponent implements OnInit {
   private router = inject(Router);
 
   ngOnInit(): void {
+    window.scrollTo(0, 0);
+
     this.activatedRoute.data.subscribe(({ eventi }) => {
       this.eventi.set(eventi);
     });

@@ -7,8 +7,8 @@
 <div class="results-container" [class.blur-background]="showPrivacyModal">
   <aside class="sidebar">
     <button class="btn-back" (click)="tornaIndietro()" [disabled]="isLoading">
-      <fa-icon icon="arrow-left"></fa-icon>
-      Indietro
+      <fa-icon [icon]="faArrowLeft"></fa-icon>
+      <span>Indietro</span>
     </button>
 
     <div class="report-section">
@@ -37,7 +37,7 @@
             <h3 class="room-name">{{ item.nome }}</h3>
             <div class="room-meta">
               <div class="avatar-circle">
-                <fa-icon icon="door-open"></fa-icon>
+                <fa-icon [icon]="faDoorOpen"></fa-icon>
               </div>
               <div class="text-info">
                 <span class="info-title">Capienza: {{ item.capienza }} persone</span>
@@ -46,7 +46,9 @@
             </div>
           </div>
           <div class="card-action">
-            <button class="btn-book" (click)="apriSceltaPrivacy(item)" [disabled]="isLoading">Prenota</button>
+            <button class="btn-book" (click)="apriSceltaPrivacy(item)" [disabled]="isLoading">
+              <span>Prenota</span>
+            </button>
           </div>
         </div>
       }
@@ -54,4 +56,21 @@
   </main>
 </div>
 
-<div class="minimal-overlay" *ngIf="showPrivacyModal"></div>
+<div class="minimal-overlay" *ngIf="showPrivacyModal">
+  <div class="minimal-modal">
+    <button class="close-btn" (click)="showPrivacyModal = false">×</button>
+    <h2 class="modal-title">Privacy Evento</h2>
+    <p class="modal-subtitle">
+      Scegli la visibilità per <span>{{ salaSelezionata?.nome }}</span>
+    </p>
+
+    <div class="option-card" (click)="confermaEProcedi(true)">
+      <div class="option-info"><strong>Pubblico</strong></div>
+      <fa-icon [icon]="faChevronRight" class="arrow-icon"></fa-icon>
+    </div>
+    <div class="option-card" (click)="confermaEProcedi(false)">
+      <div class="option-info"><strong>Privato</strong></div>
+      <fa-icon [icon]="faChevronRight" class="arrow-icon"></fa-icon>
+    </div>
+  </div>
+</div>

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faArrowLeft, faDoorOpen, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { SaleApiService, ISalaDTO } from 'app/services/sale-api.service';
 import { PrenotazioniApiService } from 'app/services/prenotazioni-api.service';
 
@@ -20,6 +21,10 @@ export interface Sala {
   styleUrl: './risultati-sala.component.scss',
 })
 export class RisultatiSalaComponent implements OnInit {
+  faArrowLeft = faArrowLeft;
+  faDoorOpen = faDoorOpen;
+  faChevronRight = faChevronRight;
+
   dataRicerca = '';
   oraRicerca = '';
   capienzaRicerca = 0;
@@ -32,7 +37,7 @@ export class RisultatiSalaComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private saleApiService = inject(SaleApiService);
-  private prenotazioniApi = inject(PrenotazioniApiService); // Re-iniettato per creare la prenotazione
+  private prenotazioniApi = inject(PrenotazioniApiService);
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -93,7 +98,6 @@ export class RisultatiSalaComponent implements OnInit {
 
     this.isLoading = true;
     const parts = this.oraRicerca.split('-');
-
     if (parts.length < 2) {
       this.isLoading = false;
       return;

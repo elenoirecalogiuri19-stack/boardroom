@@ -21,6 +21,7 @@ $white: #ffffff;
 
 .sidebar {
   width: 240px;
+
   .btn-back {
     background: transparent;
     border: none;
@@ -33,12 +34,30 @@ $white: #ffffff;
     margin-bottom: 40px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     transition: all 0.3s ease;
-    &:hover {
+    position: relative;
+
+    &:hover:not(:disabled) {
       color: $br-green;
     }
+
+    &:disabled {
+      color: transparent !important;
+      &::after {
+        content: '';
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba($br-text-soft, 0.2);
+        border-top-color: $br-text-soft;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+    }
   }
+
   .report-section {
     padding-left: 15px;
     border-left: 1px solid $br-border;
@@ -101,6 +120,7 @@ $white: #ffffff;
     font-weight: 600;
     margin-bottom: 6px;
   }
+
   .room-meta {
     display: flex;
     align-items: center;
@@ -138,11 +158,33 @@ $white: #ffffff;
   text-transform: uppercase;
   cursor: pointer;
   min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.3s ease;
-  &:hover {
+  position: relative;
+
+  &:hover:not(:disabled) {
     background: $br-green;
     color: $white;
     transform: translateY(-2px);
+  }
+
+  &:disabled {
+    color: transparent !important;
+    cursor: not-allowed;
+    background: transparent !important;
+
+    &::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba($br-green, 0.2);
+      border-top-color: $br-green;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
   }
 }
 
@@ -244,10 +286,11 @@ $white: #ffffff;
 }
 
 @keyframes spin {
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
+
 @keyframes fadeIn {
   from {
     opacity: 0;
