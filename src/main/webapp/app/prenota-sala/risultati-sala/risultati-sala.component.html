@@ -7,9 +7,8 @@
 <div class="results-container" [class.blur-background]="showPrivacyModal">
   <aside class="sidebar">
     <button class="btn-back" (click)="tornaIndietro()" [disabled]="isLoading">
-      <fa-icon icon="arrow-left" *ngIf="!isLoading"></fa-icon>
-      <div class="loader-button" *ngIf="isLoading"></div>
-      {{ isLoading ? '' : 'Indietro' }}
+      <fa-icon icon="arrow-left"></fa-icon>
+      Indietro
     </button>
 
     <div class="report-section">
@@ -47,13 +46,7 @@
             </div>
           </div>
           <div class="card-action">
-            <button class="btn-book" (click)="apriSceltaPrivacy(item)" [disabled]="isLoading">
-              @if (isLoading) {
-                <div class="loader-button"></div>
-              } @else {
-                Prenota
-              }
-            </button>
+            <button class="btn-book" (click)="apriSceltaPrivacy(item)" [disabled]="isLoading">Prenota</button>
           </div>
         </div>
       }
@@ -61,43 +54,4 @@
   </main>
 </div>
 
-<div class="minimal-overlay" *ngIf="showPrivacyModal">
-  <div class="minimal-modal">
-    <button class="close-btn" (click)="showPrivacyModal = false">&times;</button>
-
-    <div class="modal-content">
-      <h2 class="modal-title">Tipo di evento</h2>
-      <p class="modal-subtitle">
-        Configura il tuo evento in <span>{{ salaSelezionata?.nome }}</span>
-      </p>
-
-      <div class="options-container">
-        <div class="option-card" (click)="confermaEProcedi(true)" [class.disabled]="isLoading">
-          <div class="option-info">
-            <strong>Evento Pubblico</strong>
-          </div>
-          <div class="action-zone">
-            @if (isLoading) {
-              <div class="minimal-spinner"></div>
-            } @else {
-              <span class="arrow-icon">→</span>
-            }
-          </div>
-        </div>
-
-        <div class="option-card" (click)="confermaEProcedi(false)" [class.disabled]="isLoading">
-          <div class="option-info">
-            <strong>Evento Privato</strong>
-          </div>
-          <div class="action-zone">
-            @if (isLoading) {
-              <div class="minimal-spinner"></div>
-            } @else {
-              <span class="arrow-icon">→</span>
-            }
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="minimal-overlay" *ngIf="showPrivacyModal"></div>

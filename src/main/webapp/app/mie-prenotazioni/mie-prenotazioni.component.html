@@ -15,10 +15,10 @@
         <div class="event-card-wrapper" [class.is-expanded]="isExpanded(pren.id)">
           <div class="event-card-row">
             <div class="action-column">
-              <button class="btn-action btn-edit" [routerLink]="['/eventi', pren.eventoId, 'edit']">
+              <button class="btn-action btn-edit" [routerLink]="['/eventi', pren.eventoId, 'edit']" [disabled]="isLoading">
                 <span>📝 Modifica</span>
               </button>
-              <button class="btn-action btn-delete" (click)="eliminaEvento(pren.id)">
+              <button class="btn-action btn-delete" (click)="eliminaEvento(pren.id)" [disabled]="isLoading">
                 <span>🗑️ Elimina</span>
               </button>
             </div>
