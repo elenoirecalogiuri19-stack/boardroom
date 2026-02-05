@@ -9,7 +9,7 @@
     <div class="profile-header">
       <div class="avatar-column">
         <div class="avatar-circle">
-          <fa-icon icon="user"></fa-icon>
+          <fa-icon [icon]="faUser"></fa-icon>
         </div>
       </div>
       <div class="title-column">
@@ -41,18 +41,20 @@
 
     <div class="secondary-actions">
       <button class="btn-light-green" routerLink="/storico-prenotazioni">
-        <fa-icon icon="history" class="me-2"></fa-icon>
+        <div class="spinner-border spinner-border-sm me-2" *ngIf="false"></div>
+        <fa-icon [icon]="faHistory" class="me-2"></fa-icon>
         <span>Storico prenotazioni</span>
       </button>
 
       <button class="btn-light-green" routerLink="/account/settings">
-        <fa-icon icon="cog" class="me-2"></fa-icon>
+        <div class="spinner-border spinner-border-sm me-2" *ngIf="false"></div>
+        <fa-icon [icon]="faCog" class="me-2"></fa-icon>
         <span>Impostazioni account</span>
       </button>
     </div>
 
     <div class="logout-wrapper">
-      <span class="logout-text-link" (click)="logout()">Logout</span>
+      <span class="logout-text-link" (click)="logout()" style="cursor: pointer">Logout</span>
     </div>
   </div>
 </div>

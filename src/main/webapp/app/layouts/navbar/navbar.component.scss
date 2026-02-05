@@ -1,62 +1,108 @@
-@import 'bootstrap/scss/functions';
-@import 'bootswatch/dist/flatly/variables';
-@import 'bootstrap/scss/variables';
+$br-green: #4a8c40;
+$br-dark: #334155;
+$br-soft: #64748b;
+$white: #ffffff;
+$nav-height: 120px;
 
-$boardroom-green: #28a745;
-$dark-grey: #444444;
+.boardroom-nav {
+  height: $nav-height !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(15px) !important;
+  -webkit-backdrop-filter: blur(15px) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 0 4% !important;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  z-index: 1030;
+}
 
-.navbar {
-  height: 120px !important;
-  min-height: 120px !important;
-  padding: 0 2rem !important;
-  background-color: #ffffff !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+.navbar-brand.logo {
+  padding: 0 !important;
+  margin-right: 30px;
+  display: flex;
+  align-items: center;
+}
 
-  .navbar-nav {
-    align-items: center !important;
+.nav-logo {
+  height: 100px !important;
+  max-height: 100px !important;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease;
 
-    .nav-link {
-      color: $dark-grey !important;
-      font-weight: 700;
-      font-size: 18px !important;
-      height: 120px !important;
-      display: flex !important;
-      align-items: center !important;
-      transition: all 0.3s ease;
-      cursor: pointer;
+  &:hover {
+    transform: scale(1.02);
+  }
+}
 
-      &.active,
+.navbar-nav {
+  .nav-item {
+    padding: 0 15px;
+  }
+
+  .nav-link {
+    color: $br-dark !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    &:not(.login-link-green):not(.p-0)::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 3px;
+      background-color: $br-green;
+      transition: width 0.3s ease;
+    }
+
+    &:not(.login-link-green):hover,
+    &:not(.login-link-green).active {
+      color: $br-green !important;
+      &::after {
+        width: 100%;
+      }
+    }
+
+    &.login-link-green {
+      color: $br-green !important;
+      transition: all 0.2s ease;
+
+      fa-icon {
+        font-size: 1.1rem;
+      }
+
       &:hover {
-        color: $boardroom-green !important;
-        fa-icon {
-          color: $boardroom-green !important;
-        }
+        opacity: 0.7;
+        transform: translateY(-1px);
       }
     }
   }
 }
 
-.avatar-nav-circle {
+.avatar-nav-wrapper {
   width: 55px;
   height: 55px;
-  background-color: #f8f9fa;
-  border: 2px solid $boardroom-green;
   border-radius: 50%;
+  border: 2px solid $br-green;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  background: $white;
   transition: all 0.3s ease;
-  margin-left: 15px;
+  margin-left: 10px;
 
   &:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(40, 167, 69, 0.2);
-  }
-
-  fa-icon {
-    font-size: 1.4rem;
-    color: $boardroom-green;
+    transform: scale(1.08);
+    box-shadow: 0 4px 15px rgba($br-green, 0.2);
   }
 
   .profile-image-nav {
@@ -64,16 +110,11 @@ $dark-grey: #444444;
     height: 100%;
     object-fit: cover;
   }
-}
 
-.dropdown-toggle::after {
-  display: none !important;
-}
-
-.spinner-border-sm {
-  width: 1rem;
-  height: 1rem;
-  border-width: 0.15em;
+  .avatar-placeholder {
+    color: $br-green;
+    font-size: 1.2rem;
+  }
 }
 
 .dropdown-menu {
@@ -81,4 +122,11 @@ $dark-grey: #444444;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
   padding: 10px 0;
+}
+
+.navbar-toggler {
+  border: none;
+  &:focus {
+    box-shadow: none;
+  }
 }
