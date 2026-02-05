@@ -1,6 +1,7 @@
 package main.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -84,13 +85,8 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
             SELECT p
             FROM Prenotazioni p
             WHERE p.stato.codice = :stato
-              AND (p.data < :oggi
-                   OR (p.data = :oggi AND p.oraInizio < :oraLimite))
+              AND p.createdAt < :limite
         """
     )
-    List<Prenotazioni> findExpiredWaiting(
-        @Param("stato") StatoCodice stato,
-        @Param("oggi") LocalDate oggi,
-        @Param("oraLimite") LocalTime oraLimite
-    );
+    List<Prenotazioni> findExpiredWaiting(@Param("stato") StatoCodice stato, @Param("limite") LocalDateTime limite);
 }

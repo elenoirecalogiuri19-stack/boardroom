@@ -4,21 +4,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
-import main.domain.enumeration.TipoEvento;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * Entity class for Prenotazioni
  */
 @Entity
 @Table(name = "prenotazioni")
+@EntityListeners(AuditingEntityListener.class)
 public class Prenotazioni implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -56,6 +56,10 @@ public class Prenotazioni implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = { "prenotazionis" }, allowSetters = true)
     private Sale sala;
+
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     public UUID getId() {
         return id;
@@ -154,6 +158,14 @@ public class Prenotazioni implements Serializable {
     public Prenotazioni sala(Sale sala) {
         this.setSala(sala);
         return this;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     @Override

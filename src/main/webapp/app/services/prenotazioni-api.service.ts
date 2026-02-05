@@ -12,6 +12,7 @@ export interface PrenotazioneDTO {
   stato?: {
     id: string;
     codice: string;
+    descrizione: string;
   } | null;
   utente?: {
     id: string;
