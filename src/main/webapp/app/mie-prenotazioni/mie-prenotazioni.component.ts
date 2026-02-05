@@ -25,7 +25,7 @@ export class MiePrenotazioniComponent implements OnInit {
   caricaLeMiePrenotazioni(): void {
     this.isLoading = true;
     this.prenotazioniApi.getMiePrenotazioni().subscribe({
-      next: res => {
+      next: (res: PrenotazioneDTO[]) => {
         this.prenotazioni.set(res);
         this.isLoading = false;
       },

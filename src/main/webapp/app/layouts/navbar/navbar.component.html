@@ -53,7 +53,7 @@
         <li class="nav-item ms-lg-3">
           @let accountRef = account();
           @if (accountRef !== null) {
-            <a class="nav-link p-0" routerLink="/profilo-utente" (click)="collapseNavbar()" title="Vai al mio profilo">
+            <a class="nav-link p-0 profile-link-wrapper" routerLink="/profilo-utente" (click)="collapseNavbar()" title="Vai al mio profilo">
               <div class="avatar-nav-wrapper">
                 <img *ngIf="accountRef?.imageUrl" [src]="accountRef!.imageUrl" class="profile-image-nav" alt="Avatar" />
                 <div *ngIf="!accountRef?.imageUrl" class="avatar-placeholder">

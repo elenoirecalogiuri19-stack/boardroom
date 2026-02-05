@@ -7,7 +7,7 @@ $white: #ffffff;
 
 .results-container {
   display: flex;
-  padding: 60px 10%;
+  padding: 160px 10% 60px;
   gap: 70px;
   background-color: $br-bg;
   min-height: 100vh;
@@ -147,6 +147,7 @@ $white: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
 
   &:hover {
     background: $br-green;
@@ -165,7 +166,7 @@ $white: #ffffff;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000;
   animation: fadeIn 0.3s ease-out;
 }
 
@@ -244,6 +245,7 @@ $white: #ffffff;
   align-items: center;
   z-index: 9999;
 }
+
 .spinner-boardroom {
   width: 40px;
   height: 40px;
@@ -252,6 +254,7 @@ $white: #ffffff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
+
 .loader-button,
 .minimal-spinner {
   width: 18px;
@@ -261,6 +264,7 @@ $white: #ffffff;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
+
 @keyframes spin {
   100% {
     transform: rotate(360deg);

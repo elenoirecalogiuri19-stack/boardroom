@@ -6,24 +6,11 @@ $boardroom-green: #4a8c40;
   min-height: calc(100vh - 120px);
 }
 
-::ng-deep {
-  jhi-loading-indicator,
-  .spinner-border,
-  .mio-loader,
-  .loading,
-  .fa-spin,
-  .fa-spinner {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-  }
-}
-
 .login-wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 100px 20px;
+  padding: 160px 20px 80px;
 }
 
 .login-card {
@@ -80,8 +67,13 @@ $boardroom-green: #4a8c40;
   transition: all 0.3s;
   box-shadow: 0 8px 20px rgba(74, 140, 64, 0.2);
 
+  &:hover:not(:disabled) {
+    background-color: darken($boardroom-green, 5%) !important;
+    transform: translateY(-1px);
+  }
+
   &:disabled {
-    opacity: 0.8;
+    opacity: 0.6;
     cursor: not-allowed;
   }
 }
