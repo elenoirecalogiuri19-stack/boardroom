@@ -393,24 +393,29 @@ public class PrenotazioniService {
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void aggiornaPrenotazioniScadute() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDate oggi = now.toLocalDate();
-        LocalTime oraLimite = now.minusMinutes(5).toLocalTime();
+        LocalDateTime limite = LocalDateTime.now().minusMinutes(5);
 
-        List<Prenotazioni> scadute = prenotazioniRepository.findExpiredWaiting(StatoCodice.WAITING, oggi, oraLimite);
-
+        List<Prenotazioni> scadute = prenotazioniRepository.findExpiredWaiting(StatoCodice.WAITING, limite);
         if (scadute.isEmpty()) {
             return;
         }
 
-        StatiPrenotazione statoRejected = statiPrenotazioneRepository
+        StatiPrenotazione rejected = statiPrenotazioneRepository
             .findByCodice(StatoCodice.REJECTED)
             .orElseThrow(() -> new EntityNotFoundException("Stato REJECTED non trovato"));
 
-        for (Prenotazioni p : scadute) {
-            p.setStato(statoRejected);
-        }
+        scadute.forEach(p -> p.setStato(rejected));
 
         prenotazioniRepository.saveAll(scadute);
+
+        LOG.debug("Aggiornate {} prenotazioni da WAITING a REJECTED", scadute.size());
+
+        prenotazioniRepository.saveAll(scadute);
+    }
+
+    private StatiPrenotazione getRejectedState() {
+        return statiPrenotazioneRepository
+            .findByCodice(StatoCodice.REJECTED)
+            .orElseThrow(() -> new EntityNotFoundException("Stato REJECTED non trovato"));
     }
 }
