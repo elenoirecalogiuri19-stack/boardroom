@@ -53,7 +53,7 @@ public class StatiPrenotazioneResource {
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new statiPrenotazioneDTO, or with status {@code 400 (Bad Request)} if the statiPrenotazione has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<StatiPrenotazioneDTO> createStatiPrenotazione(@Valid @RequestBody StatiPrenotazioneDTO dto)
         throws URISyntaxException {
         LOG.debug("REST request to save StatiPrenotazione : {}", dto);
@@ -143,7 +143,7 @@ public class StatiPrenotazioneResource {
      *
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of statiPrenotaziones in body.
      */
-    @GetMapping("")
+    @GetMapping
     public List<StatiPrenotazioneDTO> getAllStatiPrenotaziones() {
         LOG.debug("REST request to get all StatiPrenotaziones");
         return statiPrenotazioneService.findAll();

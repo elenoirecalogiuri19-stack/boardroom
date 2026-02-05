@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -53,11 +54,13 @@ public class EventiResource {
         return eventiService.findPublicEventi();
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<EventiDTO> createEventi(@Valid @RequestBody EventiDTO eventiDTO) throws URISyntaxException {
         LOG.debug("REST request to save Eventi : {}", eventiDTO);
         validaNewEvento(eventiDTO);
+
         EventiDTO saved = eventiService.createEvento(eventiDTO);
+
         return ResponseEntity.created(new URI("/api/eventis/" + saved.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, saved.getId().toString()))
             .body(saved);
@@ -76,7 +79,9 @@ public class EventiResource {
     ) throws URISyntaxException {
         LOG.debug("REST request to update Eventi : {}, {}", id, eventiDTO);
         validaIdPerUpdate(id, eventiDTO);
+
         EventiDTO result = eventiService.update(eventiDTO);
+
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, result.getId().toString()))
             .body(result);
@@ -100,14 +105,16 @@ public class EventiResource {
         @NotNull @RequestBody EventiDTO eventiDTO
     ) throws URISyntaxException {
         validaIdPerUpdate(id, eventiDTO);
+
         Optional<EventiDTO> result = eventiService.partialUpdate(eventiDTO);
+
         return ResponseUtil.wrapOrNotFound(
             result,
             HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, eventiDTO.getId().toString())
         );
     }
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<EventiDTO>> getAllEventis(@org.springdoc.core.annotations.ParameterObject Pageable pageable) {
         Page<EventiDTO> page = eventiService.findAll(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);

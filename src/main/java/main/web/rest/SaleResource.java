@@ -24,7 +24,7 @@ public class SaleResource {
         this.saleService = saleService;
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<SaleDTO> createSale(@RequestBody SaleDTO saleDTO) {
         LOG.debug("REST request to save Sale : {}", saleDTO);
         SaleDTO result = saleService.save(saleDTO);
@@ -39,7 +39,7 @@ public class SaleResource {
         return ResponseEntity.ok().body(result);
     }
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<SaleDTO>> getAllSales() {
         LOG.debug("REST request to get all Sales");
         return ResponseEntity.ok().body(saleService.findAll(Pageable.unpaged()).getContent());
