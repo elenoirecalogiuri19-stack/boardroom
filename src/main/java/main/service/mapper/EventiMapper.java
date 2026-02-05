@@ -19,6 +19,7 @@ public interface EventiMapper extends EntityMapper<EventiDTO, Eventi> {
     @Mapping(source = "prenotazione.oraInizio", target = "oraInizio")
     @Mapping(source = "prenotazione.oraFine", target = "oraFine")
     @Mapping(source = "prenotazione.sala.nome", target = "salaNome")
+    @Mapping(source = "descrizione", target = "descrizione")
     EventiDTO toDto(Eventi s);
 
     List<EventiDTO> toDto(List<Eventi> eventiList);
