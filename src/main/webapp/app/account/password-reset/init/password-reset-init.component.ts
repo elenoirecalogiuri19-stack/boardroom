@@ -1,18 +1,21 @@
 import { AfterViewInit, Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import SharedModule from 'app/shared/shared.module';
-
 import { PasswordResetInitService } from './password-reset-init.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'jhi-password-reset-init',
-  imports: [SharedModule, FormsModule, ReactiveFormsModule],
+  standalone: true,
+  imports: [SharedModule, FormsModule, ReactiveFormsModule, RouterModule],
   templateUrl: './password-reset-init.component.html',
+  styleUrl: './password-reset-init.component.scss',
 })
 export default class PasswordResetInitComponent implements AfterViewInit {
-  email = viewChild.required<ElementRef>('email');
+  emailInput = viewChild<ElementRef>('email');
 
   success = signal(false);
+  isLoading = signal(false);
   resetRequestForm;
 
   private readonly passwordResetInitService = inject(PasswordResetInitService);
@@ -25,10 +28,17 @@ export default class PasswordResetInitComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.email().nativeElement.focus();
+    this.emailInput()?.nativeElement.focus();
   }
 
   requestReset(): void {
-    this.passwordResetInitService.save(this.resetRequestForm.get(['email'])!.value).subscribe(() => this.success.set(true));
+    this.isLoading.set(true);
+    this.passwordResetInitService.save(this.resetRequestForm.get(['email'])!.value).subscribe({
+      next: () => {
+        this.success.set(true);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false),
+    });
   }
 }

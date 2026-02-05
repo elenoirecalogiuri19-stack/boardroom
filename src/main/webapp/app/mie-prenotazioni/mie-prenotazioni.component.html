@@ -5,90 +5,87 @@
   </div>
 
   @if (isLoading) {
-    <div class="loader-container">
+    <div class="loader-overlay">
       <div class="spinner-boardroom"></div>
       <p>Caricamento in corso...</p>
     </div>
-  } @else {
-    <div class="list-container">
-      @for (pren of prenotazioni(); track pren.id) {
-        <div class="event-card-wrapper" [class.is-expanded]="isExpanded(pren.id)">
-          <div class="event-card-row">
-            <div class="action-column">
-              <button class="btn-action btn-edit" [routerLink]="['/eventi', pren.eventoId, 'edit']">
-                <span>📝 Modifica</span>
-              </button>
-              <button class="btn-action btn-delete" (click)="eliminaEvento(pren.id)">
-                <span>🗑️ Elimina</span>
-              </button>
+  }
+
+  <div class="list-container">
+    @for (pren of prenotazioni(); track pren.id) {
+      <div class="event-card-wrapper" [class.is-expanded]="isExpanded(pren.id)">
+        <div class="event-card-row">
+          <div class="action-column">
+            <button class="btn-action btn-edit" [routerLink]="['/eventi', pren.eventoId, 'edit']">
+              <span>📝 Modifica</span>
+            </button>
+            <button class="btn-action btn-delete" (click)="eliminaEvento(pren.id)">
+              <span>🗑️ Elimina</span>
+            </button>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-group">
+              <span class="label">Evento</span>
+              <span class="value title-highlight">{{ pren.evento?.titolo || 'N/A' }}</span>
             </div>
-
-            <div class="info-grid">
-              <div class="info-group">
-                <span class="label">Evento</span>
-                <span class="value title-highlight">{{ pren.evento?.titolo || 'N/A' }}</span>
-              </div>
-
-              <div class="info-group">
-                <span class="label">Location</span>
-                <span class="value">📍 {{ pren.sala?.nome || 'N/A' }}</span>
-              </div>
-
-              <div class="info-group">
-                <span class="label">Data e Ora</span>
-                <div class="value">
-                  <span class="d-block">{{ pren.data | date: 'dd MMM yyyy' }}</span>
-                  <span class="time-sub">{{ pren.oraInizio }} - {{ pren.oraFine }}</span>
-                </div>
-              </div>
-
-              <div class="info-group">
-                <span class="label">Stato</span>
-                <span class="status-pill" [attr.data-status]="pren.stato?.codice?.toLowerCase()">
-                  {{ pren.stato?.codice || 'N/D' }}
-                </span>
+            <div class="info-group">
+              <span class="label">Location</span>
+              <span class="value">📍 {{ pren.sala?.nome || 'N/A' }}</span>
+            </div>
+            <div class="info-group">
+              <span class="label">Data e Ora</span>
+              <div class="value">
+                <span class="d-block">{{ pren.data | date: 'dd MMM yyyy' }}</span>
+                <span class="time-sub">{{ pren.oraInizio }} - {{ pren.oraFine }}</span>
               </div>
             </div>
-
-            <div class="arrow-column" (click)="toggleDetails(pren.id)">
-              <div class="arrow-circle" [class.rotated]="isExpanded(pren.id)">
-                <span class="arrow-icon">▼</span>
-              </div>
+            <div class="info-group">
+              <span class="label">Stato</span>
+              <span class="status-pill" [attr.data-status]="pren.stato?.codice?.toLowerCase()">
+                {{ pren.stato?.codice || 'N/D' }}
+              </span>
             </div>
           </div>
 
-          @if (isExpanded(pren.id)) {
-            <div class="details-drawer">
-              <div class="drawer-inner">
-                <div class="detail-block">
-                  <span class="label">Descrizione Evento</span>
-                  <p class="description-text">
-                    {{ pren.evento?.descrizione || 'Nessuna descrizione disponibile per questo evento.' }}
-                  </p>
-                </div>
+          <div class="arrow-column" (click)="toggleDetails(pren.id)">
+            <div class="arrow-circle" [class.rotated]="isExpanded(pren.id)">
+              <span class="arrow-icon">▼</span>
+            </div>
+          </div>
+        </div>
 
-                <div class="meta-footer">
+        @if (isExpanded(pren.id)) {
+          <div class="details-drawer">
+            <div class="drawer-inner">
+              <div class="detail-block">
+                <span class="label">Descrizione Evento</span>
+                <p class="description-text">
+                  {{ pren.evento?.descrizione || 'Nessuna descrizione disponibile per questo evento.' }}
+                </p>
+              </div>
+              <div class="meta-footer">
+                <div class="meta-item">
+                  <span class="label">Tipologia</span>
+                  <span class="badge-type">{{ pren.evento?.tipo || 'PRIVATO' }}</span>
+                </div>
+                @if (pren.evento?.tipo === 'PUBBLICO' || (pren.evento?.prezzo ?? 0) > 0) {
                   <div class="meta-item">
-                    <span class="label">Tipologia</span>
-                    <span class="badge-type">{{ pren.evento?.tipo || 'PRIVATO' }}</span>
+                    <span class="label">Prezzo</span>
+                    <span class="price-tag">€ {{ pren.evento?.prezzo | number: '1.2-2' }}</span>
                   </div>
-
-                  @if (pren.evento?.tipo === 'PUBBLICO' || (pren.evento?.prezzo ?? 0) > 0) {
-                    <div class="meta-item">
-                      <span class="label">Prezzo</span>
-                      <span class="price-tag">€ {{ pren.evento?.prezzo | number: '1.2-2' }}</span>
-                    </div>
-                  }
-                </div>
+                }
               </div>
             </div>
-          }
-        </div>
-      } @empty {
+          </div>
+        }
+      </div>
+    } @empty {
+      @if (!isLoading) {
         <div class="empty-state">
           <p>Nessuna prenotazione trovata nel tuo archivio.</p>
         </div>
       }
-    </div>
-  }
+    }
+  </div>
 </div>
