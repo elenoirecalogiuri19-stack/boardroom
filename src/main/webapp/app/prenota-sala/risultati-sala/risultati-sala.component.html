@@ -1,7 +1,14 @@
 <div class="results-container" [class.blur-background]="showPrivacyModal">
+  @if (isLoading) {
+    <div class="global-loader-overlay">
+      <div class="spinner-boardroom"></div>
+    </div>
+  }
+
   <aside class="sidebar">
-    <button class="btn-back" (click)="tornaIndietro()" [class.btn-loading]="isLoading" [disabled]="isLoading">
+    <button class="btn-back" (click)="tornaIndietro()" [disabled]="isLoading">
       <fa-icon icon="arrow-left" *ngIf="!isLoading"></fa-icon>
+      <div class="loader-button" *ngIf="isLoading"></div>
       {{ isLoading ? '' : 'Indietro' }}
     </button>
 
@@ -38,7 +45,8 @@
             </div>
           </div>
           <div class="card-action">
-            <button class="btn-book" (click)="apriSceltaPrivacy(item)" [class.btn-loading]="isLoading" [disabled]="isLoading">
+            <button class="btn-book" (click)="apriSceltaPrivacy(item)" [disabled]="isLoading">
+              <div class="loader-button" *ngIf="isLoading"></div>
               {{ isLoading ? '' : 'Prenota' }}
             </button>
           </div>

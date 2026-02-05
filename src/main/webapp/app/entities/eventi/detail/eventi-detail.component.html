@@ -1,80 +1,44 @@
 <div class="detail-container">
-  @if (eventi(); as eventiRef) {
-    <div class="main-card shadow-sm">
-      <div class="image-section">
-        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=600" alt="Sala Boardroom" class="main-img" />
-        <div class="type-badge">
-          {{ eventiRef.tipo }}
-        </div>
-      </div>
-
-      <div class="content-section">
-        <div class="header-content">
-          <h1 class="event-title">{{ eventiRef.titolo }}</h1>
-          <p class="price-tag">
-            {{ eventiRef.prezzo | currency: 'EUR' : 'symbol' : '1.0-2' }}
-          </p>
-        </div>
-
-        <div class="info-grid">
-          <div class="info-item">
-            <label>SALA</label>
-            <p>{{ eventiRef.salaNome }}</p>
-          </div>
-
-          <div class="info-item">
-            <label>DATA E ORA</label>
-            <p>{{ eventiRef.data }}</p>
-            <p>Ora inizio {{ eventiRef.oraInizio }} | Ora fine {{ eventiRef.oraFine }}</p>
-          </div>
-        </div>
-
-        <div class="description-box">
-          <label>DESCRIZIONE</label>
-          <p>{{ eventiRef.descrizione }}</p>
-        </div>
-
-        <div class="actions-wrapper">
-          <button (click)="previousState()" class="btn-back" [disabled]="isLoading">
-            <span *ngIf="!isLoading">INDIETRO</span>
-            <div *ngIf="isLoading" class="loader-dark"></div>
-          </button>
-
-          <button class="btn-book" (click)="apriModal()" [disabled]="isLoading">
-            <span *ngIf="!isLoading">PRENOTA IL TUO POSTO</span>
-            <div *ngIf="isLoading" class="loader-white"></div>
-          </button>
-        </div>
-      </div>
+  @if (isLoading) {
+    <div class="global-loader-overlay">
+      <div class="spinner-boardroom"></div>
     </div>
   }
 
-  @if (showModal) {
-    <div class="modal-overlay">
-      <div class="modal-card">
-        <button class="btn-close" (click)="chiudiModal()">×</button>
+  @if (eventi(); as eventiRef) {
+    <div class="compact-card">
+      <div class="side-image">
+        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=400" alt="Sala" />
+        <div class="type-tag">{{ eventiRef.tipo }}</div>
+      </div>
 
-        <div class="modal-header">
-          <h2>Prenota il tuo posto</h2>
-          <p>Inserisci i tuoi dati per ricevere il biglietto</p>
+      <div class="main-content">
+        <div class="top-row">
+          <h1 class="event-title">{{ eventiRef.titolo }}</h1>
+          <span class="price-badge">{{ eventiRef.prezzo | currency: 'EUR' : 'symbol' : '1.0-2' }}</span>
         </div>
 
-        <form #prenotazioneForm="ngForm" class="modal-body">
-          <div class="input-group">
-            <input type="text" name="nome" [(ngModel)]="prenotazione.nome" placeholder="Nome" required />
+        <div class="info-strip">
+          <div class="info-bit">
+            <span class="label">SALA</span>
+            <span class="value">{{ eventiRef.salaNome }}</span>
           </div>
-          <div class="input-group">
-            <input type="text" name="cognome" [(ngModel)]="prenotazione.cognome" placeholder="Cognome" required />
+          <div class="info-bit">
+            <span class="label">QUANDO</span>
+            <span class="value">{{ eventiRef.data }}</span>
+            <small>{{ eventiRef.oraInizio }} - {{ eventiRef.oraFine }}</small>
           </div>
-          <div class="input-group">
-            <input type="email" name="email" [(ngModel)]="prenotazione.email" placeholder="Email" required email />
-          </div>
+        </div>
 
-          <button class="btn-confirm" (click)="confermaPrenotazione()" [disabled]="isLoading || prenotazioneForm.invalid">
-            <span *ngIf="!isLoading">Conferma</span>
-            <div *ngIf="isLoading" class="loader-white"></div>
-          </button>
-        </form>
+        <div class="desc-box">
+          <span class="label">DESCRIZIONE</span>
+          <p>{{ eventiRef.descrizione }}</p>
+        </div>
+
+        <div class="button-row">
+          <button (click)="previousState()" class="btn-text">INDIETRO</button>
+          <button class="btn-br-action" (click)="apriModal()">PRENOTA POSTO</button>
+        </div>
       </div>
     </div>
   }

@@ -1,14 +1,23 @@
 <div class="booking-container">
-  <h2 class="title-green">Prenota sala</h2>
+  @if (caricamento) {
+    <div class="global-loader-overlay">
+      <div class="spinner-boardroom"></div>
+    </div>
+  }
+
+  <div class="header-section">
+    <h2 class="title-green">Prenota la tua Sala</h2>
+    <p class="subtitle">Seleziona i dettagli per la scelta della sala</p>
+  </div>
 
   <div class="search-bar-card">
     <div class="input-group-custom">
-      <label for="data">Data</label>
+      <label for="data">DATA</label>
       <input id="data" type="date" class="form-control-br" [(ngModel)]="dataSelezionata" />
     </div>
 
     <div class="input-group-custom">
-      <label for="ora">Ora</label>
+      <label for="ora">ORARIO</label>
       <select id="ora" class="form-control-br" [(ngModel)]="oraSelezionata">
         <option value="" disabled selected>Seleziona fascia</option>
         @for (ora of orari; track ora) {
@@ -17,10 +26,10 @@
       </select>
     </div>
 
-    <div class="input-group-custom">
+    <div class="input-group-custom range-group">
       <div class="label-box">
-        <span class="label">Capienza</span>
-        <span class="value-badge">{{ capienza }}</span>
+        <span class="label">CAPIENZA</span>
+        <span class="value-badge">{{ capienza }} PERSONE</span>
       </div>
 
       <input id="capienza" type="range" min="0" max="100" class="form-range-br" [(ngModel)]="capienza" />
@@ -32,13 +41,7 @@
     </div>
 
     <div class="button-group">
-      <button class="btn-conferma" [disabled]="caricamento" (click)="confermaPrenotazione()">
-        @if (!caricamento) {
-          <span>Conferma</span>
-        } @else {
-          <div class="loader-white"></div>
-        }
-      </button>
+      <button class="btn-conferma-br" [disabled]="caricamento" (click)="confermaPrenotazione()">CONFERMA</button>
     </div>
   </div>
 </div>

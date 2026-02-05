@@ -33,35 +33,19 @@ export class RisultatiSalaComponent implements OnInit {
 
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private ricercaService = inject(RicercaService);
   private saleApiService = inject(SaleApiService);
-  private prenotazioniApi = inject(PrenotazioniApiService);
-  private accountService = inject(AccountService);
-  private account: any;
 
   ngOnInit(): void {
-    this.accountService.identity().subscribe(acc => {
-      this.account = acc;
-    });
-
     this.route.queryParams.subscribe(params => {
       this.dataRicerca = params['data'] ?? '';
       this.oraRicerca = params['ora'] ?? '';
       this.capienzaRicerca = Number(params['capienza'] ?? 0);
-
       this.caricaSaleDisponibili();
-
-      if (params['apriModal'] === 'true' && params['salaId']) {
-        this.gestisciRiaperturaModal(params['salaId']);
-      }
     });
   }
 
   tornaIndietro(): void {
-    this.isLoading = true;
-    this.router.navigate(['/prenota-sala']).then(() => {
-      this.isLoading = false;
-    });
+    this.router.navigate(['/prenota-sala']);
   }
 
   apriSceltaPrivacy(sala: Sala): void {
@@ -72,86 +56,48 @@ export class RisultatiSalaComponent implements OnInit {
   confermaEProcedi(isPubblico: boolean): void {
     if (!this.salaSelezionata) return;
 
+    this.showPrivacyModal = false;
     this.isLoading = true;
 
-    const sala = this.salaSelezionata;
-    const [oraInizio, oraFine] = this.oraRicerca.split('-').map(o => o.trim());
-
-    const payload = {
-      data: this.dataRicerca,
-      oraInizio: this.normalizzaOra(oraInizio),
-      oraFine: this.normalizzaOra(oraFine),
-      salaId: sala.id,
-    };
-
-    this.prenotazioniApi.creaPrenotazione(payload).subscribe({
-      next: pren => {
-        this.showPrivacyModal = false;
-
-        this.router
-          .navigate(['/prenota-sala/crea-evento'], {
-            queryParams: {
-              salaId: sala.id,
-              nomeSala: sala.nome,
-              data: this.dataRicerca,
-              ora: this.oraRicerca,
-              pubblico: isPubblico,
-              prenotazioneId: pren.id,
-            },
-          })
-          .finally(() => (this.isLoading = false));
-      },
-      error: err => {
-        console.error('Errore creazione prenotazione:', err);
+    this.router
+      .navigate(['/prenota-sala/crea-evento'], {
+        queryParams: {
+          salaId: this.salaSelezionata.id,
+          nomeSala: this.salaSelezionata.nome,
+          data: this.dataRicerca,
+          ora: this.oraRicerca,
+          pubblico: isPubblico,
+        },
+      })
+      .then(() => {
         this.isLoading = false;
-      },
-    });
-  }
-
-  private gestisciRiaperturaModal(idSala: string): void {
-    const checkSale = setInterval(() => {
-      if (!this.isLoading && this.sale.length > 0) {
-        const sala = this.sale.find(s => s.id === idSala);
-        if (sala) {
-          this.apriSceltaPrivacy(sala);
-        }
-        clearInterval(checkSale);
-      }
-    }, 100);
-
-    setTimeout(() => clearInterval(checkSale), 3000);
+      });
   }
 
   private caricaSaleDisponibili(): void {
     if (!this.dataRicerca || !this.oraRicerca) return;
 
-    const parts = this.oraRicerca.split('-');
-    if (parts.length !== 2) return;
-
     this.isLoading = true;
+    const parts = this.oraRicerca.split('-');
     const inizio = this.normalizzaOra(parts[0].trim());
     const fine = this.normalizzaOra(parts[1].trim());
 
     this.saleApiService.getSaleDisponibili(this.dataRicerca, inizio, fine, this.capienzaRicerca).subscribe({
       next: (saleDto: ISalaDTO[]) => {
         this.sale = saleDto.map(s => ({
-          id: s.id,
-          nome: s.nome,
-          capienza: s.capienza,
+          ...s,
+          id: s.id.toString(),
+          nome: s.nome || 'Sala Executive',
+          capienza: s.capienza || 0,
         }));
         this.isLoading = false;
       },
-      error: err => {
-        console.error('Errore nel caricamento sale:', err);
-        this.isLoading = false;
-      },
+      error: () => (this.isLoading = false),
     });
   }
 
   private normalizzaOra(ora: string): string {
     const [h, m] = ora.split(':');
-    const hh = h.padStart(2, '0');
-    const mm = m ?? '00';
-    return `${hh}:${mm}`;
+    return `${h.padStart(2, '0')}:${m ?? '00'}`;
   }
 }
