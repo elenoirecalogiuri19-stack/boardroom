@@ -4,10 +4,10 @@ $br-text-main: #475569;
 $br-label-color: #94a3b8;
 $br-border-lux: #e2e8f0;
 $input-bg-soft: #fcfdfe;
-$bg-global: #f8fafc;
+$bg-global: #ffffff;
 
 .booking-container {
-  padding: 80px 20px;
+  padding: 160px 20px 80px;
   background-color: $bg-global;
   min-height: 100vh;
   display: flex;
@@ -170,6 +170,10 @@ $bg-global: #f8fafc;
   transition: all 0.3s ease;
   min-width: 160px;
   height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 
   &:hover:not(:disabled) {
     background-color: darken($br-green, 5%);
@@ -180,6 +184,7 @@ $bg-global: #f8fafc;
   &:disabled {
     background-color: #cbd5e1;
     cursor: not-allowed;
+    transform: none;
   }
 }
 

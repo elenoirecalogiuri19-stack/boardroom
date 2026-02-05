@@ -3,10 +3,20 @@ $br-dark: #1a252f;
 $text-muted: #8e9aaf;
 $bg-white: #ffffff;
 
+$status-confirm-bg: #e8f5e9;
+$status-confirm-text: #2e7d32;
+$status-cancel-bg: #fdecea;
+$status-cancel-text: #d32f2f;
+$status-reject-bg: #fff9c4;
+$status-reject-text: #f57f17;
+$status-wait-bg: #f1f5f9;
+$status-wait-text: #475569;
+
 .mie-prenotazioni-container {
-  padding: 60px 20px;
+  padding: 160px 20px 60px;
   background-color: $bg-white;
   min-height: 100vh;
+  position: relative;
 
   .header-section {
     text-align: center;
@@ -24,6 +34,34 @@ $bg-white: #ffffff;
   }
 }
 
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+
+  .spinner-boardroom {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba($br-success, 0.1);
+    border-top-color: $br-success;
+    border-radius: 50%;
+    animation: spin 1s infinite linear;
+    margin-bottom: 15px;
+  }
+  p {
+    color: $br-success;
+    font-weight: 700;
+  }
+}
+
 .event-card-wrapper {
   background: white;
   border-radius: 20px;
@@ -31,11 +69,9 @@ $bg-white: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.05);
   transition: all 0.4s ease;
   overflow: hidden;
-
   &:hover {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
   }
-
   &.is-expanded {
     border-color: $br-success;
   }
@@ -54,7 +90,6 @@ $bg-white: #ffffff;
   gap: 25px;
   padding: 0 30px;
   border-left: 1px solid #f1f5f9;
-
   .info-group {
     display: flex;
     flex-direction: column;
@@ -74,40 +109,40 @@ $bg-white: #ffffff;
       color: $br-success;
       font-weight: 700;
     }
-    .time-sub {
-      font-size: 0.8rem;
-      color: $text-muted;
-    }
   }
 }
 
 .status-pill {
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 800;
   text-transform: uppercase;
-  width: fit-content;
-
-  background: #f1f5f9;
-  color: #64748b;
+  letter-spacing: 0.5px;
+  display: inline-block;
 
   &[data-status='confirmed'],
   &[data-status='confermata'] {
-    background: #e8f5e9;
-    color: #2e7d32;
+    background: $status-confirm-bg;
+    color: $status-confirm-text;
   }
 
   &[data-status='cancelled'],
   &[data-status='annullata'] {
-    background: #fdecea;
-    color: #d32f2f;
+    background: $status-cancel-bg;
+    color: $status-cancel-text;
   }
 
   &[data-status='rejected'],
   &[data-status='rifiutata'] {
-    background: #fff9c4;
-    color: #f57f17;
+    background: $status-reject-bg;
+    color: $status-reject-text;
+  }
+
+  &[data-status='waiting'],
+  &[data-status='attesa'] {
+    background: $status-wait-bg;
+    color: $status-wait-text;
   }
 }
 
@@ -115,7 +150,6 @@ $bg-white: #ffffff;
   display: flex;
   flex-direction: column;
   gap: 8px;
-
   .btn-action {
     padding: 7px 12px;
     border-radius: 8px;
@@ -124,23 +158,13 @@ $bg-white: #ffffff;
     cursor: pointer;
     background: transparent;
     transition: 0.2s;
-    border: 1px solid transparent;
-
     &.btn-edit {
       color: $br-success;
-      border-color: rgba($br-success, 0.2);
-      &:hover {
-        background: $br-success;
-        color: white;
-      }
+      border: 1px solid rgba($br-success, 0.2);
     }
     &.btn-delete {
       color: #e74c3c;
-      border-color: rgba(#e74c3c, 0.2);
-      &:hover {
-        background: #e74c3c;
-        color: white;
-      }
+      border: 1px solid rgba(#e74c3c, 0.2);
     }
   }
 }
@@ -158,11 +182,6 @@ $bg-white: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: 0.3s;
-    .arrow-icon {
-      font-size: 0.7rem;
-      transition: 0.3s;
-    }
     &.rotated {
       background: $br-success;
       color: white;
@@ -177,35 +196,10 @@ $bg-white: #ffffff;
   background: #fafbfc;
   border-top: 1px solid #f1f5f9;
   padding: 25px 30px;
-  animation: slideDown 0.3s ease-out;
-}
-
-.loader-container {
-  text-align: center;
-  padding: 80px;
-  .spinner-boardroom {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba($br-success, 0.1);
-    border-top-color: $br-success;
-    border-radius: 50%;
-    animation: spin 1s infinite linear;
-    margin: 0 auto 15px;
-  }
 }
 
 @keyframes spin {
   to {
     transform: rotate(360deg);
-  }
-}
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
