@@ -1,9 +1,13 @@
-$br-green: #28a745;
-$bg-light: #f8f9fa;
+$br-green: #4a8c40;
+$br-green-pale: #f0fdf4;
+$br-text-dark: #334155;
+$br-text-soft: #64748b;
+$br-border: #f1f5f9;
+$white: #ffffff;
 
 .storico-container {
   max-width: 850px;
-  margin: 50px auto;
+  margin: 150px auto 50px;
   padding: 0 20px;
 }
 
@@ -17,10 +21,11 @@ $bg-light: #f8f9fa;
     padding: 8px 24px;
     border-radius: 50px;
     background: #eeeeee;
-    color: #666;
-    font-weight: 600;
+    color: $br-text-soft;
+    font-weight: 700;
     font-size: 14px;
     transition: 0.3s;
+    cursor: pointer;
 
     &.active {
       background: $br-green;
@@ -40,7 +45,7 @@ $bg-light: #f8f9fa;
   top: 0;
   bottom: 0;
   width: 2px;
-  background-color: #e0e0e0;
+  background-color: $br-border;
 }
 
 .timeline-item {
@@ -54,54 +59,62 @@ $bg-light: #f8f9fa;
     transform: translateY(-50%);
     width: 14px;
     height: 14px;
-    background-color: #999;
+    background-color: $white;
+    border: 3px solid $br-green;
     border-radius: 50%;
     z-index: 5;
   }
 }
 
 .booking-card {
-  background: #f4f4f4;
+  background: $white;
   border-radius: 20px;
   padding: 25px 35px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid transparent;
+  border: 1px solid $br-border;
   transition: 0.3s;
 
   &:hover {
-    border-color: #ddd;
-    background: #eeeeee;
+    border-color: rgba($br-green, 0.3);
+    transform: translateX(5px);
   }
 
   .date-label {
     font-size: 13px;
-    color: #888;
-    font-weight: 700;
+    color: $br-green;
+    font-weight: 800;
     margin-bottom: 5px;
-    text-transform: capitalize;
+    text-transform: uppercase;
   }
 
   .room-title {
     font-size: 24px;
     font-weight: 850;
     margin: 0;
-    color: #333;
+    color: $br-text-dark;
   }
 
   .time-range {
     font-size: 15px;
-    color: #555;
+    color: $br-text-soft;
     margin-top: 4px;
+    font-weight: 600;
   }
 }
 
 .status-badge {
-  background: #cccccc;
-  color: white;
-  padding: 6px 18px;
+  background: $br-green-pale;
+  color: $br-green;
+  padding: 8px 20px;
   border-radius: 50px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.empty-msg {
+  color: $br-text-soft;
+  font-weight: 600;
 }

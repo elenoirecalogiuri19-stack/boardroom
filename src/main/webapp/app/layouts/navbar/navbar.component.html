@@ -1,7 +1,7 @@
-<nav data-cy="navbar" class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+<nav data-cy="navbar" class="navbar navbar-expand-md fixed-top boardroom-nav">
   <div class="container-fluid">
     <a class="navbar-brand logo" routerLink="/" (click)="collapseNavbar()">
-      <img src="content/images/logo-jhipster.png" alt="Boardroom Logo" style="max-height: 80px; width: auto" />
+      <img src="content/images/logo-jhipster.png" alt="Boardroom Logo" class="nav-logo" />
     </a>
 
     <button
@@ -16,74 +16,54 @@
     </button>
 
     <div class="navbar-collapse collapse" id="navbarResponsive" [ngbCollapse]="isNavbarCollapsed()">
-      <ul class="navbar-nav ms-auto">
+      <ul class="navbar-nav ms-auto align-items-center">
         <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <a class="nav-link" routerLink="/" (click)="collapseNavbar()">
-            <fa-icon icon="home" class="me-1"></fa-icon>
             <span>Home</span>
           </a>
         </li>
 
-        <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <li class="nav-item" routerLinkActive="active">
           <a class="nav-link" (click)="navigazioneProtetta('/prenota-sala')" style="cursor: pointer">
-            <fa-icon icon="calendar-alt" class="me-1"></fa-icon>
             <span>Prenota sala</span>
           </a>
         </li>
 
-        <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <li class="nav-item" routerLinkActive="active">
           <a class="nav-link" (click)="navigazioneProtetta('/mie-prenotazioni')" style="cursor: pointer">
-            <fa-icon icon="list" class="me-1"></fa-icon> <span>Le mie prenotazioni</span>
+            <span>Le mie prenotazioni</span>
           </a>
         </li>
 
         @if (hasAnyAuthority('ROLE_ADMIN')) {
           <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" routerLinkActive="active">
-            <a class="nav-link dropdown-toggle" ngbDropdownToggle href="javascript:void(0);" id="entity-menu">
-              <fa-icon icon="th-list" class="me-1"></fa-icon>
-              <span>Entità</span>
+            <a class="nav-link dropdown-toggle admin-link" ngbDropdownToggle href="javascript:void(0);" id="entity-menu">
+              <span>Amministrazione</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end" ngbDropdownMenu aria-labelledby="entity-menu">
-              <li>
-                <a class="dropdown-item" routerLink="/sale" (click)="collapseNavbar()"><fa-icon icon="asterisk"></fa-icon> Sale</a>
-              </li>
-              <li>
-                <a class="dropdown-item" routerLink="/utenti" (click)="collapseNavbar()"><fa-icon icon="asterisk"></fa-icon> Utenti</a>
-              </li>
-              <li>
-                <a class="dropdown-item" routerLink="/stati-prenotazione" (click)="collapseNavbar()"
-                  ><fa-icon icon="asterisk"></fa-icon> Stati</a
-                >
-              </li>
-              <li>
-                <a class="dropdown-item" routerLink="/prenotazioni" (click)="collapseNavbar()"
-                  ><fa-icon icon="asterisk"></fa-icon> Prenotazioni</a
-                >
-              </li>
-              <li>
-                <a class="dropdown-item" routerLink="/eventi" (click)="collapseNavbar()"><fa-icon icon="asterisk"></fa-icon> Eventi</a>
-              </li>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg" ngbDropdownMenu aria-labelledby="entity-menu">
+              <li><a class="dropdown-item" routerLink="/sale" (click)="collapseNavbar()">Sale</a></li>
+              <li><a class="dropdown-item" routerLink="/utenti" (click)="collapseNavbar()">Utenti</a></li>
+              <li><a class="dropdown-item" routerLink="/stati-prenotazione" (click)="collapseNavbar()">Stati</a></li>
+              <li><a class="dropdown-item" routerLink="/prenotazioni" (click)="collapseNavbar()">Prenotazioni</a></li>
+              <li><a class="dropdown-item" routerLink="/eventi" (click)="collapseNavbar()">Eventi</a></li>
             </ul>
           </li>
         }
 
-        <li class="nav-item" routerLinkActive="active">
+        <li class="nav-item ms-lg-3">
           @let accountRef = account();
           @if (accountRef !== null) {
-            <a
-              class="nav-link d-flex align-items-center"
-              routerLink="/profilo-utente"
-              (click)="collapseNavbar()"
-              title="Vai al mio profilo"
-            >
-              <div class="avatar-nav-circle">
+            <a class="nav-link p-0" routerLink="/profilo-utente" (click)="collapseNavbar()" title="Vai al mio profilo">
+              <div class="avatar-nav-wrapper">
                 <img *ngIf="accountRef?.imageUrl" [src]="accountRef!.imageUrl" class="profile-image-nav" alt="Avatar" />
-                <fa-icon icon="user" *ngIf="!accountRef?.imageUrl"></fa-icon>
+                <div *ngIf="!accountRef?.imageUrl" class="avatar-placeholder">
+                  <fa-icon icon="user"></fa-icon>
+                </div>
               </div>
             </a>
           } @else {
-            <a class="nav-link d-flex align-items-center" (click)="login()" style="cursor: pointer">
-              <fa-icon icon="user" class="me-1"></fa-icon>
+            <a class="nav-link login-link-green" (click)="login()" style="cursor: pointer">
+              <fa-icon icon="user" class="me-2"></fa-icon>
               <span>Accedi</span>
             </a>
           }
