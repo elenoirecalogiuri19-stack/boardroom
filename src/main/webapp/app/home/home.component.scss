@@ -201,12 +201,35 @@ $br-bg: #fdfdfd;
     background: $br-green;
     color: white;
     transform: translateY(-50%) scale(1.1);
+
+    .arrow-icon {
+      border-color: white;
+    }
   }
   &.left {
     left: 10px;
   }
   &.right {
     right: 10px;
+  }
+
+  .arrow-icon {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-top: 3px solid $br-green;
+    border-left: 3px solid $br-green;
+    transition: border-color 0.3s ease;
+
+    &.left {
+      transform: rotate(-45deg);
+      margin-left: 5px;
+    }
+
+    &.right {
+      transform: rotate(135deg);
+      margin-right: 5px;
+    }
   }
 }
 

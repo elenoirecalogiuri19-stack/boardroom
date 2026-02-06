@@ -1,27 +1,25 @@
-$br-primary: #4a8c40;
-$br-dark: #1a252f;
-$text-soft: #7f8c8d;
-$bg-light: #f4f7f6;
+$br-green: #4a8c40;
+$br-dark: #2c3e50;
+$br-text-muted: #64748b;
 
 .detail-container {
-  padding: 40px;
-  background-color: $bg-light;
+  padding: 140px 20px 60px;
+  background-color: #f8fafc;
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .compact-card {
   background: white;
-  border-radius: 24px;
+  border-radius: 16px;
   display: flex;
-  max-width: 800px;
+  max-width: 900px;
   width: 100%;
-  height: 400px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+  min-height: 460px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .side-image {
@@ -31,18 +29,16 @@ $bg-light: #f4f7f6;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: brightness(0.9);
   }
   .type-tag {
     position: absolute;
-    bottom: 20px;
-    left: 20px;
-    background: rgba($br-dark, 0.8);
-    backdrop-filter: blur(4px);
+    top: 15px;
+    left: 15px;
+    background: $br-green;
     color: white;
-    padding: 4px 12px;
-    border-radius: 6px;
-    font-size: 0.65rem;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.6rem;
     font-weight: 700;
     text-transform: uppercase;
   }
@@ -50,7 +46,7 @@ $bg-light: #f4f7f6;
 
 .main-content {
   width: 65%;
-  padding: 35px;
+  padding: 40px;
   display: flex;
   flex-direction: column;
 }
@@ -58,46 +54,36 @@ $bg-light: #f4f7f6;
 .top-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-
+  align-items: center;
+  margin-bottom: 25px;
   .event-title {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: $br-dark;
-    margin: 0;
-  }
-
-  .price-badge {
-    color: $br-primary;
+    font-size: 1.6rem;
     font-weight: 700;
-    font-size: 1.1rem;
+    color: $br-dark;
+  }
+  .price-badge {
+    color: $br-green;
+    font-weight: 700;
+    font-size: 1.2rem;
   }
 }
 
 .info-strip {
   display: flex;
-  gap: 40px;
-  margin-bottom: 25px;
-
+  gap: 30px;
+  margin-bottom: 30px;
   .info-bit {
-    display: flex;
-    flex-direction: column;
     .label {
-      font-size: 0.6rem;
-      font-weight: 800;
-      color: $text-soft;
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: $br-text-muted;
+      margin-bottom: 3px;
     }
     .value {
       font-size: 0.85rem;
       font-weight: 600;
       color: $br-dark;
-    }
-    small {
-      color: $text-soft;
-      font-size: 0.75rem;
     }
   }
 }
@@ -105,21 +91,17 @@ $bg-light: #f4f7f6;
 .desc-box {
   flex-grow: 1;
   .label {
-    font-size: 0.6rem;
-    font-weight: 800;
-    color: $text-soft;
-    margin-bottom: 6px;
     display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: $br-text-muted;
+    margin-bottom: 8px;
   }
   p {
-    font-size: 0.85rem;
-    color: #555;
-    line-height: 1.5;
+    font-size: 0.95rem;
+    color: #475569;
+    line-height: 1.6;
     margin: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
   }
 }
 
@@ -127,59 +109,135 @@ $bg-light: #f4f7f6;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 30px;
 }
 
-.btn-text {
-  background: none;
+.btn-br-primary {
+  background: $br-green;
+  color: white;
   border: none;
-  color: $text-soft;
-  font-weight: 700;
-  font-size: 0.75rem;
+  padding: 12px 28px;
+  border-radius: 6px;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
   &:hover {
-    color: $br-dark;
+    background: darken($br-green, 5%);
   }
 }
 
-.btn-br-action {
-  background: $br-primary;
-  color: white;
+.btn-back {
+  background: transparent;
   border: none;
-  padding: 12px 30px;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 0.8rem;
+  color: $br-text-muted;
+  font-weight: 600;
   cursor: pointer;
-  transition:
-    transform 0.2s,
-    background 0.3s;
-  &:hover {
-    transform: scale(1.03);
-    background: darken($br-primary, 5%);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-white-card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  width: 95%;
+  max-width: 500px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+  .modal-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 30px;
+
+    .modal-main-title {
+      font-size: 1.5rem;
+      color: $br-dark;
+      margin: 0 0 8px 0;
+      font-weight: 700;
+    }
+
+    .modal-subtitle {
+      font-size: 0.9rem;
+      color: $br-text-muted;
+      margin: 0;
+    }
+  }
+}
+
+.row-fields {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  .field {
+    flex: 1;
+  }
+}
+
+.field {
+  margin-bottom: 20px;
+  label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $br-dark;
+    margin-bottom: 8px;
+  }
+  input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.9rem;
+    &:focus {
+      border-color: $br-green;
+      outline: none;
+    }
+  }
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  margin-top: 10px;
+  .btn-link {
+    background: none;
+    border: none;
+    color: $br-text-muted;
+    font-weight: 600;
+    cursor: pointer;
   }
 }
 
 .global-loader-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(4px);
+  background: rgba(255, 255, 255, 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
 }
-
 .spinner-boardroom {
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba($br-primary, 0.1);
-  border-top: 4px solid $br-primary;
+  width: 45px;
+  height: 45px;
+  border: 4px solid #f1f5f9;
+  border-top: 4px solid $br-green;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
-
 @keyframes spin {
   to {
     transform: rotate(360deg);

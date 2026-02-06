@@ -28,7 +28,6 @@ export class EventiDetailComponent implements OnInit {
 
   ngOnInit(): void {
     window.scrollTo(0, 0);
-
     this.activatedRoute.data.subscribe(({ eventi }) => {
       this.eventi.set(eventi);
     });
@@ -47,11 +46,11 @@ export class EventiDetailComponent implements OnInit {
   }
 
   confermaPrenotazione(): void {
+    this.showModal = false;
     this.isLoading = true;
 
     setTimeout(() => {
       this.isLoading = false;
-      this.showModal = false;
       this.router.navigate(['/']);
     }, 2000);
   }

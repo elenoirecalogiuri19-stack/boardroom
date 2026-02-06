@@ -15,7 +15,7 @@
       <div class="main-content">
         <div class="top-row">
           <h1 class="event-title">{{ eventiRef.titolo }}</h1>
-          <span class="price-badge">{{ eventiRef.prezzo | currency: 'EUR' : 'symbol' : '1.0-2' }}</span>
+          <span class="price-badge">€ {{ eventiRef.prezzo }}</span>
         </div>
 
         <div class="info-strip">
@@ -24,9 +24,12 @@
             <span class="value">{{ eventiRef.salaNome }}</span>
           </div>
           <div class="info-bit">
-            <span class="label">QUANDO</span>
-            <span class="value">{{ eventiRef.data }}</span>
-            <small>{{ eventiRef.oraInizio }} - {{ eventiRef.oraFine }}</small>
+            <span class="label">DATA</span>
+            <span class="value">{{ eventiRef.data | date: 'dd MMM yyyy' }}</span>
+          </div>
+          <div class="info-bit">
+            <span class="label">ORARIO</span>
+            <span class="value">{{ eventiRef.oraInizio }} - {{ eventiRef.oraFine }}</span>
           </div>
         </div>
 
@@ -36,8 +39,42 @@
         </div>
 
         <div class="button-row">
-          <button (click)="previousState()" class="btn-text">INDIETRO</button>
-          <button class="btn-br-action" (click)="apriModal()">PRENOTA POSTO</button>
+          <button (click)="previousState()" class="btn-back">Indietro</button>
+          <button class="btn-br-primary" (click)="apriModal()">Prenota Posto</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showModal) {
+    <div class="modal-overlay">
+      <div class="modal-white-card">
+        <div class="modal-header">
+          <h2 class="modal-main-title">Registrazione Rapida</h2>
+          <p class="modal-subtitle">Inserisci i tuoi dati per partecipare</p>
+        </div>
+
+        <div class="form-container">
+          <div class="row-fields">
+            <div class="field">
+              <label>Nome</label>
+              <input type="text" [(ngModel)]="prenotazione.nome" />
+            </div>
+            <div class="field">
+              <label>Cognome</label>
+              <input type="text" [(ngModel)]="prenotazione.cognome" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Email </label>
+            <input type="email" [(ngModel)]="prenotazione.email" />
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn-link" (click)="chiudiModal()">Annulla</button>
+            <button class="btn-br-primary" (click)="confermaPrenotazione()">Conferma</button>
+          </div>
         </div>
       </div>
     </div>
