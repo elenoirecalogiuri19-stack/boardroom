@@ -72,7 +72,6 @@ public class MailService {
             content
         );
 
-        // Prepare message using a Spring helper
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage, isMultipart, StandardCharsets.UTF_8.name());
@@ -97,13 +96,34 @@ public class MailService {
             LOG.debug("Email doesn't exist for user '{}'", user.getLogin());
             return;
         }
-        Locale locale = Locale.forLanguageTag(user.getLangKey());
-        Context context = new Context(locale);
-        context.setVariable(USER, user);
-        context.setVariable(BASE_URL, jHipsterProperties.getMail().getBaseUrl());
-        String content = templateEngine.process(templateName, context);
-        String subject = messageSource.getMessage(titleKey, null, locale);
-        sendEmailSync(user.getEmail(), subject, content, false, true);
+
+        try {
+            Locale locale = Locale.forLanguageTag(user.getLangKey());
+            Context context = new Context(locale);
+            context.setVariable(USER, user);
+            context.setVariable(BASE_URL, jHipsterProperties.getMail().getBaseUrl());
+
+            String content = templateEngine.process(templateName, context);
+            String subject = messageSource.getMessage(titleKey, null, locale);
+
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setTo(user.getEmail());
+            helper.setFrom(jHipsterProperties.getMail().getFrom());
+            helper.setSubject(subject);
+            helper.setText(content, true);
+
+            // LOGO INLINE (per tutte le email)
+            ClassPathResource logo = new ClassPathResource("imags/logo-jhipster.png");
+            helper.addInline("logoimg", logo, "image/png");
+
+            javaMailSender.send(mimeMessage);
+
+            LOG.debug("Sent email to User '{}'", user.getEmail());
+        } catch (MessagingException e) {
+            LOG.error("Errore durante l'invio dell'email da template {}", templateName, e);
+        }
     }
 
     @Async
