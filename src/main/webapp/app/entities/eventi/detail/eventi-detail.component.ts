@@ -15,7 +15,6 @@ import { HttpClient } from '@angular/common/http';
 })
 export class EventiDetailComponent implements OnInit {
   eventi = signal<IEventi | null>(null);
-  isLoading = false;
   showModal = false;
 
   prenotazione = {
@@ -53,7 +52,6 @@ export class EventiDetailComponent implements OnInit {
     }
 
     this.showModal = false;
-    this.isLoading = true;
 
     this.http
       .post(`/api/eventis/${this.eventi()!.id}/prenotazione-email`, {
@@ -63,13 +61,9 @@ export class EventiDetailComponent implements OnInit {
       })
       .subscribe({
         next: () => {
-          this.isLoading = false;
-          this.showModal = false;
-          alert('Email inviata con successo!');
           this.router.navigate(['/']);
         },
         error: () => {
-          this.isLoading = false;
           alert("Errore durante l'invio dell'email");
         },
       });
