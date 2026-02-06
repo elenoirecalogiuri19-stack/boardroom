@@ -16,7 +16,6 @@ import dayjs from 'dayjs/esm';
 export class StoricoPrenotazioniComponent implements OnInit {
   prenotazioniMostrate = signal<IPrenotazioni[]>([]);
   tutteLePrenotazioni: IPrenotazioni[] = [];
-  isLoading = signal(false);
   filtroAttivo = signal('tutte');
 
   private prenotazioniService = inject(PrenotazioniService);
@@ -26,16 +25,14 @@ export class StoricoPrenotazioniComponent implements OnInit {
   }
 
   loadData(): void {
-    this.isLoading.set(true);
     this.prenotazioniService.getStorico().subscribe({
       next: res => {
         const dati = res.body ?? [];
         this.tutteLePrenotazioni = dati.sort((a, b) => dayjs(b.data).valueOf() - dayjs(a.data).valueOf());
         this.prenotazioniMostrate.set(this.tutteLePrenotazioni);
-        this.isLoading.set(false);
       },
       error: () => {
-        this.isLoading.set(false);
+        // Gestione errore silenziosa, l'interceptor chiude comunque il loader globale
       },
     });
   }
