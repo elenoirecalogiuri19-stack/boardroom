@@ -56,7 +56,7 @@ export class EventiDetailComponent implements OnInit {
     this.isLoading = true;
 
     this.http
-      .post(`/api/eventi/${this.eventi()!.id}/prenotazione-email`, {
+      .post(`/api/eventis/${this.eventi()!.id}/prenotazione-email`, {
         nome: this.prenotazione.nome,
         cognome: this.prenotazione.cognome,
         email: this.prenotazione.email,

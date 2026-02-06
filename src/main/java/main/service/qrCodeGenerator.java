@@ -13,7 +13,7 @@ public class qrCodeGenerator {
 
     public String generateQRCodeBase64(String text) {
         try {
-            int size = 250;
+            int size = 150;
             BitMatrix matrix = new MultiFormatWriter().encode(text, BarcodeFormat.QR_CODE, size, size);
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();

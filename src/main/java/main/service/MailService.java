@@ -3,13 +3,16 @@ package main.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Locale;
 import main.domain.Eventi;
+import main.domain.Prenotazioni;
 import main.domain.User;
 import main.service.dto.PrenotazioniEmailDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -121,15 +124,46 @@ public class MailService {
     }
 
     @Async
-    public void sendPrenotazioneEventoPublico(Eventi eventi, PrenotazioniEmailDTO dto, String codicePre, String qrCod) {
-        Context ctx = new Context();
-        ctx.setVariable("evento", eventi);
-        ctx.setVariable("dati", dto);
-        ctx.setVariable("codice", codicePre);
-        ctx.setVariable("qrCod", qrCod);
+    public void sendPrenotazioneEventoPublico(Eventi evento, PrenotazioniEmailDTO dto, String codicePre, String qrCod) {
+        try {
+            Context context = new Context();
 
-        String content = templateEngine.process("mail/eventoPrenotazioneEmail", ctx);
+            context.setVariable("titoloEvento", evento.getTitolo());
+            context.setVariable("descrizioneEvento", evento.getDescrizione());
+            context.setVariable("tipoEvento", evento.getTipo().name());
+            context.setVariable("prezzoEvento", evento.getPrezzo());
 
-        sendEmailSync(dto.getEmail(), "Conferma prenotazione - " + eventi.getTitolo(), content, false, true);
+            Prenotazioni p = evento.getPrenotazione();
+            context.setVariable("dataPrenotazione", p.getData());
+            context.setVariable("oraInizio", p.getOraInizio());
+            context.setVariable("oraFine", p.getOraFine());
+            context.setVariable("salaNome", p.getSala().getNome());
+            context.setVariable("salaCapienza", p.getSala().getCapienza());
+
+            context.setVariable("nome", dto.getNome());
+            context.setVariable("cognome", dto.getCognome());
+            context.setVariable("email", dto.getEmail());
+            context.setVariable("codicePre", codicePre);
+
+            String content = templateEngine.process("mail/eventoPrenotazioneEmail", context);
+
+            byte[] qrBytes = Base64.getDecoder().decode(qrCod);
+
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setTo(dto.getEmail());
+            helper.setFrom(jHipsterProperties.getMail().getFrom());
+            helper.setSubject("Conferma Prenotazione Evento");
+            helper.setText(content, true);
+
+            helper.addInline("qrcode", new ByteArrayResource(qrBytes), "image/png");
+
+            javaMailSender.send(mimeMessage);
+
+            LOG.debug("Sent email to User '{}'", dto.getEmail());
+        } catch (MessagingException e) {
+            LOG.error("Errore durante l'invio dell'email di prenotazione", e);
+        }
     }
 }

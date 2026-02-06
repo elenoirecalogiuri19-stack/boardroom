@@ -139,7 +139,9 @@ public class EventiService {
     }
 
     public void inviaEmailPrenotazione(UUID Id, PrenotazioniEmailDTO dto) {
-        Eventi evento = eventiRepository.findById(Id).orElseThrow(() -> new EntityNotFoundException("Evento non trovato"));
+        Eventi evento = eventiRepository
+            .findByIdWithPrenotazioneAndSala(Id)
+            .orElseThrow(() -> new EntityNotFoundException("Evento non trovato"));
 
         String codicePre = UUID.randomUUID().toString().substring(0, 8);
 
