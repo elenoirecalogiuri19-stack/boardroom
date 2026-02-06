@@ -1,34 +1,43 @@
-<div class="storico-container">
-  <div class="filter-header">
-    <button class="filter-btn" [class.active]="filtroAttivo() === 'tutte'" (click)="applicaFiltro('tutte')">tutte</button>
-    <button class="filter-btn" [class.active]="filtroAttivo() === '30giorni'" (click)="applicaFiltro('30giorni')">ultimi 30 giorni</button>
-    <button class="filter-btn" [class.active]="filtroAttivo() === '2025'" (click)="applicaFiltro('2025')">2025</button>
-  </div>
+<div class="storico-minimal">
+  <header class="header-section">
+    <h1>I tuoi Eventi</h1>
+    <p>Cronologia in <span class="brand-green">Boardroom</span></p>
+  </header>
 
-  <div class="timeline-wrapper">
-    <div class="timeline-line"></div>
+  <nav class="filter-bar">
+    <button [class.active]="filtroAttivo() === 'tutte'" (click)="applicaFiltro('tutte')">tutte</button>
+    <button [class.active]="filtroAttivo() === '30giorni'" (click)="applicaFiltro('30giorni')">ultimi 30 giorni</button>
+    <button [class.active]="filtroAttivo() === '2025'" (click)="applicaFiltro('2025')">2025</button>
+  </nav>
 
-    @for (p of prenotazioniPassate(); track p.id) {
-      <div class="timeline-item">
-        <div class="timeline-dot"></div>
-        <div class="booking-card shadow-sm">
-          <div class="card-left">
-            <p class="date-label">{{ p.data?.toDate() | date: 'dd MMMM yyyy' }}</p>
-            <h3 class="room-title">{{ p.sala?.nome }}</h3>
-            <p class="time-range">{{ p.oraInizio }} - {{ p.oraFine }}</p>
+  @if (isLoading()) {
+    <div class="loading-state">
+      <span class="main-loader"></span>
+      <p>Caricamento...</p>
+    </div>
+  } @else {
+    <div class="list-wrapper">
+      @for (p of prenotazioniMostrate(); track p.id) {
+        <div class="entry-row">
+          <div class="date-side">
+            <span class="day">{{ convertToDate(p.data) | date: 'dd' }}</span>
+            <span class="month">{{ convertToDate(p.data) | date: 'MMM' | uppercase }}</span>
           </div>
-          <div class="card-right">
-            <span class="status-badge">Conclusa</span>
+
+          <div class="content-side">
+            <h3>{{ p.id }} - Incontro Boardroom</h3>
+            <p>{{ p.sala?.nome || 'Sala non specificata' }} <span class="dot">•</span> {{ p.oraInizio }} - {{ p.oraFine }}</p>
+          </div>
+
+          <div class="status-side">
+            <span class="tag-concluso">Concluso</span>
           </div>
         </div>
-      </div>
-    } @empty {
-      @if (!isLoading()) {
-        <div class="empty-msg text-center mt-4">
-          <fa-icon icon="info-circle" class="me-2"></fa-icon>
-          Nessuna prenotazione passata presente nello storico.
+      } @empty {
+        <div class="empty-text">
+          <p>Nessun evento passato trovato.</p>
         </div>
       }
-    }
-  </div>
+    </div>
+  }
 </div>
