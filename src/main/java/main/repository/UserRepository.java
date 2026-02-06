@@ -37,5 +37,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findAllByIdNotNullAndActivatedIsTrue(Pageable pageable);
 
     @Query("select u from User u where u.login = :login")
-    Optional<User> findByUserLogin(@Param("login") String login);
+    Optional<User> findByLogin(@Param("login") String login);
 }
