@@ -1,6 +1,7 @@
 package main.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import main.domain.Eventi;
 import main.domain.enumeration.StatoCodice;
@@ -13,4 +14,14 @@ import org.springframework.stereotype.Repository;
 public interface EventiRepository extends JpaRepository<Eventi, UUID> {
     @Query("SELECT e FROM Eventi e WHERE e.tipo = :tipo AND e.prenotazione.stato.codice = :stato")
     List<Eventi> findPublicConfirmed(@Param("tipo") TipoEvento tipo, @Param("stato") StatoCodice stato);
+
+    @Query(
+        """
+            select e from Eventi e
+            join fetch e.prenotazione p
+            join fetch p.sala
+            where e.id = :id
+        """
+    )
+    Optional<Eventi> findByIdWithPrenotazioneAndSala(UUID id);
 }

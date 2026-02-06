@@ -4,6 +4,7 @@ import { IEventi } from '../eventi.model';
 import SharedModule from 'app/shared/shared.module';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   standalone: true,
@@ -25,6 +26,7 @@ export class EventiDetailComponent implements OnInit {
 
   private activatedRoute = inject(ActivatedRoute);
   private router = inject(Router);
+  private http = inject(HttpClient);
 
   ngOnInit(): void {
     window.scrollTo(0, 0);
@@ -46,12 +48,30 @@ export class EventiDetailComponent implements OnInit {
   }
 
   confermaPrenotazione(): void {
+    if (!this.eventi()) {
+      return;
+    }
+
     this.showModal = false;
     this.isLoading = true;
 
-    setTimeout(() => {
-      this.isLoading = false;
-      this.router.navigate(['/']);
-    }, 2000);
+    this.http
+      .post(`/api/eventis/${this.eventi()!.id}/prenotazione-email`, {
+        nome: this.prenotazione.nome,
+        cognome: this.prenotazione.cognome,
+        email: this.prenotazione.email,
+      })
+      .subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.showModal = false;
+          alert('Email inviata con successo!');
+          this.router.navigate(['/']);
+        },
+        error: () => {
+          this.isLoading = false;
+          alert("Errore durante l'invio dell'email");
+        },
+      });
   }
 }

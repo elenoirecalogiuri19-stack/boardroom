@@ -62,7 +62,6 @@ public class SecurityConfiguration {
             )
             .authorizeHttpRequests(authz ->
                 authz
-                    //Risorse statiche
                     .requestMatchers(
                         mvc.pattern("/index.html"),
                         mvc.pattern("/*.js"),
@@ -82,7 +81,6 @@ public class SecurityConfiguration {
                     .permitAll()
                     .requestMatchers(mvc.pattern("/swagger-ui/**"))
                     .permitAll()
-                    // Endpoint PUBBLICI
                     .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/authenticate"))
                     .permitAll()
                     .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/authenticate"))
@@ -95,7 +93,8 @@ public class SecurityConfiguration {
                     .permitAll()
                     .requestMatchers(mvc.pattern("/api/account/reset-password/finish"))
                     .permitAll()
-                    // Endpoint UTENTE REGISTRATO
+                    .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/eventis/*/prenotazione-email"))
+                    .permitAll()
                     .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/eventis/pubblici"))
                     .permitAll()
                     .requestMatchers(mvc.pattern(HttpMethod.GET, "/api/eventis"))
@@ -134,7 +133,6 @@ public class SecurityConfiguration {
                     .authenticated()
                     .requestMatchers(mvc.pattern(HttpMethod.PATCH, "/api/eventis/**"))
                     .authenticated()
-                    // Endpoint ADMIN
                     .requestMatchers(mvc.pattern("/v3/api-docs/**"))
                     .hasAuthority(AuthoritiesConstants.ADMIN)
                     .requestMatchers(mvc.pattern("/management/**"))
