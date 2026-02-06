@@ -13,7 +13,6 @@ import { PrenotazioneDTO, PrenotazioniApiService } from '../services/prenotazion
 })
 export class MiePrenotazioniComponent implements OnInit {
   prenotazioni = signal<PrenotazioneDTO[]>([]);
-  isLoading = false;
   expandedRows = signal<Set<string>>(new Set());
 
   private prenotazioniApi = inject(PrenotazioniApiService);
@@ -23,13 +22,10 @@ export class MiePrenotazioniComponent implements OnInit {
   }
 
   caricaLeMiePrenotazioni(): void {
-    this.isLoading = true;
     this.prenotazioniApi.getMiePrenotazioni().subscribe({
       next: (res: PrenotazioneDTO[]) => {
         this.prenotazioni.set(res);
-        this.isLoading = false;
       },
-      error: () => (this.isLoading = false),
     });
   }
 

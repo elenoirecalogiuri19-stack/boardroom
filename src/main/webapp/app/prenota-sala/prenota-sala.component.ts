@@ -52,18 +52,16 @@ export default class PrenotaSalaComponent implements OnInit {
       capienza: this.capienza,
     });
 
-    setTimeout(() => {
-      this.router
-        .navigate(['/risultati-sala'], {
-          queryParams: {
-            data: this.dataSelezionata,
-            ora: this.oraSelezionata,
-            capienza: this.capienza,
-          },
-        })
-        .then(() => {
-          this.caricamento = false;
-        });
-    }, 800);
+    this.router
+      .navigate(['/risultati-sala'], {
+        queryParams: {
+          data: this.dataSelezionata,
+          ora: this.oraSelezionata,
+          capienza: this.capienza,
+        },
+      })
+      .then(() => {
+        this.caricamento = false;
+      });
   }
 }

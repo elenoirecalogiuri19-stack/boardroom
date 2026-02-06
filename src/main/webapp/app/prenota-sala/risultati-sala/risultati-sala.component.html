@@ -1,9 +1,3 @@
-@if (isLoading) {
-  <div class="global-loader-overlay">
-    <div class="spinner-boardroom"></div>
-  </div>
-}
-
 <div class="results-container" [class.blur-background]="showPrivacyModal">
   <aside class="sidebar">
     <button class="btn-back" (click)="tornaIndietro()" [disabled]="isLoading">
@@ -61,7 +55,7 @@
     <button class="close-btn" (click)="showPrivacyModal = false">×</button>
     <h2 class="modal-title">Privacy Evento</h2>
     <p class="modal-subtitle">
-      Scegli la visibilità per <span>{{ salaSelezionata?.nome }}</span>
+      Seleziona il tipo di evento per <span>{{ salaSelezionata?.nome }}</span>
     </p>
 
     <div class="option-card" (click)="confermaEProcedi(true)">

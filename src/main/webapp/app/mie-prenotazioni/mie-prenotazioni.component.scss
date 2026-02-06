@@ -95,7 +95,6 @@ $status-wait-text: #475569;
   font-size: 0.65rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -106,20 +105,17 @@ $status-wait-text: #475569;
     background: $status-confirm-bg !important;
     color: $status-confirm-text !important;
   }
-
   &[data-status='cancellata'],
   &[data-status='cancelled'],
   &[data-status='annullata'] {
     background: $status-cancel-bg !important;
     color: $status-cancel-text !important;
   }
-
   &[data-status='rifiutata'],
   &[data-status='rejected'] {
     background: $status-reject-bg !important;
     color: $status-reject-text !important;
   }
-
   &[data-status='validazione prenotazione in corso'],
   &[data-status='waiting'] {
     background: $status-wait-bg !important;
@@ -132,7 +128,6 @@ $status-wait-text: #475569;
   flex-direction: column;
   gap: 8px;
   .btn-action {
-    position: relative;
     padding: 7px 12px;
     border-radius: 8px;
     font-size: 0.75rem;
@@ -141,7 +136,6 @@ $status-wait-text: #475569;
     background: transparent;
     transition: 0.2s;
     min-width: 100px;
-
     &.btn-edit {
       color: $br-success;
       border: 1px solid rgba($br-success, 0.2);
@@ -149,24 +143,6 @@ $status-wait-text: #475569;
     &.btn-delete {
       color: #e74c3c;
       border: 1px solid rgba(#e74c3c, 0.2);
-    }
-
-    &:disabled {
-      color: transparent !important;
-      cursor: not-allowed;
-      &::after {
-        content: '';
-        position: absolute;
-        width: 14px;
-        height: 14px;
-        top: 50%;
-        left: 50%;
-        margin: -7px;
-        border: 2px solid rgba(0, 0, 0, 0.1);
-        border-top-color: currentColor;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-      }
     }
   }
 }
@@ -217,25 +193,5 @@ $status-wait-text: #475569;
   .price-tag {
     color: $br-success;
     font-weight: 700;
-  }
-}
-
-.loader-overlay {
-  text-align: center;
-  padding: 100px 0;
-  .spinner-boardroom {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid $br-success;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
   }
 }
