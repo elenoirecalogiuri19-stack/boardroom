@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,6 +11,7 @@ import java.util.UUID;
 import main.repository.EventiRepository;
 import main.service.EventiService;
 import main.service.dto.EventiDTO;
+import main.service.dto.PrenotazioniEmailDTO;
 import main.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,5 +133,11 @@ public class EventiResource {
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    @PostMapping("/{id}/prenotazione-email")
+    public ResponseEntity<Void> prenotazioneEmail(@PathVariable("id") UUID id, @RequestBody PrenotazioniEmailDTO dto) {
+        eventiService.inviaEmailPrenotazione(id, dto);
+        return ResponseEntity.ok().build();
     }
 }

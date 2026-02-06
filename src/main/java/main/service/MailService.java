@@ -4,7 +4,9 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import main.domain.Eventi;
 import main.domain.User;
+import main.service.dto.PrenotazioniEmailDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -116,5 +118,18 @@ public class MailService {
     public void sendPasswordResetMail(User user) {
         LOG.debug("Sending password reset email to '{}'", user.getEmail());
         sendEmailFromTemplateSync(user, "mail/passwordResetEmail", "email.reset.title");
+    }
+
+    @Async
+    public void sendPrenotazioneEventoPublico(Eventi eventi, PrenotazioniEmailDTO dto, String codicePre, String qrCod) {
+        Context ctx = new Context();
+        ctx.setVariable("evento", eventi);
+        ctx.setVariable("dati", dto);
+        ctx.setVariable("codice", codicePre);
+        ctx.setVariable("qrCod", qrCod);
+
+        String content = templateEngine.process("mail/eventoPrenotazioneEmail", ctx);
+
+        sendEmailSync(dto.getEmail(), "Conferma prenotazione - " + eventi.getTitolo(), content, false, true);
     }
 }

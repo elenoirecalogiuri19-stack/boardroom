@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <body>
+    <h2>Prenotazione confermata</h2>
+
+    <p>Ciao <strong th:text="${dati.nome} + ' ' + ${dati.cognome}"></strong>,</p>
+
+    <p>Hai prenotato il tuo posto per:</p>
+
+    <ul>
+      <li><strong th:text="${evento.titolo}"></strong></li>
+      <li th:text="'Sala: ' + ${evento.salaNome}"></li>
+      <li th:text="'Data: ' + ${evento.data}"></li>
+      <li th:text="'Orario: ' + ${evento.oraInizio} + ' - ' + ${evento.oraFine}"></li>
+    </ul>
+
+    <p>Codice prenotazione: <strong th:text="${codice}"></strong></p>
+
+    <p>Mostra questo QR code all’ingresso:</p>
+    <img th:src="'data:image/png;base64,' + ${qr}" />
+
+    <p>Grazie per aver scelto Boardroom.</p>
+  </body>
+</html>

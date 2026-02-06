@@ -13,6 +13,7 @@ import main.repository.EventiRepository;
 import main.repository.PrenotazioniRepository;
 import main.repository.StatiPrenotazioneRepository;
 import main.service.dto.EventiDTO;
+import main.service.dto.PrenotazioniEmailDTO;
 import main.service.mapper.EventiMapper;
 import main.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
@@ -32,17 +33,23 @@ public class EventiService {
     private final EventiMapper eventiMapper;
     private final PrenotazioniRepository prenotazioniRepository;
     private final StatiPrenotazioneRepository statiPrenotazioneRepository;
+    private final MailService mailService;
+    private final qrCodeGenerator qrCodeGenerator;
 
     public EventiService(
         EventiRepository eventiRepository,
         EventiMapper eventiMapper,
         PrenotazioniRepository prenotazioniRepository,
-        StatiPrenotazioneRepository statiPrenotazioneRepository
+        StatiPrenotazioneRepository statiPrenotazioneRepository,
+        MailService mailService,
+        qrCodeGenerator qrCodeGenerator
     ) {
         this.eventiRepository = eventiRepository;
         this.eventiMapper = eventiMapper;
         this.prenotazioniRepository = prenotazioniRepository;
         this.statiPrenotazioneRepository = statiPrenotazioneRepository;
+        this.mailService = mailService;
+        this.qrCodeGenerator = qrCodeGenerator;
     }
 
     @Transactional(readOnly = true)
@@ -129,5 +136,15 @@ public class EventiService {
         statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED).ifPresent(prenotazione::setStato);
 
         prenotazioniRepository.save(prenotazione);
+    }
+
+    public void inviaEmailPrenotazione(UUID Id, PrenotazioniEmailDTO dto) {
+        Eventi evento = eventiRepository.findById(Id).orElseThrow(() -> new EntityNotFoundException("Evento non trovato"));
+
+        String codicePre = UUID.randomUUID().toString().substring(0, 8);
+
+        String qrCod = qrCodeGenerator.generateQRCodeBase64(codicePre);
+
+        mailService.sendPrenotazioneEventoPublico(evento, dto, codicePre, qrCod);
     }
 }
