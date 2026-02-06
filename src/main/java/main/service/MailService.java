@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -158,6 +159,9 @@ public class MailService {
             helper.setText(content, true);
 
             helper.addInline("qrcode", new ByteArrayResource(qrBytes), "image/png");
+
+            ClassPathResource logo = new ClassPathResource("imags/logo-jhipster.png");
+            helper.addInline("logoimg", logo, "image/png");
 
             javaMailSender.send(mimeMessage);
 
