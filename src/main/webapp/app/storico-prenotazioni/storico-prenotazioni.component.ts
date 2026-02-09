@@ -31,9 +31,7 @@ export class StoricoPrenotazioniComponent implements OnInit {
         this.tutteLePrenotazioni = dati.sort((a, b) => dayjs(b.data).valueOf() - dayjs(a.data).valueOf());
         this.prenotazioniMostrate.set(this.tutteLePrenotazioni);
       },
-      error: () => {
-        // Gestione errore silenziosa, l'interceptor chiude comunque il loader globale
-      },
+      error: () => {},
     });
   }
 
