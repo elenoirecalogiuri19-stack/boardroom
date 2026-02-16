@@ -25,7 +25,7 @@
           </div>
 
           <div class="content-side">
-            <h3>{{ (p as any).evento?.titolo || (p as any).titolo || 'Incontro Boardroom' }}</h3>
+            <h3>{{ $any(p).evento?.titolo || $any(p).titolo || 'Incontro Boardroom' }}</h3>
             <p>{{ p.sala?.nome || 'Sala non specificata' }} <span class="dot">•</span> {{ p.oraInizio }} - {{ p.oraFine }}</p>
           </div>
 
