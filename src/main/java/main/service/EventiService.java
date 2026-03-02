@@ -71,7 +71,7 @@ public class EventiService {
         }
 
         Eventi eventi = buildEventoFromDto(dto, pren);
-        setPrezzoInBaseAlTipo(dto, eventi);
+        setPrezzoInBaseAlTipo(dto.getTipo(), dto.getPrezzo(), eventi);
 
         eventi = eventiRepository.save(eventi);
 
@@ -97,9 +97,12 @@ public class EventiService {
 
         existing.setTitolo(eventiDTO.getTitolo());
         existing.setDescrizione(eventiDTO.getDescrizione());
-        existing.setTipo(eventiDTO.getTipo());
 
-        setPrezzoInBaseAlTipo(eventiDTO, existing);
+        // Preserva il tipo dal DB se il frontend non lo invia (colonna NOT NULL)
+        TipoEvento tipoEffettivo = eventiDTO.getTipo() != null ? eventiDTO.getTipo() : existing.getTipo();
+        existing.setTipo(tipoEffettivo);
+
+        setPrezzoInBaseAlTipo(tipoEffettivo, eventiDTO.getPrezzo(), existing);
 
         return eventiMapper.toDto(eventiRepository.save(existing));
     }
@@ -110,8 +113,14 @@ public class EventiService {
             .map(existing -> {
                 if (eventiDTO.getTitolo() != null) existing.setTitolo(eventiDTO.getTitolo());
                 if (eventiDTO.getDescrizione() != null) existing.setDescrizione(eventiDTO.getDescrizione());
-                if (existing.getTipo() == TipoEvento.PUBBLICO && eventiDTO.getPrezzo() != null) {
+                // Aggiorna tipo solo se esplicitamente inviato
+                if (eventiDTO.getTipo() != null) existing.setTipo(eventiDTO.getTipo());
+                // Aggiorna prezzo solo se pubblico e prezzo fornito
+                TipoEvento tipoEffettivo = existing.getTipo();
+                if (tipoEffettivo == TipoEvento.PUBBLICO && eventiDTO.getPrezzo() != null) {
                     existing.setPrezzo(eventiDTO.getPrezzo());
+                } else if (tipoEffettivo == TipoEvento.PRIVATO) {
+                    existing.setPrezzo(BigDecimal.ZERO);
                 }
                 return eventiRepository.save(existing);
             })
@@ -131,9 +140,9 @@ public class EventiService {
         return evento;
     }
 
-    private void setPrezzoInBaseAlTipo(EventiDTO dto, Eventi evento) {
-        if (dto.getTipo() == TipoEvento.PUBBLICO) {
-            evento.setPrezzo(dto.getPrezzo());
+    private void setPrezzoInBaseAlTipo(TipoEvento tipo, BigDecimal prezzoDto, Eventi evento) {
+        if (tipo == TipoEvento.PUBBLICO) {
+            evento.setPrezzo(prezzoDto != null ? prezzoDto : BigDecimal.ZERO);
         } else {
             evento.setPrezzo(BigDecimal.ZERO);
         }

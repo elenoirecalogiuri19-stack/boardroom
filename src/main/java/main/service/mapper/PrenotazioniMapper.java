@@ -20,5 +20,6 @@ public interface PrenotazioniMapper extends EntityMapper<PrenotazioniDTO, Prenot
     @Override
     @Mapping(target = "utente", source = "utente")
     @Mapping(target = "sala", source = "sala")
+    @Mapping(target = "evento", ignore = true)
     Prenotazioni toEntity(PrenotazioniDTO dto);
 }
