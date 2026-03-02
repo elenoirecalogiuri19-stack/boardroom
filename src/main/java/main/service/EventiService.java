@@ -150,7 +150,14 @@ public class EventiService {
             .findByIdWithPrenotazioneAndSala(Id)
             .orElseThrow(() -> new EntityNotFoundException("Evento non trovato"));
 
-        String codicePre = UUID.randomUUID().toString().substring(0, 8);
+        Prenotazioni prenotazione = evento.getPrenotazione();
+
+        String codicePre = prenotazione.getCodiceQr();
+        if (codicePre == null) {
+            codicePre = UUID.randomUUID().toString().substring(0, 8);
+            prenotazione.setCodiceQr(codicePre);
+            prenotazioniRepository.save(prenotazione);
+        }
 
         String qrCod = qrCodeGenerator.generateQRCodeBase64(codicePre);
 

@@ -2,7 +2,6 @@ package main.service.dto;
 
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
@@ -30,6 +29,8 @@ public class PrenotazioniDTO implements Serializable {
     private UUID salaId;
 
     private UUID eventoId;
+
+    private String codiceQr;
 
     public UUID getId() {
         return id;
@@ -117,5 +118,13 @@ public class PrenotazioniDTO implements Serializable {
 
     public void setEvento(EventiDTO evento) {
         this.evento = evento;
+    }
+
+    public String getCodiceQr() {
+        return codiceQr;
+    }
+
+    public void setCodiceQr(String codiceQr) {
+        this.codiceQr = codiceQr;
     }
 }
