@@ -410,8 +410,6 @@ public class PrenotazioniService {
         prenotazioniRepository.saveAll(scadute);
 
         LOG.debug("Aggiornate {} prenotazioni da WAITING a REJECTED", scadute.size());
-
-        prenotazioniRepository.saveAll(scadute);
     }
 
     private StatiPrenotazione getRejectedState() {
