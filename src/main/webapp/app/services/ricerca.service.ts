@@ -17,7 +17,6 @@ export class RicercaService {
   };
 
   salvaRicerca(nuoviDati: IRicercaSale): void {
-    console.warn('Service: Salvataggio dati...', nuoviDati);
     this.datiRicerca = { ...nuoviDati };
   }
 
@@ -26,7 +25,6 @@ export class RicercaService {
   }
 
   resetRicerca(): void {
-    console.warn('Service: Reset dati effettuato.');
     this.datiRicerca = {
       data: '',
       ora: '',

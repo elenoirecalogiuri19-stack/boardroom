@@ -67,7 +67,7 @@ export class CreaEventoComponent implements OnInit {
       descrizione: this.evento.descrizione,
       prezzo: this.isPubblico ? this.evento.prezzo : null,
       tipo: this.isPubblico ? 'PUBBLICO' : 'PRIVATO',
-      prenotazioneId: this.prenotazioneId, // 🔥 collegamento backend
+      prenotazioneId: this.prenotazioneId,
     };
 
     this.eventiApi.creaEvento(payload).subscribe({
@@ -76,8 +76,7 @@ export class CreaEventoComponent implements OnInit {
         this.notificationService.show('Evento creato con successo!', 'success');
         this.router.navigate(['/']);
       },
-      error: err => {
-        console.error('Errore creazione evento:', err);
+      error: () => {
         this.isLoading = false;
         this.notificationService.show('Errore durante la creazione evento', 'error');
       },

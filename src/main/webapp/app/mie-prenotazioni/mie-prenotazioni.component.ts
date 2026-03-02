@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import SharedModule from 'app/shared/shared.module';
 import { PrenotazioneDTO, PrenotazioniApiService } from '../services/prenotazioni-api.service';
+import { NotificationService } from 'app/shared/notification/notification.service';
 
 @Component({
   standalone: true,
@@ -14,8 +15,11 @@ import { PrenotazioneDTO, PrenotazioniApiService } from '../services/prenotazion
 export class MiePrenotazioniComponent implements OnInit {
   prenotazioni = signal<PrenotazioneDTO[]>([]);
   expandedRows = signal<Set<string>>(new Set());
+  showDeleteModal = signal(false);
+  prenotazioneIdDaEliminare = signal<string | undefined>(undefined);
 
   private prenotazioniApi = inject(PrenotazioniApiService);
+  private notificationService = inject(NotificationService);
 
   ngOnInit(): void {
     this.caricaLeMiePrenotazioni();
@@ -25,6 +29,9 @@ export class MiePrenotazioniComponent implements OnInit {
     this.prenotazioniApi.getMiePrenotazioni().subscribe({
       next: (res: PrenotazioneDTO[]) => {
         this.prenotazioni.set(res);
+      },
+      error: () => {
+        this.notificationService.show('Errore nel caricamento delle prenotazioni', 'error');
       },
     });
   }
@@ -44,12 +51,32 @@ export class MiePrenotazioniComponent implements OnInit {
     return !!id && this.expandedRows().has(id);
   }
 
-  eliminaEvento(id: string | undefined): void {
+  chiediConfermaEliminazione(id: string | undefined): void {
     if (!id) return;
-    if (confirm('Sei sicuro di voler eliminare questa prenotazione?')) {
-      this.prenotazioniApi.cancellaPrenotazione(id).subscribe({
-        next: () => this.caricaLeMiePrenotazioni(),
-      });
-    }
+    this.prenotazioneIdDaEliminare.set(id);
+    this.showDeleteModal.set(true);
+  }
+
+  annullaEliminazione(): void {
+    this.showDeleteModal.set(false);
+    this.prenotazioneIdDaEliminare.set(undefined);
+  }
+
+  confermaEliminazione(): void {
+    const id = this.prenotazioneIdDaEliminare();
+    if (!id) return;
+    this.showDeleteModal.set(false);
+
+    this.prenotazioniApi.cancellaPrenotazione(id).subscribe({
+      next: () => {
+        this.notificationService.show('Prenotazione eliminata con successo', 'success');
+        this.caricaLeMiePrenotazioni();
+      },
+      error: () => {
+        this.notificationService.show("Errore durante l'eliminazione", 'error');
+      },
+    });
+
+    this.prenotazioneIdDaEliminare.set(undefined);
   }
 }

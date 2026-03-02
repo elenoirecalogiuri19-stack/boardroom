@@ -7,7 +7,7 @@
   <nav class="filter-bar">
     <button [class.active]="filtroAttivo() === 'tutte'" (click)="applicaFiltro('tutte')">tutte</button>
     <button [class.active]="filtroAttivo() === '30giorni'" (click)="applicaFiltro('30giorni')">ultimi 30 giorni</button>
-    <button [class.active]="filtroAttivo() === '2025'" (click)="applicaFiltro('2025')">2025</button>
+    <button [class.active]="filtroAttivo() === 'annoCorrente'" (click)="applicaFiltro('annoCorrente')">{{ annoCorrente }}</button>
   </nav>
 
   @if (isLoading()) {

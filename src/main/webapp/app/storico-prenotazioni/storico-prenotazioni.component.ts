@@ -18,6 +18,7 @@ export class StoricoPrenotazioniComponent implements OnInit {
   tutteLePrenotazioni: IPrenotazioni[] = [];
   filtroAttivo = signal('tutte');
   isLoading = signal<boolean>(false);
+  readonly annoCorrente = dayjs().year();
 
   private prenotazioniService = inject(PrenotazioniService);
 
@@ -49,8 +50,8 @@ export class StoricoPrenotazioniComponent implements OnInit {
     } else if (tipo === '30giorni') {
       const limite = oggi.subtract(30, 'days');
       this.prenotazioniMostrate.set(this.tutteLePrenotazioni.filter(p => p.data && dayjs(p.data).isAfter(limite)));
-    } else if (tipo === '2025') {
-      this.prenotazioniMostrate.set(this.tutteLePrenotazioni.filter(p => p.data && dayjs(p.data).year() === 2025));
+    } else if (tipo === 'annoCorrente') {
+      this.prenotazioniMostrate.set(this.tutteLePrenotazioni.filter(p => p.data && dayjs(p.data).year() === this.annoCorrente));
     }
   }
 

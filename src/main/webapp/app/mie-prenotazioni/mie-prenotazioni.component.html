@@ -1,4 +1,4 @@
-<div class="mie-prenotazioni-container">
+<div class="mie-prenotazioni-container" [class.blur-content]="showDeleteModal()">
   <div class="header-section">
     <h1>Le tue Prenotazioni</h1>
     <p>Gestisci e monitora lo stato delle tue prenotazioni.</p>
@@ -12,7 +12,7 @@
             <button class="btn-action btn-edit" [routerLink]="['/eventi', pren.eventoId, 'edit']">
               <span>📝 Modifica</span>
             </button>
-            <button class="btn-action btn-delete" (click)="eliminaEvento(pren.id)">
+            <button class="btn-action btn-delete" (click)="chiediConfermaEliminazione(pren.id)">
               <span>🗑️ Elimina</span>
             </button>
           </div>
@@ -85,3 +85,16 @@
     }
   </div>
 </div>
+
+@if (showDeleteModal()) {
+  <div class="delete-overlay">
+    <div class="delete-modal">
+      <h2 class="modal-title">Conferma eliminazione</h2>
+      <p class="modal-subtitle">Sei sicuro di voler eliminare questa prenotazione? L'operazione non è reversibile.</p>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" (click)="annullaEliminazione()">Annulla</button>
+        <button class="btn-modal-confirm" (click)="confermaEliminazione()">Elimina</button>
+      </div>
+    </div>
+  </div>
+}

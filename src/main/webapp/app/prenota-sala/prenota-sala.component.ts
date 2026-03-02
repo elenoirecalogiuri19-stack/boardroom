@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RicercaService } from '../services/ricerca.service';
+import { NotificationService } from 'app/shared/notification/notification.service';
 
 @Component({
   standalone: true,
@@ -16,12 +17,12 @@ export default class PrenotaSalaComponent implements OnInit {
   capienza = 50;
   dataSelezionata = '';
   oraSelezionata = '';
-
   caricamento = false;
 
   constructor(
     private router: Router,
     private ricercaService: RicercaService,
+    private notificationService: NotificationService,
   ) {}
 
   ngOnInit(): void {
@@ -44,6 +45,24 @@ export default class PrenotaSalaComponent implements OnInit {
   }
 
   confermaPrenotazione(): void {
+    if (!this.dataSelezionata) {
+      this.notificationService.show('Seleziona una data per continuare', 'error');
+      return;
+    }
+
+    if (!this.oraSelezionata) {
+      this.notificationService.show('Seleziona una fascia oraria per continuare', 'error');
+      return;
+    }
+
+    const oggi = new Date();
+    oggi.setHours(0, 0, 0, 0);
+    const dataScelta = new Date(this.dataSelezionata);
+    if (dataScelta < oggi) {
+      this.notificationService.show('La data selezionata è nel passato', 'error');
+      return;
+    }
+
     this.caricamento = true;
 
     this.ricercaService.salvaRicerca({

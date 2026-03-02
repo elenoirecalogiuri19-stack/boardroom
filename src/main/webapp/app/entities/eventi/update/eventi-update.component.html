@@ -19,14 +19,12 @@
           }
         </div>
 
-        @let descrizioneRef = editForm.get('descrizione')!;
         <div class="mb-3">
           <label class="form-label" for="field_descrizione">Descrizione</label>
           <textarea class="form-control" id="field_descrizione" formControlName="descrizione" rows="4"></textarea>
         </div>
       </div>
 
-      @let prezzoRef = editForm.get('prezzo')!;
       <div class="mb-3">
         <label class="form-label" for="field_prezzo">Prezzo</label>
         <input type="number" class="form-control" id="field_prezzo" formControlName="prezzo" step="0.01" />
