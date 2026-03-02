@@ -48,9 +48,16 @@ public class PrenotazioniResource {
 
     private final PrenotazioniRepository prenotazioniRepository;
 
-    public PrenotazioniResource(PrenotazioniService prenotazioniService, PrenotazioniRepository prenotazioniRepository) {
+    private final PrenotazioniMapper prenotazioniMapper;
+
+    public PrenotazioniResource(
+        PrenotazioniService prenotazioniService,
+        PrenotazioniRepository prenotazioniRepository,
+        PrenotazioniMapper prenotazioniMapper
+    ) {
         this.prenotazioniService = prenotazioniService;
         this.prenotazioniRepository = prenotazioniRepository;
+        this.prenotazioniMapper = prenotazioniMapper;
     }
 
     @PostMapping
@@ -219,5 +226,21 @@ public class PrenotazioniResource {
     public ResponseEntity<PrenotazioniDTO> confermaPrenotazioni(@PathVariable UUID id) {
         PrenotazioniDTO dto = prenotazioniService.confermaPrenotazione(id);
         return ResponseEntity.ok(dto);
+    }
+
+    /**
+     *
+     * GET /prenotazionis/verifica-qr/{codice}
+     *
+     */
+    @GetMapping("/verifica-qr/{codice}")
+    @Transactional(readOnly = true)
+    public ResponseEntity<PrenotazioniDTO> verificaQrCode(@PathVariable String codice) {
+        LOG.debug("REST request to verify QR code : {}", codice);
+        return prenotazioniRepository
+            .findByCodiceQr(codice)
+            .map(prenotazioniMapper::toDto)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 }

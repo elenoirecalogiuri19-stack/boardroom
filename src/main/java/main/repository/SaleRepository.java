@@ -1,8 +1,10 @@
 package main.repository;
 
+import jakarta.persistence.LockModeType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import main.domain.Sale;
 import org.springframework.data.jpa.repository.*;
@@ -33,4 +35,8 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
         @Param("fine") LocalTime fine,
         @Param("capienza") Integer capienza
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM Sale s WHERE s.id = :id")
+    Optional<Sale> findByIdWithLock(@Param("id") UUID id);
 }

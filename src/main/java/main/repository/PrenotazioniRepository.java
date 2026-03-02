@@ -89,4 +89,6 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         """
     )
     List<Prenotazioni> findExpiredWaiting(@Param("stato") StatoCodice stato, @Param("limite") LocalDateTime limite);
+
+    Optional<Prenotazioni> findByCodiceQr(String codiceQr);
 }

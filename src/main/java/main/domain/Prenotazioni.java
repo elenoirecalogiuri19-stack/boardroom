@@ -61,6 +61,9 @@ public class Prenotazioni implements Serializable {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "codice_qr", unique = true)
+    private String codiceQr;
+
     public UUID getId() {
         return id;
     }
@@ -166,6 +169,14 @@ public class Prenotazioni implements Serializable {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getCodiceQr() {
+        return codiceQr;
+    }
+
+    public void setCodiceQr(String codiceQr) {
+        this.codiceQr = codiceQr;
     }
 
     @Override

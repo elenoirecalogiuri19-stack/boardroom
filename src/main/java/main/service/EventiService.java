@@ -62,16 +62,22 @@ public class EventiService {
     public EventiDTO createEvento(EventiDTO dto) {
         LOG.debug("REST request to save Eventi : {}", dto);
 
-        Prenotazioni pren = prenotazioniRepository
-            .findById(dto.getPrenotazioneId())
-            .orElseThrow(() -> new BadRequestAlertException("Prenotazione non trovata", "eventi", "prenotazioneNotFound"));
+        Prenotazioni pren = null;
+
+        if (dto.getPrenotazioneId() != null) {
+            pren = prenotazioniRepository
+                .findById(dto.getPrenotazioneId())
+                .orElseThrow(() -> new BadRequestAlertException("Prenotazione non trovata", "eventi", "prenotazioneNotFound"));
+        }
 
         Eventi eventi = buildEventoFromDto(dto, pren);
-        setPrezzoInBaseAlTipo(dto, eventi);
+        setPrezzoInBaseAlTipo(dto.getTipo(), dto.getPrezzo(), eventi);
 
         eventi = eventiRepository.save(eventi);
 
-        aggiornaStatoPrenotazioneConfermata(pren);
+        if (pren != null) {
+            aggiornaStatoPrenotazioneConfermata(pren);
+        }
 
         return eventiMapper.toDto(eventi);
     }
@@ -92,7 +98,11 @@ public class EventiService {
         existing.setTitolo(eventiDTO.getTitolo());
         existing.setDescrizione(eventiDTO.getDescrizione());
 
-        setPrezzoInBaseAlTipo(eventiDTO, existing);
+        // Preserva il tipo dal DB se il frontend non lo invia (colonna NOT NULL)
+        TipoEvento tipoEffettivo = eventiDTO.getTipo() != null ? eventiDTO.getTipo() : existing.getTipo();
+        existing.setTipo(tipoEffettivo);
+
+        setPrezzoInBaseAlTipo(tipoEffettivo, eventiDTO.getPrezzo(), existing);
 
         return eventiMapper.toDto(eventiRepository.save(existing));
     }
@@ -103,8 +113,14 @@ public class EventiService {
             .map(existing -> {
                 if (eventiDTO.getTitolo() != null) existing.setTitolo(eventiDTO.getTitolo());
                 if (eventiDTO.getDescrizione() != null) existing.setDescrizione(eventiDTO.getDescrizione());
-                if (existing.getTipo() == TipoEvento.PUBBLICO && eventiDTO.getPrezzo() != null) {
+                // Aggiorna tipo solo se esplicitamente inviato
+                if (eventiDTO.getTipo() != null) existing.setTipo(eventiDTO.getTipo());
+                // Aggiorna prezzo solo se pubblico e prezzo fornito
+                TipoEvento tipoEffettivo = existing.getTipo();
+                if (tipoEffettivo == TipoEvento.PUBBLICO && eventiDTO.getPrezzo() != null) {
                     existing.setPrezzo(eventiDTO.getPrezzo());
+                } else if (tipoEffettivo == TipoEvento.PRIVATO) {
+                    existing.setPrezzo(BigDecimal.ZERO);
                 }
                 return eventiRepository.save(existing);
             })
@@ -124,9 +140,9 @@ public class EventiService {
         return evento;
     }
 
-    private void setPrezzoInBaseAlTipo(EventiDTO dto, Eventi evento) {
-        if (dto.getTipo() == TipoEvento.PUBBLICO) {
-            evento.setPrezzo(dto.getPrezzo());
+    private void setPrezzoInBaseAlTipo(TipoEvento tipo, BigDecimal prezzoDto, Eventi evento) {
+        if (tipo == TipoEvento.PUBBLICO) {
+            evento.setPrezzo(prezzoDto != null ? prezzoDto : BigDecimal.ZERO);
         } else {
             evento.setPrezzo(BigDecimal.ZERO);
         }
@@ -143,7 +159,14 @@ public class EventiService {
             .findByIdWithPrenotazioneAndSala(Id)
             .orElseThrow(() -> new EntityNotFoundException("Evento non trovato"));
 
-        String codicePre = UUID.randomUUID().toString().substring(0, 8);
+        Prenotazioni prenotazione = evento.getPrenotazione();
+
+        String codicePre = prenotazione.getCodiceQr();
+        if (codicePre == null) {
+            codicePre = UUID.randomUUID().toString().substring(0, 8);
+            prenotazione.setCodiceQr(codicePre);
+            prenotazioniRepository.save(prenotazione);
+        }
 
         String qrCod = qrCodeGenerator.generateQRCodeBase64(codicePre);
 
