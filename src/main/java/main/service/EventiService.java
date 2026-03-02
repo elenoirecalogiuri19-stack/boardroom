@@ -62,16 +62,22 @@ public class EventiService {
     public EventiDTO createEvento(EventiDTO dto) {
         LOG.debug("REST request to save Eventi : {}", dto);
 
-        Prenotazioni pren = prenotazioniRepository
-            .findById(dto.getPrenotazioneId())
-            .orElseThrow(() -> new BadRequestAlertException("Prenotazione non trovata", "eventi", "prenotazioneNotFound"));
+        Prenotazioni pren = null;
+
+        if (dto.getPrenotazioneId() != null) {
+            pren = prenotazioniRepository
+                .findById(dto.getPrenotazioneId())
+                .orElseThrow(() -> new BadRequestAlertException("Prenotazione non trovata", "eventi", "prenotazioneNotFound"));
+        }
 
         Eventi eventi = buildEventoFromDto(dto, pren);
         setPrezzoInBaseAlTipo(dto, eventi);
 
         eventi = eventiRepository.save(eventi);
 
-        aggiornaStatoPrenotazioneConfermata(pren);
+        if (pren != null) {
+            aggiornaStatoPrenotazioneConfermata(pren);
+        }
 
         return eventiMapper.toDto(eventi);
     }
@@ -91,6 +97,7 @@ public class EventiService {
 
         existing.setTitolo(eventiDTO.getTitolo());
         existing.setDescrizione(eventiDTO.getDescrizione());
+        existing.setTipo(eventiDTO.getTipo());
 
         setPrezzoInBaseAlTipo(eventiDTO, existing);
 

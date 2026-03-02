@@ -157,7 +157,7 @@ public class PrenotazioniService {
 
     public void delete(UUID id) {
         LOG.debug("Request to delete Utenti : {}", id);
-        utentiRepository.deleteById(id);
+        prenotazioniRepository.deleteById(id);
     }
 
     /**
@@ -216,6 +216,7 @@ public class PrenotazioniService {
             .orElseThrow(() -> new EntityNotFoundException("Prenotazione non trovato"));
 
         verificaStatoWaiting(pren);
+        saleRepository.findByIdWithLock(pren.getSala().getId()).orElseThrow(() -> new EntityNotFoundException("Sala non trovata"));
         verificaAssenzaConflitti(pren);
 
         StatiPrenotazione statoConfirmed = statiPrenotazioneRepository
@@ -313,7 +314,7 @@ public class PrenotazioniService {
         UUID salaId = pren.getSala().getId();
 
         Utenti ut = utentiRepository.findById(utenteId).orElseThrow(() -> new EntityNotFoundException("Utente non trovato"));
-        Sale sa = saleRepository.findById(salaId).orElseThrow(() -> new EntityNotFoundException("Sala non trovata"));
+        Sale sa = saleRepository.findByIdWithLock(salaId).orElseThrow(() -> new EntityNotFoundException("Sala non trovata"));
         pren.setUtente(ut);
         pren.setSala(sa);
     }
@@ -372,7 +373,7 @@ public class PrenotazioniService {
     }
 
     private Sale caricaSala(UUID salaId) {
-        return saleRepository.findById(salaId).orElseThrow(() -> new EntityNotFoundException("Sala non trovata"));
+        return saleRepository.findByIdWithLock(salaId).orElseThrow(() -> new EntityNotFoundException("Sala non trovata"));
     }
 
     private Utenti caricaUtenteAutenticato() {
