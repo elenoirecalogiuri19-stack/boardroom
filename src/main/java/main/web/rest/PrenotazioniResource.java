@@ -99,7 +99,7 @@ public class PrenotazioniResource {
         LOG.debug("REST request to update Prenotazioni : {}, {}", id, prenotazioniDTO);
         validaPrenoUpdate(id, prenotazioniDTO);
 
-        PrenotazioniDTO result = prenotazioniService.save(prenotazioniDTO);
+        PrenotazioniDTO result = prenotazioniService.update(prenotazioniDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, prenotazioniDTO.getId().toString()))
             .body(result);
