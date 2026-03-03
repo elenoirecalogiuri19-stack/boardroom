@@ -34,7 +34,7 @@ public class EventiService {
     private final PrenotazioniRepository prenotazioniRepository;
     private final StatiPrenotazioneRepository statiPrenotazioneRepository;
     private final MailService mailService;
-    private final qrCodeGenerator qrCodeGenerator;
+    private final QrCodeGenerator qrCodeGenerator;
 
     public EventiService(
         EventiRepository eventiRepository,
@@ -42,7 +42,7 @@ public class EventiService {
         PrenotazioniRepository prenotazioniRepository,
         StatiPrenotazioneRepository statiPrenotazioneRepository,
         MailService mailService,
-        qrCodeGenerator qrCodeGenerator
+        QrCodeGenerator qrCodeGenerator
     ) {
         this.eventiRepository = eventiRepository;
         this.eventiMapper = eventiMapper;

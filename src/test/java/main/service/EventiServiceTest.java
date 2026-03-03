@@ -50,7 +50,7 @@ class EventiServiceTest {
     private MailService mailService;
 
     @Mock
-    private qrCodeGenerator qrCodeGenerator;
+    private QrCodeGenerator qrCodeGenerator;
 
     @InjectMocks
     private EventiService eventiService;

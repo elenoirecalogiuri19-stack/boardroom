@@ -34,7 +34,7 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
     )
     List<Sale> findFreeSales(
         @Param("data") LocalDate data,
-        @Param("inizio") LocalTime c,
+        @Param("inizio") LocalTime inizio,
         @Param("fine") LocalTime fine,
         @Param("capienza") Integer capienza
     );

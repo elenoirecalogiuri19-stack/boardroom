@@ -17,6 +17,7 @@ import main.repository.PrenotazioniRepository;
 import main.repository.SaleRepository;
 import main.repository.StatiPrenotazioneRepository;
 import main.repository.UtentiRepository;
+import main.security.AuthoritiesConstants;
 import main.service.dto.PrenotazioniDTO;
 import main.service.mapper.PrenotazioniMapper;
 import main.web.rest.errors.UtenteNonAutenticatoException;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -155,21 +157,30 @@ public class PrenotazioniService {
         return findAll(pageable);
     }
 
-    public void delete(UUID id) {
-        LOG.debug("Request to delete Utenti : {}", id);
+    /**
+     * Cancellazione fisica riservata agli amministratori.
+     * Rimuove il record dal DB senza passare per il cambio di stato.
+     *
+     * @param id the id of the entity.
+     */
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public void deleteAsAdmin(UUID id) {
+        LOG.debug("Request to hard-delete Prenotazioni (admin) : {}", id);
+        if (!prenotazioniRepository.existsById(id)) {
+            throw new EntityNotFoundException("Prenotazione non trovata: " + id);
+        }
         prenotazioniRepository.deleteById(id);
+        LOG.debug("Prenotazione {} eliminata definitivamente dall'amministratore", id);
     }
 
     /**
-     * Delete the prenotazioni by id.
+     * Cancellazione logica per l'utente proprietario della prenotazione.
+     * Imposta lo stato a CANCELLED senza rimuovere il record dal DB.
      *
      * @param id the id of the entity.
-     *
-     * gestita permessi per eliminazione prenotazione
-     *
      */
     public void deletePrenotazione(UUID id) throws AccessDeniedException {
-        LOG.debug("Request to delete Prenotazioni : {}", id);
+        LOG.debug("Request to cancel Prenotazioni : {}", id);
 
         String username = getAuthenticatedUsername();
 
@@ -183,23 +194,7 @@ public class PrenotazioniService {
         pren.setStato(statoCancelled);
         prenotazioniRepository.save(pren);
 
-        LOG.debug("Prenotazione {} annulaa con sucesso");
-    }
-
-    public PrenotazioniDTO creaPrenotazione(PrenotazioniDTO dto) {
-        LOG.debug("Request to create Prenotazioni : {}", dto);
-
-        Prenotazioni pren = prenotazioniMapper.toEntity(dto);
-
-        validaRiferimenti(dto);
-        collegaUtenteESala(pren);
-        validaPrenotazione(pren);
-        impostaStatoIniziale(pren);
-        gestisciSovrapposizioni(pren);
-
-        pren = prenotazioniRepository.save(pren);
-
-        return prenotazioniMapper.toDto(pren);
+        LOG.debug("Prenotazione {} annullata con successo dall'utente {}", id, username);
     }
 
     /**
@@ -221,7 +216,7 @@ public class PrenotazioniService {
 
         StatiPrenotazione statoConfirmed = statiPrenotazioneRepository
             .findByCodice(StatoCodice.CONFIRMED)
-            .orElseThrow(() -> new EntityNotFoundException("Stato COFERMED non trovato"));
+            .orElseThrow(() -> new EntityNotFoundException("Stato CONFIRMED non trovato"));
         pren.setStato(statoConfirmed);
 
         pren = prenotazioniRepository.save(pren);
@@ -250,10 +245,19 @@ public class PrenotazioniService {
         LOG.debug("Request to nuovo Prenotazioni : {}", dto);
 
         validaInputRicerca(dto);
+        LOG.debug(
+            "Input ricerca valido - salaId={}, data={}, oraInizio={}, oraFine={}",
+            dto.getSalaId(),
+            dto.getData(),
+            dto.getOraInizio(),
+            dto.getOraFine()
+        );
 
         Sale sala = caricaSala(dto.getSalaId());
+        LOG.debug("Sala caricata: {}", sala.getId());
 
         Utenti utente = caricaUtenteAutenticato();
+        LOG.debug("Utente autenticato: {}", utente.getId());
 
         Prenotazioni pren = costruisciPrenotazioneDaRicerca(dto, sala, utente);
 
@@ -261,7 +265,10 @@ public class PrenotazioniService {
 
         impostaStatoIniziale(pren);
 
+        gestisciSovrapposizioni(pren);
+
         Prenotazioni salvata = prenotazioniRepository.save(pren);
+        LOG.debug("Prenotazione salvata: {}", salvata.getId());
 
         return prenotazioniMapper.toDto(salvata);
     }
@@ -273,10 +280,10 @@ public class PrenotazioniService {
 
     public void validaPrenotazione(Prenotazioni prenotazioni) {
         if (prenotazioni.getOraInizio().isAfter(prenotazioni.getOraFine())) {
-            throw new IllegalArgumentException("l'ora di inizie deve esere inferiore dello ora fine");
+            throw new IllegalArgumentException("L'ora di inizio deve essere inferiore all'ora di fine");
         }
         if (prenotazioni.getData().isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("la data della prenotazione non deve essere nel pasato");
+            throw new IllegalArgumentException("La data della prenotazione non deve essere nel passato");
         }
     }
 
@@ -378,7 +385,16 @@ public class PrenotazioniService {
 
     private Utenti caricaUtenteAutenticato() {
         String username = getAuthenticatedUsername();
-        return utentiRepository.findByUser_Login(username);
+        return utentiRepository
+            .findByUser_Login(username)
+            .orElseThrow(() ->
+                new EntityNotFoundException(
+                    "Profilo utente non trovato per l'account '" +
+                    username +
+                    "': " +
+                    "completare la registrazione prima di effettuare una prenotazione"
+                )
+            );
     }
 
     private Prenotazioni costruisciPrenotazioneDaRicerca(PrenotazioniDTO dto, Sale sala, Utenti utente) {
@@ -388,6 +404,7 @@ public class PrenotazioniService {
         pren.setData(dto.getData());
         pren.setOraInizio(dto.getOraInizio());
         pren.setOraFine(dto.getOraFine());
+        pren.setNumPersone(dto.getNumPersone());
         return pren;
     }
 
@@ -410,11 +427,5 @@ public class PrenotazioniService {
         prenotazioniRepository.saveAll(scadute);
 
         LOG.debug("Aggiornate {} prenotazioni da WAITING a REJECTED", scadute.size());
-    }
-
-    private StatiPrenotazione getRejectedState() {
-        return statiPrenotazioneRepository
-            .findByCodice(StatoCodice.REJECTED)
-            .orElseThrow(() -> new EntityNotFoundException("Stato REJECTED non trovato"));
     }
 }

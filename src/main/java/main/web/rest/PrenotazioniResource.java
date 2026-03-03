@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import main.repository.PrenotazioniRepository;
+import main.security.AuthoritiesConstants;
 import main.service.PrenotazioniService;
 import main.service.dto.PrenotazioniDTO;
 import main.service.mapper.PrenotazioniMapper;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -60,9 +62,15 @@ public class PrenotazioniResource {
         this.prenotazioniMapper = prenotazioniMapper;
     }
 
+    /**
+     * {@code POST /prenotazionis} : Creazione diretta riservata agli amministratori.
+     * Imposta lo stato a CONFIRMED senza passare per il flusso WAITING.
+     * Gli utenti devono usare POST /prenotta.
+     */
     @PostMapping
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<PrenotazioniDTO> createPrenotazioni(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO) {
-        LOG.debug("REST request to save Prenotazioni : {}", prenotazioniDTO);
+        LOG.debug("REST request to save Prenotazioni (admin) : {}", prenotazioniDTO);
         if (prenotazioniDTO.getId() != null) {
             throw new BadRequestAlertException("A new prenotazioni cannot already have an ID", ENTITY_NAME, "idexists");
         }
@@ -73,10 +81,23 @@ public class PrenotazioniResource {
             .body(result);
     }
 
+    /**
+     * {@code POST /prenotazionis/prenotta} : Creazione prenotazione per utente autenticato.
+     * Imposta lo stato iniziale a WAITING, verifica sovrapposizioni e collega automaticamente
+     * l'utente autenticato. Questo è l'unico endpoint da usare per il flusso utente.
+     */
     @PostMapping("/prenotta")
     public ResponseEntity<PrenotazioniDTO> nuovaPrenotazione(@Valid @RequestBody PrenotazioniDTO dto) {
-        PrenotazioniDTO result = prenotazioniService.nuovoPrenotazioni(dto);
-        return ResponseEntity.ok(result);
+        try {
+            PrenotazioniDTO result = prenotazioniService.nuovoPrenotazioni(dto);
+            return ResponseEntity.ok(result);
+        } catch (EntityNotFoundException e) {
+            LOG.warn("Risorsa non trovata durante la creazione della prenotazione: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Input non valido durante la creazione della prenotazione: {}", e.getMessage());
+            throw new BadRequestAlertException(e.getMessage(), ENTITY_NAME, "invalidinput");
+        }
     }
 
     /**
@@ -97,7 +118,7 @@ public class PrenotazioniResource {
         LOG.debug("REST request to update Prenotazioni : {}, {}", id, prenotazioniDTO);
         validaPrenoUpdate(id, prenotazioniDTO);
 
-        PrenotazioniDTO result = prenotazioniService.save(prenotazioniDTO);
+        PrenotazioniDTO result = prenotazioniService.update(prenotazioniDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, prenotazioniDTO.getId().toString()))
             .body(result);
@@ -187,13 +208,12 @@ public class PrenotazioniResource {
     }
 
     /**
-     * {@code DELETE  /prenotazionis/:id} : delete the "id" prenotazioni.
+     * {@code DELETE /prenotazionis/:id} : cancellazione logica per l'utente proprietario.
+     * Imposta lo stato a CANCELLED. Solo il proprietario della prenotazione può eseguire questa operazione.
      */
-
-    @DeleteMapping("/cancella/{id}")
-    public ResponseEntity<Void> deletePrenotazioni(@PathVariable("id") UUID id) {
-        LOG.debug("REST request to delete Prenotazioni : {}", id);
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancellaPrenotazione(@PathVariable("id") UUID id) {
+        LOG.debug("REST request to cancel Prenotazioni : {}", id);
         try {
             prenotazioniService.deletePrenotazione(id);
             return ResponseEntity.noContent()
@@ -207,14 +227,21 @@ public class PrenotazioniResource {
     }
 
     /**
-     *
-     * Endpoint per la prenotazione con validazione
-     *
+     * {@code DELETE /prenotazionis/:id/admin} : cancellazione fisica riservata agli amministratori.
+     * Rimuove definitivamente il record dal DB.
      */
-    @PostMapping("/crea")
-    public ResponseEntity<PrenotazioniDTO> creaPrenotazione(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO) {
-        PrenotazioniDTO dto = prenotazioniService.creaPrenotazione(prenotazioniDTO);
-        return ResponseEntity.ok(dto);
+    @DeleteMapping("/{id}/admin")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<Void> deletePrenotazioneAdmin(@PathVariable("id") UUID id) {
+        LOG.debug("REST request to hard-delete Prenotazioni (admin) : {}", id);
+        try {
+            prenotazioniService.deleteAsAdmin(id);
+            return ResponseEntity.noContent()
+                .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
+                .build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**

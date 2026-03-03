@@ -8,7 +8,7 @@ export interface PrenotazioneDTO {
   data: string;
   oraInizio: string;
   oraFine: string;
-  numPersone?: number;
+  numPersone?: number | null;
   stato?: {
     id: string;
     codice: string;
@@ -46,6 +46,6 @@ export class PrenotazioniApiService {
   }
 
   cancellaPrenotazione(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/cancella/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

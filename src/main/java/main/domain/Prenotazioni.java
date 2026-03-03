@@ -64,6 +64,9 @@ public class Prenotazioni implements Serializable {
     @Column(name = "codice_qr", unique = true)
     private String codiceQr;
 
+    @Column(name = "num_persone")
+    private Integer numPersone;
+
     public UUID getId() {
         return id;
     }
@@ -177,6 +180,14 @@ public class Prenotazioni implements Serializable {
 
     public void setCodiceQr(String codiceQr) {
         this.codiceQr = codiceQr;
+    }
+
+    public Integer getNumPersone() {
+        return numPersone;
+    }
+
+    public void setNumPersone(Integer numPersone) {
+        this.numPersone = numPersone;
     }
 
     @Override

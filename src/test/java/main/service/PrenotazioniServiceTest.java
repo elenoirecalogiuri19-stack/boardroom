@@ -114,25 +114,30 @@ class PrenotazioniServiceTest {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // delete() — cancellazione fisica (BUG FIX: era utentiRepository)
+    // deleteAsAdmin() — cancellazione fisica riservata agli admin
     // ─────────────────────────────────────────────────────────────
 
     @Test
-    void delete_shouldCallPrenotazioniRepository_notUtentiRepository() {
-        prenotazioniService.delete(prenotazioneId);
+    void deleteAsAdmin_shouldDeleteFromRepository_whenRecordExists() {
+        when(prenotazioniRepository.existsById(prenotazioneId)).thenReturn(true);
 
+        prenotazioniService.deleteAsAdmin(prenotazioneId);
+
+        verify(prenotazioniRepository).existsById(prenotazioneId);
         verify(prenotazioniRepository).deleteById(prenotazioneId);
         verify(utentiRepository, never()).deleteById(any());
     }
 
     @Test
-    void delete_shouldDeleteCorrectId() {
-        UUID specificId = UUID.randomUUID();
+    void deleteAsAdmin_shouldThrowEntityNotFound_whenRecordDoesNotExist() {
+        UUID missingId = UUID.randomUUID();
+        when(prenotazioniRepository.existsById(missingId)).thenReturn(false);
 
-        prenotazioniService.delete(specificId);
+        assertThatThrownBy(() -> prenotazioniService.deleteAsAdmin(missingId))
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessageContaining("Prenotazione non trovata");
 
-        verify(prenotazioniRepository).deleteById(specificId);
-        verify(utentiRepository, never()).deleteById(any());
+        verify(prenotazioniRepository, never()).deleteById(any());
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -357,64 +362,82 @@ class PrenotazioniServiceTest {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // creaPrenotazione() — validazioni e flusso
+    // nuovoPrenotazioni() — flusso utente: WAITING, sovrapposizioni, utente da SecurityContext
     // ─────────────────────────────────────────────────────────────
 
     @Test
-    void creaPrenotazione_shouldPersistAndReturnDTO() {
-        PrenotazioniDTO dto = buildPrenotazioneDTOValida();
+    void nuovoPrenotazioni_shouldPersistAndReturnDTO() {
+        setAuthenticatedUser("owner");
+        PrenotazioniDTO dto = buildPrenotazioneDTODaRicerca();
 
-        when(prenotazioniMapper.toEntity(dto)).thenReturn(prenotazione);
-        when(utentiRepository.findById(any(UUID.class))).thenReturn(Optional.of(utenteOwner));
+        when(saleRepository.findByIdWithLock(any(UUID.class))).thenReturn(Optional.of(sala));
+        when(utentiRepository.findByUser_Login("owner")).thenReturn(Optional.of(utenteOwner));
         when(statiPrenotazioneRepository.findByCodice(StatoCodice.WAITING)).thenReturn(Optional.of(statoWaiting));
         when(prenotazioniRepository.existsOverlappingConfirmedPrenotazione(any(), any(), any(), any())).thenReturn(false);
         when(prenotazioniRepository.save(any())).thenReturn(prenotazione);
         when(prenotazioniMapper.toDto(any(Prenotazioni.class))).thenReturn(dto);
 
-        PrenotazioniDTO result = prenotazioniService.creaPrenotazione(dto);
+        PrenotazioniDTO result = prenotazioniService.nuovoPrenotazioni(dto);
 
         assertThat(result).isNotNull();
         verify(prenotazioniRepository).save(any());
     }
 
     @Test
-    void creaPrenotazione_shouldSetRejected_whenOverlapExists() {
-        PrenotazioniDTO dto = buildPrenotazioneDTOValida();
+    void nuovoPrenotazioni_shouldSetRejected_whenOverlapExists() {
+        setAuthenticatedUser("owner");
+        PrenotazioniDTO dto = buildPrenotazioneDTODaRicerca();
 
-        when(prenotazioniMapper.toEntity(dto)).thenReturn(prenotazione);
-        when(utentiRepository.findById(any(UUID.class))).thenReturn(Optional.of(utenteOwner));
+        when(saleRepository.findByIdWithLock(any(UUID.class))).thenReturn(Optional.of(sala));
+        when(utentiRepository.findByUser_Login("owner")).thenReturn(Optional.of(utenteOwner));
         when(statiPrenotazioneRepository.findByCodice(StatoCodice.WAITING)).thenReturn(Optional.of(statoWaiting));
         when(prenotazioniRepository.existsOverlappingConfirmedPrenotazione(any(), any(), any(), any())).thenReturn(true);
         when(statiPrenotazioneRepository.findByCodice(StatoCodice.REJECTED)).thenReturn(Optional.of(statoRejected));
         when(prenotazioniRepository.save(any())).thenReturn(prenotazione);
         when(prenotazioniMapper.toDto(any(Prenotazioni.class))).thenReturn(dto);
 
-        prenotazioniService.creaPrenotazione(dto);
+        prenotazioniService.nuovoPrenotazioni(dto);
 
         assertThat(prenotazione.getStato()).isEqualTo(statoRejected);
     }
 
     @Test
-    void creaPrenotazione_shouldThrowIllegalArgument_whenUtenteIdMissing() {
+    void nuovoPrenotazioni_shouldThrowIllegalArgument_whenSalaIdMissing() {
+        setAuthenticatedUser("owner");
         PrenotazioniDTO dto = new PrenotazioniDTO();
-        dto.setSala(new SaleDTO());
-        dto.getSala().setId(sala.getId());
+        dto.setData(LocalDate.now().plusDays(1));
+        dto.setOraInizio(LocalTime.of(10, 0));
+        dto.setOraFine(LocalTime.of(11, 0));
+        // salaId deliberatamente assente
 
-        assertThatThrownBy(() -> prenotazioniService.creaPrenotazione(dto)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> prenotazioniService.nuovoPrenotazioni(dto)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void creaPrenotazione_shouldThrowIllegalArgument_whenSalaIdMissing() {
-        PrenotazioniDTO dto = new PrenotazioniDTO();
-        dto.setUtente(new UtentiDTO());
-        dto.getUtente().setId(utenteOwner.getId());
+    void nuovoPrenotazioni_shouldThrowEntityNotFound_whenUtenteNonHaProfilo() {
+        setAuthenticatedUser("owner");
+        PrenotazioniDTO dto = buildPrenotazioneDTODaRicerca();
 
-        assertThatThrownBy(() -> prenotazioniService.creaPrenotazione(dto)).isInstanceOf(IllegalArgumentException.class);
+        when(saleRepository.findByIdWithLock(any(UUID.class))).thenReturn(Optional.of(sala));
+        when(utentiRepository.findByUser_Login("owner")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> prenotazioniService.nuovoPrenotazioni(dto))
+            .isInstanceOf(jakarta.persistence.EntityNotFoundException.class)
+            .hasMessageContaining("Profilo utente non trovato");
     }
 
     // ─────────────────────────────────────────────────────────────
     // helpers
     // ─────────────────────────────────────────────────────────────
+
+    private PrenotazioniDTO buildPrenotazioneDTODaRicerca() {
+        PrenotazioniDTO dto = new PrenotazioniDTO();
+        dto.setSalaId(sala.getId());
+        dto.setData(LocalDate.now().plusDays(1));
+        dto.setOraInizio(LocalTime.of(10, 0));
+        dto.setOraFine(LocalTime.of(11, 0));
+        return dto;
+    }
 
     private PrenotazioniDTO buildPrenotazioneDTOValida() {
         SaleDTO saleDTO = new SaleDTO();
