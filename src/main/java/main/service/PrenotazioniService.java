@@ -216,7 +216,7 @@ public class PrenotazioniService {
 
         StatiPrenotazione statoConfirmed = statiPrenotazioneRepository
             .findByCodice(StatoCodice.CONFIRMED)
-            .orElseThrow(() -> new EntityNotFoundException("Stato COFERMED non trovato"));
+            .orElseThrow(() -> new EntityNotFoundException("Stato CONFIRMED non trovato"));
         pren.setStato(statoConfirmed);
 
         pren = prenotazioniRepository.save(pren);
@@ -280,10 +280,10 @@ public class PrenotazioniService {
 
     public void validaPrenotazione(Prenotazioni prenotazioni) {
         if (prenotazioni.getOraInizio().isAfter(prenotazioni.getOraFine())) {
-            throw new IllegalArgumentException("l'ora di inizie deve esere inferiore dello ora fine");
+            throw new IllegalArgumentException("L'ora di inizio deve essere inferiore all'ora di fine");
         }
         if (prenotazioni.getData().isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("la data della prenotazione non deve essere nel pasato");
+            throw new IllegalArgumentException("La data della prenotazione non deve essere nel passato");
         }
     }
 
