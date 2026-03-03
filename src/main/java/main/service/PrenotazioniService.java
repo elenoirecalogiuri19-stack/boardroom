@@ -17,6 +17,7 @@ import main.repository.PrenotazioniRepository;
 import main.repository.SaleRepository;
 import main.repository.StatiPrenotazioneRepository;
 import main.repository.UtentiRepository;
+import main.security.AuthoritiesConstants;
 import main.service.dto.PrenotazioniDTO;
 import main.service.mapper.PrenotazioniMapper;
 import main.web.rest.errors.UtenteNonAutenticatoException;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -155,21 +157,30 @@ public class PrenotazioniService {
         return findAll(pageable);
     }
 
-    public void delete(UUID id) {
-        LOG.debug("Request to delete Utenti : {}", id);
+    /**
+     * Cancellazione fisica riservata agli amministratori.
+     * Rimuove il record dal DB senza passare per il cambio di stato.
+     *
+     * @param id the id of the entity.
+     */
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public void deleteAsAdmin(UUID id) {
+        LOG.debug("Request to hard-delete Prenotazioni (admin) : {}", id);
+        if (!prenotazioniRepository.existsById(id)) {
+            throw new EntityNotFoundException("Prenotazione non trovata: " + id);
+        }
         prenotazioniRepository.deleteById(id);
+        LOG.debug("Prenotazione {} eliminata definitivamente dall'amministratore", id);
     }
 
     /**
-     * Delete the prenotazioni by id.
+     * Cancellazione logica per l'utente proprietario della prenotazione.
+     * Imposta lo stato a CANCELLED senza rimuovere il record dal DB.
      *
      * @param id the id of the entity.
-     *
-     * gestita permessi per eliminazione prenotazione
-     *
      */
     public void deletePrenotazione(UUID id) throws AccessDeniedException {
-        LOG.debug("Request to delete Prenotazioni : {}", id);
+        LOG.debug("Request to cancel Prenotazioni : {}", id);
 
         String username = getAuthenticatedUsername();
 
@@ -183,7 +194,7 @@ public class PrenotazioniService {
         pren.setStato(statoCancelled);
         prenotazioniRepository.save(pren);
 
-        LOG.debug("Prenotazione {} annulaa con sucesso");
+        LOG.debug("Prenotazione {} annullata con successo dall'utente {}", id, username);
     }
 
     public PrenotazioniDTO creaPrenotazione(PrenotazioniDTO dto) {

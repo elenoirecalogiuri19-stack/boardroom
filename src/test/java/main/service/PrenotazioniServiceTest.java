@@ -114,25 +114,30 @@ class PrenotazioniServiceTest {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // delete() — cancellazione fisica (BUG FIX: era utentiRepository)
+    // deleteAsAdmin() — cancellazione fisica riservata agli admin
     // ─────────────────────────────────────────────────────────────
 
     @Test
-    void delete_shouldCallPrenotazioniRepository_notUtentiRepository() {
-        prenotazioniService.delete(prenotazioneId);
+    void deleteAsAdmin_shouldDeleteFromRepository_whenRecordExists() {
+        when(prenotazioniRepository.existsById(prenotazioneId)).thenReturn(true);
 
+        prenotazioniService.deleteAsAdmin(prenotazioneId);
+
+        verify(prenotazioniRepository).existsById(prenotazioneId);
         verify(prenotazioniRepository).deleteById(prenotazioneId);
         verify(utentiRepository, never()).deleteById(any());
     }
 
     @Test
-    void delete_shouldDeleteCorrectId() {
-        UUID specificId = UUID.randomUUID();
+    void deleteAsAdmin_shouldThrowEntityNotFound_whenRecordDoesNotExist() {
+        UUID missingId = UUID.randomUUID();
+        when(prenotazioniRepository.existsById(missingId)).thenReturn(false);
 
-        prenotazioniService.delete(specificId);
+        assertThatThrownBy(() -> prenotazioniService.deleteAsAdmin(missingId))
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessageContaining("Prenotazione non trovata");
 
-        verify(prenotazioniRepository).deleteById(specificId);
-        verify(utentiRepository, never()).deleteById(any());
+        verify(prenotazioniRepository, never()).deleteById(any());
     }
 
     // ─────────────────────────────────────────────────────────────

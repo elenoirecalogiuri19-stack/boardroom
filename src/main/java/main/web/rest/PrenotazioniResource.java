@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import main.repository.PrenotazioniRepository;
+import main.security.AuthoritiesConstants;
 import main.service.PrenotazioniService;
 import main.service.dto.PrenotazioniDTO;
 import main.service.mapper.PrenotazioniMapper;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -187,13 +189,12 @@ public class PrenotazioniResource {
     }
 
     /**
-     * {@code DELETE  /prenotazionis/:id} : delete the "id" prenotazioni.
+     * {@code DELETE /prenotazionis/:id} : cancellazione logica per l'utente proprietario.
+     * Imposta lo stato a CANCELLED. Solo il proprietario della prenotazione può eseguire questa operazione.
      */
-
-    @DeleteMapping("/cancella/{id}")
-    public ResponseEntity<Void> deletePrenotazioni(@PathVariable("id") UUID id) {
-        LOG.debug("REST request to delete Prenotazioni : {}", id);
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancellaPrenotazione(@PathVariable("id") UUID id) {
+        LOG.debug("REST request to cancel Prenotazioni : {}", id);
         try {
             prenotazioniService.deletePrenotazione(id);
             return ResponseEntity.noContent()
@@ -201,6 +202,24 @@ public class PrenotazioniResource {
                 .build();
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * {@code DELETE /prenotazionis/:id/admin} : cancellazione fisica riservata agli amministratori.
+     * Rimuove definitivamente il record dal DB.
+     */
+    @DeleteMapping("/{id}/admin")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<Void> deletePrenotazioneAdmin(@PathVariable("id") UUID id) {
+        LOG.debug("REST request to hard-delete Prenotazioni (admin) : {}", id);
+        try {
+            prenotazioniService.deleteAsAdmin(id);
+            return ResponseEntity.noContent()
+                .headers(HeaderUtil.createEntityDeletionAlert(applicationName, false, ENTITY_NAME, id.toString()))
+                .build();
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
