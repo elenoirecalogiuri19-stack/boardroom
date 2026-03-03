@@ -9,7 +9,7 @@ import java.util.Base64;
 import org.springframework.stereotype.Service;
 
 @Service
-public class qrCodeGenerator {
+public class QrCodeGenerator {
 
     public String generateQRCodeBase64(String text) {
         try {
