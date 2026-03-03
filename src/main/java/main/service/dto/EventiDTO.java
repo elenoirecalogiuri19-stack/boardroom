@@ -31,6 +31,15 @@ public class EventiDTO implements Serializable {
 
     private UUID prenotazioneId;
 
+    /** Numero massimo di partecipanti ammessi all'evento pubblico. */
+    private Integer numPersone;
+
+    /** Numero di posti già prenotati (calcolato a runtime, non nel DB). */
+    private long postiOccupati;
+
+    /** true se l'evento ha raggiunto la capienza massima. */
+    private boolean eventoPieno;
+
     public UUID getId() {
         return id;
     }
@@ -109,6 +118,30 @@ public class EventiDTO implements Serializable {
 
     public void setDescrizione(String descrizione) {
         this.descrizione = descrizione;
+    }
+
+    public Integer getNumPersone() {
+        return numPersone;
+    }
+
+    public void setNumPersone(Integer numPersone) {
+        this.numPersone = numPersone;
+    }
+
+    public long getPostiOccupati() {
+        return postiOccupati;
+    }
+
+    public void setPostiOccupati(long postiOccupati) {
+        this.postiOccupati = postiOccupati;
+    }
+
+    public boolean isEventoPieno() {
+        return eventoPieno;
+    }
+
+    public void setEventoPieno(boolean eventoPieno) {
+        this.eventoPieno = eventoPieno;
     }
 
     @Override
