@@ -6,16 +6,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import main.domain.Eventi;
+import main.domain.PrenotazioneEventoPubblico;
 import main.domain.Prenotazioni;
 import main.domain.enumeration.StatoCodice;
 import main.domain.enumeration.TipoEvento;
 import main.repository.EventiRepository;
+import main.repository.PrenotazioneEventoPubblicoRepository;
 import main.repository.PrenotazioniRepository;
 import main.repository.StatiPrenotazioneRepository;
 import main.service.dto.EventiDTO;
 import main.service.dto.PrenotazioniEmailDTO;
 import main.service.mapper.EventiMapper;
 import main.web.rest.errors.BadRequestAlertException;
+import main.web.rest.errors.EventoPienoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -35,6 +38,7 @@ public class EventiService {
     private final StatiPrenotazioneRepository statiPrenotazioneRepository;
     private final MailService mailService;
     private final QrCodeGenerator qrCodeGenerator;
+    private final PrenotazioneEventoPubblicoRepository prenotazioneEventoPubblicoRepository;
 
     public EventiService(
         EventiRepository eventiRepository,
@@ -42,7 +46,8 @@ public class EventiService {
         PrenotazioniRepository prenotazioniRepository,
         StatiPrenotazioneRepository statiPrenotazioneRepository,
         MailService mailService,
-        QrCodeGenerator qrCodeGenerator
+        QrCodeGenerator qrCodeGenerator,
+        PrenotazioneEventoPubblicoRepository prenotazioneEventoPubblicoRepository
     ) {
         this.eventiRepository = eventiRepository;
         this.eventiMapper = eventiMapper;
@@ -50,13 +55,25 @@ public class EventiService {
         this.statiPrenotazioneRepository = statiPrenotazioneRepository;
         this.mailService = mailService;
         this.qrCodeGenerator = qrCodeGenerator;
+        this.prenotazioneEventoPubblicoRepository = prenotazioneEventoPubblicoRepository;
     }
 
     @Transactional(readOnly = true)
     public List<EventiDTO> findPublicEventi() {
         LOG.debug("Request to get all public Eventi");
         List<Eventi> eventi = eventiRepository.findPublicConfirmed(TipoEvento.PUBBLICO, StatoCodice.CONFIRMED);
-        return eventiMapper.toDto(eventi);
+        return eventi
+            .stream()
+            .map(e -> {
+                EventiDTO dto = eventiMapper.toDto(e);
+                long occupati = prenotazioneEventoPubblicoRepository.countByEventoId(e.getId());
+                dto.setPostiOccupati(occupati);
+                if (dto.getNumPersone() != null) {
+                    dto.setEventoPieno(occupati >= dto.getNumPersone());
+                }
+                return dto;
+            })
+            .toList();
     }
 
     public EventiDTO createEvento(EventiDTO dto) {
@@ -113,9 +130,7 @@ public class EventiService {
             .map(existing -> {
                 if (eventiDTO.getTitolo() != null) existing.setTitolo(eventiDTO.getTitolo());
                 if (eventiDTO.getDescrizione() != null) existing.setDescrizione(eventiDTO.getDescrizione());
-                // Aggiorna tipo solo se esplicitamente inviato
                 if (eventiDTO.getTipo() != null) existing.setTipo(eventiDTO.getTipo());
-                // Aggiorna prezzo solo se pubblico e prezzo fornito
                 TipoEvento tipoEffettivo = existing.getTipo();
                 if (tipoEffettivo == TipoEvento.PUBBLICO && eventiDTO.getPrezzo() != null) {
                     existing.setPrezzo(eventiDTO.getPrezzo());
@@ -150,26 +165,46 @@ public class EventiService {
 
     private void aggiornaStatoPrenotazioneConfermata(Prenotazioni prenotazione) {
         statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED).ifPresent(prenotazione::setStato);
-
         prenotazioniRepository.save(prenotazione);
     }
 
-    public void inviaEmailPrenotazione(UUID Id, PrenotazioniEmailDTO dto) {
+    public void inviaEmailPrenotazione(UUID id, PrenotazioniEmailDTO dto) {
         Eventi evento = eventiRepository
-            .findByIdWithPrenotazioneAndSala(Id)
+            .findByIdWithPrenotazioneAndSala(id)
             .orElseThrow(() -> new EntityNotFoundException("Evento non trovato"));
 
-        Prenotazioni prenotazione = evento.getPrenotazione();
-
-        String codicePre = prenotazione.getCodiceQr();
-        if (codicePre == null) {
-            codicePre = UUID.randomUUID().toString().substring(0, 8);
-            prenotazione.setCodiceQr(codicePre);
-            prenotazioniRepository.save(prenotazione);
+        // ── 1. Verifica disponibilità posti usando prenotazione.numPersone ────────
+        Integer limitePartecipanti = evento.getPrenotazione() != null ? evento.getPrenotazione().getNumPersone() : null;
+        if (limitePartecipanti != null) {
+            long postiOccupati = prenotazioneEventoPubblicoRepository.countByEventoId(evento.getId());
+            if (postiOccupati >= limitePartecipanti) {
+                LOG.warn("Evento {} al completo ({}/{})", evento.getId(), postiOccupati, limitePartecipanti);
+                throw new EventoPienoException();
+            }
         }
 
-        String qrCod = qrCodeGenerator.generateQRCodeBase64(codicePre);
+        // ── 2. Genera codice prenotazione: {codiceEvento}-{codicePersona} ─────────
+        String codiceEvento = evento.getId().toString().replace("-", "").substring(0, 8);
+        long sequenza = prenotazioneEventoPubblicoRepository.nextSequenzaPerEvento(evento.getId());
+        String primaLettera = dto.getNome() != null && !dto.getNome().isEmpty()
+            ? String.valueOf(dto.getNome().charAt(0)).toUpperCase()
+            : "X";
+        String codicePersona = primaLettera + String.format("%02d", sequenza);
+        String codicePrenotazione = codiceEvento + "-" + codicePersona;
 
-        mailService.sendPrenotazioneEventoPublico(evento, dto, codicePre, qrCod);
+        // ── 3. Salva la prenotazione pubblica ─────────────────────────────────────
+        PrenotazioneEventoPubblico prenPub = new PrenotazioneEventoPubblico();
+        prenPub.setEvento(evento);
+        prenPub.setNome(dto.getNome());
+        prenPub.setCognome(dto.getCognome());
+        prenPub.setEmail(dto.getEmail());
+        prenPub.setCodicePrenotazione(codicePrenotazione);
+        prenotazioneEventoPubblicoRepository.save(prenPub);
+
+        // ── 4. Genera QR e invia email ────────────────────────────────────────────
+        String qrCod = qrCodeGenerator.generateQRCodeBase64(codicePrenotazione);
+        mailService.sendPrenotazioneEventoPublico(evento, dto, codicePrenotazione, qrCod);
+
+        LOG.info("Prenotazione evento pubblico {} salvata con codice {}", evento.getId(), codicePrenotazione);
     }
 }

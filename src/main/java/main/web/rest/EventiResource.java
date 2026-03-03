@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import main.repository.EventiRepository;
+import main.repository.PrenotazioneEventoPubblicoRepository;
 import main.service.EventiService;
 import main.service.dto.EventiDTO;
 import main.service.dto.PrenotazioniEmailDTO;
@@ -38,15 +39,20 @@ public class EventiResource {
 
     private final EventiService eventiService;
     private final EventiRepository eventiRepository;
+    private final PrenotazioneEventoPubblicoRepository prenotazioneEventoPubblicoRepository;
 
-    public EventiResource(EventiService eventiService, EventiRepository eventiRepository) {
+    public EventiResource(
+        EventiService eventiService,
+        EventiRepository eventiRepository,
+        PrenotazioneEventoPubblicoRepository prenotazioneEventoPubblicoRepository
+    ) {
         this.eventiService = eventiService;
         this.eventiRepository = eventiRepository;
+        this.prenotazioneEventoPubblicoRepository = prenotazioneEventoPubblicoRepository;
     }
 
     /**
-     * Endpoint specifico per gli eventi pubblici.
-     * Mappato esplicitamente per evitare conflitti con la sicurezza.
+     * Endpoint specifico per gli eventi pubblici (non richiede autenticazione).
      */
     @GetMapping("/pubblici")
     public List<EventiDTO> getPublicEventi() {
@@ -123,7 +129,16 @@ public class EventiResource {
 
     @GetMapping("/{id}")
     public ResponseEntity<EventiDTO> getEventi(@PathVariable("id") UUID id) {
-        Optional<EventiDTO> eventiDTO = eventiService.findOne(id);
+        Optional<EventiDTO> eventiDTO = eventiService
+            .findOne(id)
+            .map(dto -> {
+                long occupati = prenotazioneEventoPubblicoRepository.countByEventoId(id);
+                dto.setPostiOccupati(occupati);
+                if (dto.getNumPersone() != null) {
+                    dto.setEventoPieno(occupati >= dto.getNumPersone());
+                }
+                return dto;
+            });
         return ResponseUtil.wrapOrNotFound(eventiDTO);
     }
 
