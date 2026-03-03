@@ -70,7 +70,7 @@ $br-bg: #fdfdfd;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
 
-  &:hover {
+  &:hover:not(.event-card--sold-out) {
     transform: translateY(-12px);
     box-shadow: 0 20px 40px rgba($br-green, 0.12);
     border-color: rgba($br-green, 0.3);
@@ -79,6 +79,11 @@ $br-bg: #fdfdfd;
       background: $br-green;
       color: white;
     }
+  }
+
+  &.event-card--sold-out {
+    opacity: 0.85;
+    border-color: rgba(#e53e3e, 0.2);
   }
 }
 
@@ -111,6 +116,24 @@ $br-bg: #fdfdfd;
     font-weight: 800;
     box-shadow: 0 8px 15px rgba($br-green, 0.25);
     z-index: 2;
+  }
+
+  .card-sold-out-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 3;
+
+    .card-sold-out-stamp {
+      width: 85%;
+      max-width: 260px;
+      object-fit: contain;
+      transform: rotate(-12deg);
+      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35));
+    }
   }
 }
 
@@ -152,6 +175,14 @@ $br-bg: #fdfdfd;
       color: $br-green;
       font-size: 1rem;
     }
+
+    &.info-item--esaurito {
+      color: #e53e3e;
+      font-weight: 700;
+      i {
+        color: #e53e3e;
+      }
+    }
   }
 }
 
@@ -173,9 +204,17 @@ $br-bg: #fdfdfd;
   justify-content: center;
   gap: 10px;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: $br-green;
     color: white;
+  }
+
+  &.br-btn-action--sold-out,
+  &:disabled {
+    border-color: #a0aec0;
+    color: #a0aec0;
+    cursor: not-allowed;
+    background: white;
   }
 }
 

@@ -12,6 +12,9 @@ export interface IEventi {
   oraFine?: string | null;
   salaNome?: string | null;
   prenotazione?: Pick<IPrenotazioni, 'id'> | null;
+  numPersone?: number | null;
+  postiOccupati?: number | null;
+  eventoPieno?: boolean | null;
 }
 
 export type NewEventi = Omit<IEventi, 'id'> & { id: null };

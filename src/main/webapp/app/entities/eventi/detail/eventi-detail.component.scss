@@ -2,6 +2,7 @@
 
 // Variabili Colore Boardroom
 $br-green-boardroom: #4a8c40;
+$br-green-dark: #35662d;
 $br-gold-soft: #b59461;
 $br-text-dark: #1e3a1a;
 
@@ -51,6 +52,24 @@ $br-text-dark: #1e3a1a;
     font-weight: 800;
     letter-spacing: 1px;
     text-transform: uppercase;
+  }
+
+  /* Overlay timbro SOLD OUT */
+  .br-sold-out-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+
+    .br-sold-out-stamp {
+      width: 90%;
+      max-width: 420px;
+      object-fit: contain;
+      transform: rotate(-15deg);
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+    }
   }
 }
 
@@ -102,6 +121,11 @@ $br-text-dark: #1e3a1a;
   }
 }
 
+/* Posti esauriti in rosso */
+.br-posti-esauriti {
+  color: #e53e3e !important;
+}
+
 .br-text-description {
   font-size: 0.95rem;
   line-height: 1.7;
@@ -144,107 +168,75 @@ $br-text-dark: #1e3a1a;
     box-shadow: 0 10px 20px rgba(74, 140, 64, 0.2);
     transition: all 0.3s ease;
 
-    &:hover {
+    &:hover:not(:disabled) {
       transform: translateY(-2px);
-      background: color.adjust($br-green-boardroom, $lightness: -8%);
+      background: $br-green-dark;
       box-shadow: 0 15px 30px rgba(53, 102, 45, 0.3);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    /* Stato disabilitato - evento sold out */
+    &:disabled,
+    &.br-btn-disabled {
+      background: #a0aec0 !important;
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+      transform: none !important;
+      opacity: 0.7;
     }
   }
 }
 
 // --- MODALE CON TRASPARENZA CLASSICA ---
 
-.br-modal-overlay {
+/* Modal prenotazione */
+.br-modal-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5); // Nero trasparente classico
-  backdrop-filter: blur(6px); // Effetto sfocato moderno
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  justify-content: center;
+  z-index: 1000;
 }
 
-.br-modal-content {
+.br-modal {
   background: white;
+  border-radius: 24px;
   padding: 40px;
   border-radius: 24px;
   width: 90%;
   max-width: 420px;
-  position: relative;
-  text-align: center;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 
-  h3 {
-    color: $br-green-boardroom;
+  h2 {
+    font-size: 1.3rem;
     font-weight: 800;
-    margin-bottom: 8px;
-    font-size: 1.4rem;
-  }
-
-  p {
-    font-size: 0.85rem;
-    color: #666;
-    margin-bottom: 30px;
+    color: $br-text-dark;
+    margin: 0 0 8px;
+    text-align: center;
   }
 }
 
-.br-form {
-  .br-group {
-    text-align: left;
-    margin-bottom: 20px;
-
-    label {
-      display: block;
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: #999;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-      letter-spacing: 0.5px;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px 15px;
-      border: 1px solid #edf2f0;
-      border-radius: 12px;
-      font-size: 0.9rem;
-      background: #fcfdfc;
-      color: $br-text-dark;
-      transition: all 0.3s;
-
-      &:focus {
-        outline: none;
-        border-color: $br-green-boardroom;
-        background: white;
-        box-shadow: 0 4px 12px rgba(74, 140, 64, 0.05);
-      }
-    }
-  }
-}
-
-.br-btn-confirm {
+.br-input {
   width: 100%;
-  background: $br-green-boardroom;
-  color: white;
-  border: none;
-  padding: 16px;
-  border-radius: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: all 0.3s ease;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
 
-  &:hover {
-    background: color.adjust($br-green-boardroom, $lightness: -10%);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(74, 140, 64, 0.2);
+  &:focus {
+    border-color: $br-green-boardroom;
   }
 }
 
@@ -333,4 +325,9 @@ $br-text-dark: #1e3a1a;
   &:hover {
     color: #999;
   }
+.br-modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
 }

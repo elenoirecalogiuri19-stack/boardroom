@@ -11,9 +11,16 @@
 
     <div class="event-scroll-viewport" #carousel>
       @for (evento of eventi(); track evento.id) {
-        <div class="event-card">
+        <div class="event-card" [class.event-card--sold-out]="evento.eventoPieno">
           <div class="card-header-luxury">
             <span class="price-tag">€ {{ evento.prezzo }}</span>
+
+            <!-- Timbro SOLD OUT sulla card header -->
+            @if (evento.eventoPieno) {
+              <div class="card-sold-out-overlay">
+                <img src="/content/images/fine.png" alt="Sold Out" class="card-sold-out-stamp" />
+              </div>
+            }
           </div>
 
           <div class="card-body-luxury">
@@ -29,9 +36,22 @@
                 <i class="bi bi-clock-history"></i>
                 <span>{{ evento.oraInizio }} - {{ evento.oraFine }}</span>
               </div>
+              @if (evento.numPersone) {
+                <div class="info-item" [class.info-item--esaurito]="evento.eventoPieno">
+                  <i class="bi bi-people-fill"></i>
+                  <span>{{ evento.postiOccupati ?? 0 }} / {{ evento.numPersone }} posti</span>
+                </div>
+              }
             </div>
 
-            <button class="br-btn-action" (click)="vaiADettagli(evento)">Dettagli Evento</button>
+            <button
+              class="br-btn-action"
+              [class.br-btn-action--sold-out]="evento.eventoPieno"
+              [disabled]="evento.eventoPieno ?? false"
+              (click)="vaiADettagli(evento)"
+            >
+              {{ evento.eventoPieno ? 'Sold Out' : 'Dettagli Evento' }}
+            </button>
           </div>
         </div>
       }
