@@ -428,10 +428,4 @@ public class PrenotazioniService {
 
         LOG.debug("Aggiornate {} prenotazioni da WAITING a REJECTED", scadute.size());
     }
-
-    private StatiPrenotazione getRejectedState() {
-        return statiPrenotazioneRepository
-            .findByCodice(StatoCodice.REJECTED)
-            .orElseThrow(() -> new EntityNotFoundException("Stato REJECTED non trovato"));
-    }
 }
