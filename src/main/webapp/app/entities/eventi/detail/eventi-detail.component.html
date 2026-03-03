@@ -4,6 +4,12 @@
       <div class="br-photo-section">
         <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=600" alt="Sala" />
         <div class="br-overlay-tag">{{ eventiRef.tipo }}</div>
+
+        @if (eventiRef.eventoPieno) {
+          <div class="br-sold-out-overlay">
+            <img src="/content/images/fine.png" alt="Sold Out" class="br-sold-out-stamp" />
+          </div>
+        }
       </div>
 
       <div class="br-body-content">
@@ -19,47 +25,47 @@
           </div>
           <div class="info-block">
             <span class="label">APPUNTAMENTO</span>
-            <span class="value">{{ eventiRef.data | date: 'dd MMM' }} • {{ eventiRef.oraInizio }}</span>
+            <span class="value">{{ eventiRef.data | date: 'dd MMM' }} \u2022 {{ eventiRef.oraInizio }}</span>
           </div>
+          @if (eventiRef.numPersone) {
+            <div class="info-block">
+              <span class="label">POSTI</span>
+              <span class="value" [class.br-posti-esauriti]="eventiRef.eventoPieno">
+                {{ eventiRef.postiOccupati ?? 0 }} / {{ eventiRef.numPersone }}
+              </span>
+            </div>
+          }
         </div>
 
         <p class="br-text-description">{{ eventiRef.descrizione }}</p>
 
         <div class="br-footer-actions">
           <button (click)="previousState()" class="br-btn-text">Indietro</button>
-          <button (click)="apriModal()" class="br-btn-solid">Prenota Ora</button>
+          <button
+            (click)="apriModal()"
+            class="br-btn-solid"
+            [disabled]="eventiRef.eventoPieno ?? false"
+            [class.br-btn-disabled]="eventiRef.eventoPieno"
+          >
+            {{ eventiRef.eventoPieno ? 'Sold Out' : 'Prenota Ora' }}
+          </button>
         </div>
       </div>
     </div>
-
-    @if (showModal) {
-      <div class="br-modal-overlay">
-        <div class="br-modal-content">
-          <button class="close-btn" (click)="chiudiModal()">×</button>
-
-          <h3>Conferma Prenotazione</h3>
-          <p>Inserisci i tuoi dati per ricevere l'email di conferma</p>
-
-          <div class="br-form">
-            <div class="br-group">
-              <label>Nome</label>
-              <input type="text" [(ngModel)]="prenotazione.nome" name="nome" placeholder="Inserisci il nome" />
-            </div>
-
-            <div class="br-group">
-              <label>Cognome</label>
-              <input type="text" [(ngModel)]="prenotazione.cognome" name="cognome" placeholder="Inserisci il cognome" />
-            </div>
-
-            <div class="br-group">
-              <label>Email</label>
-              <input type="email" [(ngModel)]="prenotazione.email" name="email" placeholder="La tua email" />
-            </div>
-
-            <button class="br-btn-confirm" (click)="confermaPrenotazione()">Invia Conferma</button>
-          </div>
-        </div>
-      </div>
-    }
   }
 </div>
+
+@if (showModal) {
+  <div class="br-modal-backdrop" (click)="chiudiModal()">
+    <div class="br-modal" (click)="$event.stopPropagation()">
+      <h2>Inserisci i tuoi dati</h2>
+      <input [(ngModel)]="prenotazione.nome" placeholder="Nome" class="br-input" />
+      <input [(ngModel)]="prenotazione.cognome" placeholder="Cognome" class="br-input" />
+      <input [(ngModel)]="prenotazione.email" placeholder="Email" type="email" class="br-input" />
+      <div class="br-modal-actions">
+        <button (click)="chiudiModal()" class="br-btn-text">Annulla</button>
+        <button (click)="confermaPrenotazione()" class="br-btn-solid">Conferma</button>
+      </div>
+    </div>
+  </div>
+}
