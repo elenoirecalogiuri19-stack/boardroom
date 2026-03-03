@@ -1,5 +1,6 @@
 @use 'sass:color';
 
+// Variabili Colore Boardroom
 $br-green-boardroom: #4a8c40;
 $br-gold-soft: #b59461;
 $br-text-dark: #1e3a1a;
@@ -151,14 +152,16 @@ $br-text-dark: #1e3a1a;
   }
 }
 
+// --- MODALE CON TRASPARENZA CLASSICA ---
+
 .br-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.5); // Nero trasparente classico
+  backdrop-filter: blur(6px); // Effetto sfocato moderno
   display: flex;
   justify-content: center;
   align-items: center;
@@ -189,6 +192,76 @@ $br-text-dark: #1e3a1a;
   }
 }
 
+.br-form {
+  .br-group {
+    text-align: left;
+    margin-bottom: 20px;
+
+    label {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #999;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #edf2f0;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      background: #fcfdfc;
+      color: $br-text-dark;
+      transition: all 0.3s;
+
+      &:focus {
+        outline: none;
+        border-color: $br-green-boardroom;
+        background: white;
+        box-shadow: 0 4px 12px rgba(74, 140, 64, 0.05);
+      }
+    }
+  }
+}
+
+.br-btn-confirm {
+  width: 100%;
+  background: $br-green-boardroom;
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: color.adjust($br-green-boardroom, $lightness: -10%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 140, 64, 0.2);
+  }
+}
+
+.close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: #ddd;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.3s;
+
+  &:hover {
+    color: #999;
 .br-form {
   .br-group {
     text-align: left;
