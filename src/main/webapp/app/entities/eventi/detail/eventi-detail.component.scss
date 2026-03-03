@@ -1,5 +1,6 @@
+@use 'sass:color';
+
 $br-green-boardroom: #4a8c40;
-$br-green-dark: #35662d;
 $br-gold-soft: #b59461;
 $br-text-dark: #1e3a1a;
 
@@ -144,7 +145,7 @@ $br-text-dark: #1e3a1a;
 
     &:hover {
       transform: translateY(-2px);
-      background: $br-green-dark;
+      background: color.adjust($br-green-boardroom, $lightness: -8%);
       box-shadow: 0 15px 30px rgba(53, 102, 45, 0.3);
     }
 
