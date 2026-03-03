@@ -31,5 +31,6 @@
   <include file="config/liquibase/changelog/20260216_add_descrizione_to_eventi.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260302000001_added_indexes_prenotazioni.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260302000002_added_codice_qr_to_prenotazioni.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260303000001_add_num_persone_to_prenotazioni.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

@@ -77,6 +77,7 @@ export default class PrenotaSalaComponent implements OnInit {
           data: this.dataSelezionata,
           ora: this.oraSelezionata,
           capienza: this.capienza,
+          numPersone: this.capienza,
         },
       })
       .then(() => {

@@ -408,6 +408,7 @@ public class PrenotazioniService {
         pren.setData(dto.getData());
         pren.setOraInizio(dto.getOraInizio());
         pren.setOraFine(dto.getOraFine());
+        pren.setNumPersone(dto.getNumPersone());
         return pren;
     }
 

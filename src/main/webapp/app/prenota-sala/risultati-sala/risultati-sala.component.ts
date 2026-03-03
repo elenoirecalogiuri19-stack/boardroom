@@ -28,6 +28,7 @@ export class RisultatiSalaComponent implements OnInit {
   dataRicerca = '';
   oraRicerca = '';
   capienzaRicerca = 0;
+  numPersoneRicerca = 1;
   sale: Sala[] = [];
 
   isLoading = false;
@@ -44,6 +45,7 @@ export class RisultatiSalaComponent implements OnInit {
       this.dataRicerca = params['data'] ?? '';
       this.oraRicerca = params['ora'] ?? '';
       this.capienzaRicerca = Number(params['capienza'] ?? 0);
+      this.numPersoneRicerca = Number(params['numPersone'] ?? 1);
       this.caricaSaleDisponibili();
     });
   }
@@ -69,6 +71,7 @@ export class RisultatiSalaComponent implements OnInit {
         oraInizio: this.normalizzaOra(oraInizio),
         oraFine: this.normalizzaOra(oraFine),
         salaId: this.salaSelezionata.id,
+        numPersone: this.numPersoneRicerca,
       })
       .subscribe({
         next: pren => {

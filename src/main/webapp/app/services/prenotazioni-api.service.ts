@@ -8,7 +8,7 @@ export interface PrenotazioneDTO {
   data: string;
   oraInizio: string;
   oraFine: string;
-  numPersone?: number;
+  numPersone?: number | null;
   stato?: {
     id: string;
     codice: string;
