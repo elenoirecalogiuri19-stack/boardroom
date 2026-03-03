@@ -197,22 +197,6 @@ public class PrenotazioniService {
         LOG.debug("Prenotazione {} annullata con successo dall'utente {}", id, username);
     }
 
-    public PrenotazioniDTO creaPrenotazione(PrenotazioniDTO dto) {
-        LOG.debug("Request to create Prenotazioni : {}", dto);
-
-        Prenotazioni pren = prenotazioniMapper.toEntity(dto);
-
-        validaRiferimenti(dto);
-        collegaUtenteESala(pren);
-        validaPrenotazione(pren);
-        impostaStatoIniziale(pren);
-        gestisciSovrapposizioni(pren);
-
-        pren = prenotazioniRepository.save(pren);
-
-        return prenotazioniMapper.toDto(pren);
-    }
-
     /**
      *
      * Metodo per confermare la prenotazione
@@ -261,10 +245,19 @@ public class PrenotazioniService {
         LOG.debug("Request to nuovo Prenotazioni : {}", dto);
 
         validaInputRicerca(dto);
+        LOG.debug(
+            "Input ricerca valido - salaId={}, data={}, oraInizio={}, oraFine={}",
+            dto.getSalaId(),
+            dto.getData(),
+            dto.getOraInizio(),
+            dto.getOraFine()
+        );
 
         Sale sala = caricaSala(dto.getSalaId());
+        LOG.debug("Sala caricata: {}", sala.getId());
 
         Utenti utente = caricaUtenteAutenticato();
+        LOG.debug("Utente autenticato: {}", utente.getId());
 
         Prenotazioni pren = costruisciPrenotazioneDaRicerca(dto, sala, utente);
 
@@ -272,7 +265,10 @@ public class PrenotazioniService {
 
         impostaStatoIniziale(pren);
 
+        gestisciSovrapposizioni(pren);
+
         Prenotazioni salvata = prenotazioniRepository.save(pren);
+        LOG.debug("Prenotazione salvata: {}", salvata.getId());
 
         return prenotazioniMapper.toDto(salvata);
     }

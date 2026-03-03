@@ -62,9 +62,15 @@ public class PrenotazioniResource {
         this.prenotazioniMapper = prenotazioniMapper;
     }
 
+    /**
+     * {@code POST /prenotazionis} : Creazione diretta riservata agli amministratori.
+     * Imposta lo stato a CONFIRMED senza passare per il flusso WAITING.
+     * Gli utenti devono usare POST /prenotta.
+     */
     @PostMapping
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<PrenotazioniDTO> createPrenotazioni(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO) {
-        LOG.debug("REST request to save Prenotazioni : {}", prenotazioniDTO);
+        LOG.debug("REST request to save Prenotazioni (admin) : {}", prenotazioniDTO);
         if (prenotazioniDTO.getId() != null) {
             throw new BadRequestAlertException("A new prenotazioni cannot already have an ID", ENTITY_NAME, "idexists");
         }
@@ -75,10 +81,23 @@ public class PrenotazioniResource {
             .body(result);
     }
 
+    /**
+     * {@code POST /prenotazionis/prenotta} : Creazione prenotazione per utente autenticato.
+     * Imposta lo stato iniziale a WAITING, verifica sovrapposizioni e collega automaticamente
+     * l'utente autenticato. Questo è l'unico endpoint da usare per il flusso utente.
+     */
     @PostMapping("/prenotta")
     public ResponseEntity<PrenotazioniDTO> nuovaPrenotazione(@Valid @RequestBody PrenotazioniDTO dto) {
-        PrenotazioniDTO result = prenotazioniService.nuovoPrenotazioni(dto);
-        return ResponseEntity.ok(result);
+        try {
+            PrenotazioniDTO result = prenotazioniService.nuovoPrenotazioni(dto);
+            return ResponseEntity.ok(result);
+        } catch (EntityNotFoundException e) {
+            LOG.warn("Risorsa non trovata durante la creazione della prenotazione: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Input non valido durante la creazione della prenotazione: {}", e.getMessage());
+            throw new BadRequestAlertException(e.getMessage(), ENTITY_NAME, "invalidinput");
+        }
     }
 
     /**
@@ -223,17 +242,6 @@ public class PrenotazioniResource {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    /**
-     *
-     * Endpoint per la prenotazione con validazione
-     *
-     */
-    @PostMapping("/crea")
-    public ResponseEntity<PrenotazioniDTO> creaPrenotazione(@Valid @RequestBody PrenotazioniDTO prenotazioniDTO) {
-        PrenotazioniDTO dto = prenotazioniService.creaPrenotazione(prenotazioniDTO);
-        return ResponseEntity.ok(dto);
     }
 
     /**
