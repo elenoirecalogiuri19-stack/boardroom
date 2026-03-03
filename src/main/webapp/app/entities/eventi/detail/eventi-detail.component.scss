@@ -148,9 +148,116 @@ $br-text-dark: #1e3a1a;
       background: color.adjust($br-green-boardroom, $lightness: -8%);
       box-shadow: 0 15px 30px rgba(53, 102, 45, 0.3);
     }
+  }
+}
 
-    &:active {
-      transform: translateY(0);
+.br-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.br-modal-content {
+  background: white;
+  padding: 40px;
+  border-radius: 24px;
+  width: 90%;
+  max-width: 420px;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+
+  h3 {
+    color: $br-green-boardroom;
+    font-weight: 800;
+    margin-bottom: 8px;
+    font-size: 1.4rem;
+  }
+
+  p {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 30px;
+  }
+}
+
+.br-form {
+  .br-group {
+    text-align: left;
+    margin-bottom: 20px;
+
+    label {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #999;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
     }
+
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #edf2f0;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      background: #fcfdfc;
+      color: $br-text-dark;
+      transition: all 0.3s;
+
+      &:focus {
+        outline: none;
+        border-color: $br-green-boardroom;
+        background: white;
+        box-shadow: 0 4px 12px rgba(74, 140, 64, 0.05);
+      }
+    }
+  }
+}
+
+.br-btn-confirm {
+  width: 100%;
+  background: $br-green-boardroom;
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: color.adjust($br-green-boardroom, $lightness: -10%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 140, 64, 0.2);
+  }
+}
+
+.close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: #ddd;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.3s;
+
+  &:hover {
+    color: #999;
   }
 }

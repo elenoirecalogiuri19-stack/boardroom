@@ -31,5 +31,35 @@
         </div>
       </div>
     </div>
+
+    @if (showModal) {
+      <div class="br-modal-overlay">
+        <div class="br-modal-content">
+          <button class="close-btn" (click)="chiudiModal()">×</button>
+
+          <h3>Conferma Prenotazione</h3>
+          <p>Inserisci i tuoi dati per ricevere l'email di conferma</p>
+
+          <div class="br-form">
+            <div class="br-group">
+              <label>Nome</label>
+              <input type="text" [(ngModel)]="prenotazione.nome" name="nome" placeholder="Inserisci il nome" />
+            </div>
+
+            <div class="br-group">
+              <label>Cognome</label>
+              <input type="text" [(ngModel)]="prenotazione.cognome" name="cognome" placeholder="Inserisci il cognome" />
+            </div>
+
+            <div class="br-group">
+              <label>Email</label>
+              <input type="email" [(ngModel)]="prenotazione.email" name="email" placeholder="La tua email" />
+            </div>
+
+            <button class="br-btn-confirm" (click)="confermaPrenotazione()">Invia Conferma</button>
+          </div>
+        </div>
+      </div>
+    }
   }
 </div>
