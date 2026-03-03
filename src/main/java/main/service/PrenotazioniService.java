@@ -389,7 +389,16 @@ public class PrenotazioniService {
 
     private Utenti caricaUtenteAutenticato() {
         String username = getAuthenticatedUsername();
-        return utentiRepository.findByUser_Login(username);
+        return utentiRepository
+            .findByUser_Login(username)
+            .orElseThrow(() ->
+                new EntityNotFoundException(
+                    "Profilo utente non trovato per l'account '" +
+                    username +
+                    "': " +
+                    "completare la registrazione prima di effettuare una prenotazione"
+                )
+            );
     }
 
     private Prenotazioni costruisciPrenotazioneDaRicerca(PrenotazioniDTO dto, Sale sala, Utenti utente) {

@@ -1,5 +1,6 @@
 package main.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 import main.domain.Utenti;
 import org.springframework.data.jpa.repository.*;
@@ -11,5 +12,5 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface UtentiRepository extends JpaRepository<Utenti, UUID> {
-    Utenti findByUser_Login(String login);
+    Optional<Utenti> findByUser_Login(String login);
 }
