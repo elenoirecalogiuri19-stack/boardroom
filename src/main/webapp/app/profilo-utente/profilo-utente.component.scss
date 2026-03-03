@@ -9,22 +9,23 @@ $white: #ffffff;
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  padding: 150px 20px;
+  align-items: flex-start;
+  padding: 60px 20px;
 }
 
 .profile-card {
   width: 100%;
   max-width: 550px;
   background: $white;
-  padding: 60px; // Molto spazio interno per l'eleganza
-  border-radius: 40px; // Bordi molto morbidi
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.03); // Ombra eterea
+  padding: 60px;
+  border-radius: 40px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.03);
   border: 1px solid rgba(0, 0, 0, 0.01);
 }
 
 .profile-header {
   display: flex;
-  flex-direction: column; // Allineamento centrale per più eleganza
+  flex-direction: column;
   align-items: center;
   text-align: center;
   gap: 20px;
@@ -34,7 +35,7 @@ $white: #ffffff;
     width: 120px;
     height: 120px;
     background: $white;
-    border-radius: 45px; // Squircle pronunciato
+    border-radius: 45px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -54,7 +55,7 @@ $white: #ffffff;
       font-weight: 700;
       font-size: 0.75rem;
       text-transform: uppercase;
-      letter-spacing: 3px; // Più spazio tra le lettere
+      letter-spacing: 3px;
       margin-bottom: 12px;
     }
     .user-full-name {
@@ -101,7 +102,7 @@ $white: #ffffff;
 }
 
 .secondary-actions {
-  display: grid; // Grid invece di flex per simmetria
+  display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
 
