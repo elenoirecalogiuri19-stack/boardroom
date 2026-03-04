@@ -1,6 +1,7 @@
 package main.web.rest;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.net.URISyntaxException;
@@ -13,7 +14,6 @@ import main.repository.PrenotazioniRepository;
 import main.security.AuthoritiesConstants;
 import main.service.PrenotazioniService;
 import main.service.dto.PrenotazioniDTO;
-import main.service.mapper.PrenotazioniMapper;
 import main.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -36,7 +35,6 @@ import tech.jhipster.web.util.ResponseUtil;
  */
 @RestController
 @RequestMapping("/api/prenotazionis")
-@Transactional
 public class PrenotazioniResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(PrenotazioniResource.class);
@@ -50,21 +48,14 @@ public class PrenotazioniResource {
 
     private final PrenotazioniRepository prenotazioniRepository;
 
-    private final PrenotazioniMapper prenotazioniMapper;
-
-    public PrenotazioniResource(
-        PrenotazioniService prenotazioniService,
-        PrenotazioniRepository prenotazioniRepository,
-        PrenotazioniMapper prenotazioniMapper
-    ) {
+    public PrenotazioniResource(PrenotazioniService prenotazioniService, PrenotazioniRepository prenotazioniRepository) {
         this.prenotazioniService = prenotazioniService;
         this.prenotazioniRepository = prenotazioniRepository;
-        this.prenotazioniMapper = prenotazioniMapper;
     }
 
     /**
      * {@code POST /prenotazionis} : Creazione diretta riservata agli amministratori.
-     * Imposta lo stato a CONFIRMED senza passare per il flusso WAITING.
+     * Imposta lo stato a CONFIRMED solo se non esistono conflitti con prenotazioni già confermate.
      * Gli utenti devono usare POST /prenotta.
      */
     @PostMapping
@@ -74,11 +65,20 @@ public class PrenotazioniResource {
         if (prenotazioniDTO.getId() != null) {
             throw new BadRequestAlertException("A new prenotazioni cannot already have an ID", ENTITY_NAME, "idexists");
         }
-
-        PrenotazioniDTO result = prenotazioniService.save(prenotazioniDTO);
-        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result.getId()).toUri())
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
+        try {
+            PrenotazioniDTO result = prenotazioniService.save(prenotazioniDTO);
+            return ResponseEntity.created(
+                ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result.getId()).toUri()
+            )
+                .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+                .body(result);
+        } catch (IllegalStateException e) {
+            LOG.warn("Conflitto rilevato durante la creazione admin della prenotazione: {}", e.getMessage());
+            throw new BadRequestAlertException(e.getMessage(), ENTITY_NAME, "conflitto");
+        } catch (EntityNotFoundException e) {
+            LOG.warn("Risorsa non trovata durante la creazione admin della prenotazione: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     /**
@@ -172,7 +172,6 @@ public class PrenotazioniResource {
      * US2: Semplificato per evitare errori di compilazione con il Service.
      */
     @GetMapping("")
-    @Transactional(readOnly = true)
     public ResponseEntity<List<PrenotazioniDTO>> getAllPrenotazionis(
         @org.springdoc.core.annotations.ParameterObject Pageable pageable,
         @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload,
@@ -261,13 +260,8 @@ public class PrenotazioniResource {
      *
      */
     @GetMapping("/verifica-qr/{codice}")
-    @Transactional(readOnly = true)
     public ResponseEntity<PrenotazioniDTO> verificaQrCode(@PathVariable String codice) {
         LOG.debug("REST request to verify QR code : {}", codice);
-        return prenotazioniRepository
-            .findByCodiceQr(codice)
-            .map(prenotazioniMapper::toDto)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+        return prenotazioniService.findByCodiceQr(codice).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 }

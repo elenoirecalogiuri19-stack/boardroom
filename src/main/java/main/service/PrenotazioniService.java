@@ -66,16 +66,47 @@ public class PrenotazioniService {
     }
 
     /**
-     * Save a prenotazioni.
+     * Save a prenotazioni (admin).
+     * Imposta lo stato a CONFIRMED solo se non esistono conflitti con prenotazioni già confermate.
+     * In caso di sovrapposizione lancia IllegalStateException per evitare doppioni silenziosi.
      *
      * @param dto the entity to save.
      * @return the persisted entity.
      */
     public PrenotazioniDTO save(PrenotazioniDTO dto) {
-        LOG.debug("Request to save Prenotazioni : {}", dto);
+        LOG.debug("Request to save Prenotazioni (admin) : {}", dto);
 
         Prenotazioni entity = prenotazioniMapper.toEntity(dto);
+
+        // Carica la sala con lock per evitare race condition concorrenti
+        if (entity.getSala() != null && entity.getSala().getId() != null) {
+            UUID salaId = entity.getSala().getId();
+            Sale sala = saleRepository
+                .findByIdWithLock(salaId)
+                .orElseThrow(() -> new EntityNotFoundException("Sala non trovata: " + salaId));
+            entity.setSala(sala);
+        }
+
+        validaPrenotazione(entity);
+
         applyDefaultConfirmedState(entity);
+
+        // Verifica conflitti prima di salvare come CONFIRMED
+        if (entity.getSala() != null && entity.getData() != null && entity.getOraInizio() != null && entity.getOraFine() != null) {
+            boolean conflitto = prenotazioniRepository.existsOverlappingConfirmedPrenotazione(
+                entity.getSala(),
+                entity.getData(),
+                entity.getOraInizio(),
+                entity.getOraFine()
+            );
+            if (conflitto) {
+                throw new IllegalStateException(
+                    "Impossibile creare la prenotazione: esiste già una prenotazione confermata per la sala '" +
+                    entity.getSala().getNome() +
+                    "' in questo orario."
+                );
+            }
+        }
 
         entity = prenotazioniRepository.save(entity);
         return prenotazioniMapper.toDto(entity);
@@ -155,6 +186,12 @@ public class PrenotazioniService {
             return findAllWithEagerRelationships(pageable);
         }
         return findAll(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<PrenotazioniDTO> findByCodiceQr(String codice) {
+        LOG.debug("Request to find Prenotazioni by QR code : {}", codice);
+        return prenotazioniRepository.findByCodiceQr(codice).map(prenotazioniMapper::toDto);
     }
 
     /**
@@ -278,12 +315,29 @@ public class PrenotazioniService {
      *
      */
 
-    public void validaPrenotazione(Prenotazioni prenotazioni) {
+    private void validaPrenotazione(Prenotazioni prenotazioni) {
         if (prenotazioni.getOraInizio().isAfter(prenotazioni.getOraFine())) {
             throw new IllegalArgumentException("L'ora di inizio deve essere inferiore all'ora di fine");
         }
         if (prenotazioni.getData().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("La data della prenotazione non deve essere nel passato");
+        }
+        if (prenotazioni.getNumPersone() != null && prenotazioni.getSala() != null) {
+            if (prenotazioni.getNumPersone() <= 0) {
+                throw new IllegalArgumentException("Il numero di persone deve essere almeno 1.");
+            }
+            int capienza = prenotazioni.getSala().getCapienza();
+            if (prenotazioni.getNumPersone() > capienza) {
+                throw new IllegalArgumentException(
+                    "Il numero di persone (" +
+                    prenotazioni.getNumPersone() +
+                    ") supera la capienza della sala '" +
+                    prenotazioni.getSala().getNome() +
+                    "' (" +
+                    capienza +
+                    " posti)."
+                );
+            }
         }
     }
 

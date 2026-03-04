@@ -201,31 +201,101 @@ class PrenotazioniServiceTest {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // validaPrenotazione() — regole di business
+    // validazione regole di business — testata tramite nuovoPrenotazioni() e save()
     // ─────────────────────────────────────────────────────────────
 
     @Test
-    void validaPrenotazione_shouldThrow_whenOraInizioAfterOraFine() {
-        prenotazione.setOraInizio(LocalTime.of(11, 0));
-        prenotazione.setOraFine(LocalTime.of(10, 0));
+    void nuovoPrenotazioni_shouldThrow_whenOraInizioAfterOraFine() {
+        setAuthenticatedUser("owner");
+        PrenotazioniDTO dto = buildPrenotazioneDTODaRicerca();
+        dto.setOraInizio(LocalTime.of(11, 0));
+        dto.setOraFine(LocalTime.of(10, 0));
 
-        assertThatThrownBy(() -> prenotazioniService.validaPrenotazione(prenotazione)).isInstanceOf(IllegalArgumentException.class);
+        when(saleRepository.findByIdWithLock(any(UUID.class))).thenReturn(Optional.of(sala));
+        when(utentiRepository.findByUser_Login("owner")).thenReturn(Optional.of(utenteOwner));
+
+        assertThatThrownBy(() -> prenotazioniService.nuovoPrenotazioni(dto))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("ora di inizio");
     }
 
     @Test
-    void validaPrenotazione_shouldThrow_whenDataInPast() {
-        prenotazione.setData(LocalDate.now().minusDays(1));
+    void nuovoPrenotazioni_shouldThrow_whenDataInPast() {
+        setAuthenticatedUser("owner");
+        PrenotazioniDTO dto = buildPrenotazioneDTODaRicerca();
+        dto.setData(LocalDate.now().minusDays(1));
 
-        assertThatThrownBy(() -> prenotazioniService.validaPrenotazione(prenotazione)).isInstanceOf(IllegalArgumentException.class);
+        when(saleRepository.findByIdWithLock(any(UUID.class))).thenReturn(Optional.of(sala));
+        when(utentiRepository.findByUser_Login("owner")).thenReturn(Optional.of(utenteOwner));
+
+        assertThatThrownBy(() -> prenotazioniService.nuovoPrenotazioni(dto))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("passato");
     }
 
     @Test
-    void validaPrenotazione_shouldNotThrow_whenDataIsTodayOrFuture() {
-        prenotazione.setData(LocalDate.now().plusDays(1));
-        prenotazione.setOraInizio(LocalTime.of(9, 0));
-        prenotazione.setOraFine(LocalTime.of(10, 0));
+    void save_admin_shouldThrow_whenNumPersoneSuperaCapienza() {
+        PrenotazioniDTO dto = buildPrenotazioneDTOValida();
+        prenotazione.setNumPersone(sala.getCapienza() + 1);
 
-        prenotazioniService.validaPrenotazione(prenotazione);
+        when(prenotazioniMapper.toEntity(dto)).thenReturn(prenotazione);
+        when(saleRepository.findByIdWithLock(sala.getId())).thenReturn(Optional.of(sala));
+
+        assertThatThrownBy(() -> prenotazioniService.save(dto))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("capienza");
+
+        verify(prenotazioniRepository, never()).save(any());
+    }
+
+    @Test
+    void nuovoPrenotazioni_shouldThrow_whenNumPersoneSuperaCapienza() {
+        setAuthenticatedUser("owner");
+        PrenotazioniDTO dto = buildPrenotazioneDTODaRicerca();
+        dto.setNumPersone(sala.getCapienza() + 1);
+
+        when(saleRepository.findByIdWithLock(any(UUID.class))).thenReturn(Optional.of(sala));
+        when(utentiRepository.findByUser_Login("owner")).thenReturn(Optional.of(utenteOwner));
+
+        assertThatThrownBy(() -> prenotazioniService.nuovoPrenotazioni(dto))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("capienza");
+
+        verify(prenotazioniRepository, never()).save(any());
+    }
+
+    @Test
+    void nuovoPrenotazioni_shouldThrow_whenNumPersoneZeroONegativo() {
+        setAuthenticatedUser("owner");
+        PrenotazioniDTO dto = buildPrenotazioneDTODaRicerca();
+        dto.setNumPersone(0);
+
+        when(saleRepository.findByIdWithLock(any(UUID.class))).thenReturn(Optional.of(sala));
+        when(utentiRepository.findByUser_Login("owner")).thenReturn(Optional.of(utenteOwner));
+
+        assertThatThrownBy(() -> prenotazioniService.nuovoPrenotazioni(dto))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("almeno 1");
+
+        verify(prenotazioniRepository, never()).save(any());
+    }
+
+    @Test
+    void nuovoPrenotazioni_shouldNotThrow_whenNumPersoneIsNull() {
+        setAuthenticatedUser("owner");
+        PrenotazioniDTO dto = buildPrenotazioneDTODaRicerca();
+        dto.setNumPersone(null);
+
+        when(saleRepository.findByIdWithLock(any(UUID.class))).thenReturn(Optional.of(sala));
+        when(utentiRepository.findByUser_Login("owner")).thenReturn(Optional.of(utenteOwner));
+        when(statiPrenotazioneRepository.findByCodice(StatoCodice.WAITING)).thenReturn(Optional.of(statoWaiting));
+        when(prenotazioniRepository.existsOverlappingConfirmedPrenotazione(any(), any(), any(), any())).thenReturn(false);
+        when(prenotazioniRepository.save(any())).thenReturn(prenotazione);
+        when(prenotazioniMapper.toDto(any(Prenotazioni.class))).thenReturn(dto);
+
+        PrenotazioniDTO result = prenotazioniService.nuovoPrenotazioni(dto);
+
+        assertThat(result).isNotNull();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -359,6 +429,57 @@ class PrenotazioniServiceTest {
 
         assertThat(p1.getStato()).isEqualTo(statoRejected);
         assertThat(p2.getStato()).isEqualTo(statoRejected);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // save() — creazione admin: verifica conflitti prima di CONFIRMED
+    // ─────────────────────────────────────────────────────────────
+
+    @Test
+    void save_admin_shouldPersistAsConfirmed_whenNoConflict() {
+        PrenotazioniDTO dto = buildPrenotazioneDTOValida();
+
+        when(prenotazioniMapper.toEntity(dto)).thenReturn(prenotazione);
+        when(saleRepository.findByIdWithLock(sala.getId())).thenReturn(Optional.of(sala));
+        when(statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED)).thenReturn(Optional.of(statoConfirmed));
+        when(prenotazioniRepository.existsOverlappingConfirmedPrenotazione(any(), any(), any(), any())).thenReturn(false);
+        when(prenotazioniRepository.save(any())).thenReturn(prenotazione);
+        when(prenotazioniMapper.toDto(any(Prenotazioni.class))).thenReturn(dto);
+
+        PrenotazioniDTO result = prenotazioniService.save(dto);
+
+        assertThat(result).isNotNull();
+        assertThat(prenotazione.getStato()).isEqualTo(statoConfirmed);
+        verify(prenotazioniRepository).existsOverlappingConfirmedPrenotazione(any(), any(), any(), any());
+        verify(prenotazioniRepository).save(prenotazione);
+    }
+
+    @Test
+    void save_admin_shouldThrowIllegalState_whenConflictExists() {
+        PrenotazioniDTO dto = buildPrenotazioneDTOValida();
+
+        when(prenotazioniMapper.toEntity(dto)).thenReturn(prenotazione);
+        when(saleRepository.findByIdWithLock(sala.getId())).thenReturn(Optional.of(sala));
+        when(statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED)).thenReturn(Optional.of(statoConfirmed));
+        when(prenotazioniRepository.existsOverlappingConfirmedPrenotazione(any(), any(), any(), any())).thenReturn(true);
+
+        assertThatThrownBy(() -> prenotazioniService.save(dto)).isInstanceOf(IllegalStateException.class).hasMessageContaining("Sala Test");
+
+        verify(prenotazioniRepository, never()).save(any());
+    }
+
+    @Test
+    void save_admin_shouldThrowEntityNotFound_whenSalaNonEsiste() {
+        PrenotazioniDTO dto = buildPrenotazioneDTOValida();
+
+        when(prenotazioniMapper.toEntity(dto)).thenReturn(prenotazione);
+        when(saleRepository.findByIdWithLock(any(UUID.class))).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> prenotazioniService.save(dto))
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessageContaining("Sala non trovata");
+
+        verify(prenotazioniRepository, never()).save(any());
     }
 
     // ─────────────────────────────────────────────────────────────
