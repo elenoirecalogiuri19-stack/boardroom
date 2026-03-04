@@ -56,6 +56,7 @@ $br-bg: #fdfdfd;
   gap: 30px;
   padding: 20px 10px 50px;
   scrollbar-width: none;
+
   &::-webkit-scrollbar {
     display: none;
   }
@@ -104,6 +105,10 @@ $br-bg: #fdfdfd;
     letter-spacing: 6px;
   }
 
+  &.card-header--sold-out::after {
+    content: '';
+  }
+
   .price-tag {
     position: absolute;
     bottom: -15px;
@@ -118,22 +123,15 @@ $br-bg: #fdfdfd;
     z-index: 2;
   }
 
-  .card-sold-out-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    z-index: 3;
-
-    .card-sold-out-stamp {
-      width: 85%;
-      max-width: 260px;
-      object-fit: contain;
-      transform: rotate(-12deg);
-      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35));
-    }
+  .card-sold-out-text {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #c0392b;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    transform: rotate(-10deg);
+    display: block;
   }
 }
 
@@ -164,6 +162,7 @@ $br-bg: #fdfdfd;
 
 .info-grid {
   margin-bottom: 30px;
+
   .info-item {
     display: flex;
     align-items: center;
@@ -171,6 +170,7 @@ $br-bg: #fdfdfd;
     margin-bottom: 12px;
     font-size: 0.9rem;
     color: #555;
+
     i {
       color: $br-green;
       font-size: 1rem;
@@ -179,6 +179,7 @@ $br-bg: #fdfdfd;
     &.info-item--esaurito {
       color: #e53e3e;
       font-weight: 700;
+
       i {
         color: #e53e3e;
       }
@@ -245,9 +246,11 @@ $br-bg: #fdfdfd;
       border-color: white;
     }
   }
+
   &.left {
     left: 10px;
   }
+
   &.right {
     right: 10px;
   }
