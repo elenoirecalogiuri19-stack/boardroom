@@ -3,8 +3,10 @@ package main.service;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import main.domain.Eventi;
 import main.domain.PrenotazioneEventoPubblico;
 import main.domain.Prenotazioni;
@@ -62,11 +64,20 @@ public class EventiService {
     public List<EventiDTO> findPublicEventi() {
         LOG.debug("Request to get all public Eventi");
         List<Eventi> eventi = eventiRepository.findPublicConfirmed(TipoEvento.PUBBLICO, StatoCodice.CONFIRMED);
+
+        if (eventi.isEmpty()) {
+            return List.of();
+        }
+
+        // Una sola query aggregata per tutti gli eventi invece di N query COUNT separate
+        List<UUID> ids = eventi.stream().map(Eventi::getId).toList();
+        Map<UUID, Long> conteggioMap = prenotazioneEventoPubblicoRepository.conteggioPerEventi(ids);
+
         return eventi
             .stream()
             .map(e -> {
                 EventiDTO dto = eventiMapper.toDto(e);
-                long occupati = prenotazioneEventoPubblicoRepository.countByEventoId(e.getId());
+                long occupati = conteggioMap.getOrDefault(e.getId(), 0L);
                 dto.setPostiOccupati(occupati);
                 if (dto.getNumPersone() != null) {
                     dto.setEventoPieno(occupati >= dto.getNumPersone());
