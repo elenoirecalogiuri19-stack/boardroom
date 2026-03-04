@@ -168,11 +168,21 @@ public class EventiService {
         prenotazioniRepository.save(prenotazione);
     }
 
+    @Transactional
     public void inviaEmailPrenotazione(UUID id, PrenotazioniEmailDTO dto) {
+        // Acquisisce subito il lock pessimistico sull'evento per serializzare
+        // le richieste concorrenti: il secondo thread attende finché il primo
+        // non ha completato il salvataggio e fatto commit.
+        eventiRepository.findByIdWithLock(id).orElseThrow(() -> new EntityNotFoundException("Evento non trovato"));
+
+        // Carica l'evento con le relazioni necessarie (prenotazione + sala)
+        // all'interno della stessa transazione che detiene il lock.
         Eventi evento = eventiRepository
             .findByIdWithPrenotazioneAndSala(id)
             .orElseThrow(() -> new EntityNotFoundException("Evento non trovato"));
 
+        // Controlla capienza: a questo punto siamo gli unici nel lock,
+        // il conteggio riflette la situazione reale senza interferenze.
         Integer limitePartecipanti = evento.getPrenotazione() != null ? evento.getPrenotazione().getNumPersone() : null;
         if (limitePartecipanti != null) {
             long postiOccupati = prenotazioneEventoPubblicoRepository.countByEventoId(evento.getId());
@@ -197,6 +207,8 @@ public class EventiService {
         prenPub.setEmail(dto.getEmail());
         prenPub.setCodicePrenotazione(codicePrenotazione);
         prenotazioneEventoPubblicoRepository.save(prenPub);
+        // Il lock viene rilasciato al commit di questa transazione,
+        // garantendo che nessun altro thread abbia inserito nel frattempo.
 
         String qrCod = qrCodeGenerator.generateQRCodeBase64(codicePrenotazione);
         mailService.sendPrenotazioneEventoPublico(evento, dto, codicePrenotazione, qrCod);

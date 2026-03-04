@@ -24,4 +24,13 @@ public interface EventiRepository extends JpaRepository<Eventi, UUID> {
         """
     )
     Optional<Eventi> findByIdWithPrenotazioneAndSala(UUID id);
+
+    /**
+     * Carica l'evento con lock pessimistico (PESSIMISTIC_WRITE).
+     * Usato in inviaEmailPrenotazione per evitare race condition
+     * sul conteggio posti degli eventi pubblici.
+     */
+    @Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT e FROM Eventi e WHERE e.id = :id")
+    Optional<Eventi> findByIdWithLock(@Param("id") UUID id);
 }
