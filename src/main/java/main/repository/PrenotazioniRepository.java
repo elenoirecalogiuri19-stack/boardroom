@@ -15,9 +15,6 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-/**
- * Spring Data JPA repository for the Prenotazioni entity.
- */
 @Repository
 public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID> {
     Page<Prenotazioni> findBySalaId(UUID salaId, Pageable pageable);
@@ -62,14 +59,17 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         @Param("oraFine") LocalTime oraFine
     );
 
-    @Query("SELECT p FROM Prenotazioni p WHERE p.data < :oggi ORDER BY p.data DESC, p.oraInizio DESC ")
+    @Query("SELECT p FROM Prenotazioni p WHERE p.data < :oggi ORDER BY p.data DESC, p.oraInizio DESC")
     List<Prenotazioni> findStorico(@Param("oggi") LocalDate oggi);
 
     @Query(
         """
         SELECT p FROM Prenotazioni p
+        LEFT JOIN FETCH p.stato
+        LEFT JOIN FETCH p.utente u
+        LEFT JOIN FETCH u.user
+        LEFT JOIN FETCH p.sala
         LEFT JOIN FETCH p.evento e
-        LEFT JOIN FETCH e.prenotazione
         WHERE p.utente.user.login = :login
         AND p.data >= :oggi
         ORDER BY p.data ASC, p.oraInizio ASC
@@ -82,10 +82,10 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
 
     @Query(
         """
-            SELECT p
-            FROM Prenotazioni p
-            WHERE p.stato.codice = :stato
-              AND p.createdAt < :limite
+        SELECT p
+        FROM Prenotazioni p
+        WHERE p.stato.codice = :stato
+          AND p.createdAt < :limite
         """
     )
     List<Prenotazioni> findExpiredWaiting(@Param("stato") StatoCodice stato, @Param("limite") LocalDateTime limite);
