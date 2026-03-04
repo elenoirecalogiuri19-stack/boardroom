@@ -228,6 +228,38 @@ class PrenotazioniServiceTest {
         prenotazioniService.validaPrenotazione(prenotazione);
     }
 
+    @Test
+    void validaPrenotazione_shouldThrow_whenNumPersoneSuperaCapienza() {
+        prenotazione.setNumPersone(sala.getCapienza() + 1); // oltre la capienza
+
+        assertThatThrownBy(() -> prenotazioniService.validaPrenotazione(prenotazione))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("capienza");
+    }
+
+    @Test
+    void validaPrenotazione_shouldNotThrow_whenNumPersoneUgualeCapienza() {
+        prenotazione.setNumPersone(sala.getCapienza()); // esattamente la capienza: ok
+
+        prenotazioniService.validaPrenotazione(prenotazione);
+    }
+
+    @Test
+    void validaPrenotazione_shouldThrow_whenNumPersoneZeroONegativo() {
+        prenotazione.setNumPersone(0);
+
+        assertThatThrownBy(() -> prenotazioniService.validaPrenotazione(prenotazione))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("almeno 1");
+    }
+
+    @Test
+    void validaPrenotazione_shouldNotThrow_whenNumPersoneIsNull() {
+        prenotazione.setNumPersone(null); // campo opzionale: nessuna validazione capienza
+
+        prenotazioniService.validaPrenotazione(prenotazione);
+    }
+
     // ─────────────────────────────────────────────────────────────
     // confermaPrenotazione() — macchina a stati
     // ─────────────────────────────────────────────────────────────

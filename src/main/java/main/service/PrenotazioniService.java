@@ -87,6 +87,8 @@ public class PrenotazioniService {
             entity.setSala(sala);
         }
 
+        validaPrenotazione(entity);
+
         applyDefaultConfirmedState(entity);
 
         // Verifica conflitti prima di salvare come CONFIRMED
@@ -313,6 +315,23 @@ public class PrenotazioniService {
         }
         if (prenotazioni.getData().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("La data della prenotazione non deve essere nel passato");
+        }
+        if (prenotazioni.getNumPersone() != null && prenotazioni.getSala() != null) {
+            if (prenotazioni.getNumPersone() <= 0) {
+                throw new IllegalArgumentException("Il numero di persone deve essere almeno 1.");
+            }
+            int capienza = prenotazioni.getSala().getCapienza();
+            if (prenotazioni.getNumPersone() > capienza) {
+                throw new IllegalArgumentException(
+                    "Il numero di persone (" +
+                    prenotazioni.getNumPersone() +
+                    ") supera la capienza della sala '" +
+                    prenotazioni.getSala().getNome() +
+                    "' (" +
+                    capienza +
+                    " posti)."
+                );
+            }
         }
     }
 
