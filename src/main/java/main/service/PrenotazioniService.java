@@ -366,8 +366,10 @@ public class PrenotazioniService {
      */
 
     private void validaPrenotazione(Prenotazioni prenotazioni) {
-        if (prenotazioni.getOraInizio().isAfter(prenotazioni.getOraFine())) {
-            throw new IllegalArgumentException("L'ora di inizio deve essere inferiore all'ora di fine");
+        if (!prenotazioni.getOraInizio().isBefore(prenotazioni.getOraFine())) {
+            throw new IllegalArgumentException(
+                "L'ora di inizio deve essere strettamente inferiore all'ora di fine (durata minima: 1 minuto)"
+            );
         }
         if (prenotazioni.getData().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("La data della prenotazione non deve essere nel passato");
