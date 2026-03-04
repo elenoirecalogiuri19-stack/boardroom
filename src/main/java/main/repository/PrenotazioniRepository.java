@@ -15,6 +15,9 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Spring Data JPA repository for the Prenotazioni entity.
+ */
 @Repository
 public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID> {
     Page<Prenotazioni> findBySalaId(UUID salaId, Pageable pageable);
@@ -59,8 +62,25 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         @Param("oraFine") LocalTime oraFine
     );
 
-    @Query("SELECT p FROM Prenotazioni p WHERE p.data < :oggi ORDER BY p.data DESC, p.oraInizio DESC")
+    @Query(
+        "SELECT COUNT(p) > 0 FROM Prenotazioni p WHERE p.sala = :sala AND p.data = :data " +
+        "AND ((p.oraInizio < :oraFine) AND (p.oraFine > :oraInizio)) " +
+        "AND p.stato.codice = main.domain.enumeration.StatoCodice.CONFIRMED " +
+        "AND p.id <> :excludeId"
+    )
+    boolean existsOverlappingConfirmedExcluding(
+        @Param("sala") Sale sala,
+        @Param("data") LocalDate data,
+        @Param("oraInizio") LocalTime oraInizio,
+        @Param("oraFine") LocalTime oraFine,
+        @Param("excludeId") UUID excludeId
+    );
+
+    @Query("SELECT p FROM Prenotazioni p WHERE p.data < :oggi ORDER BY p.data DESC, p.oraInizio DESC ")
     List<Prenotazioni> findStorico(@Param("oggi") LocalDate oggi);
+
+    @Query("SELECT p FROM Prenotazioni p WHERE p.data < :oggi AND p.utente.user.login = :login ORDER BY p.data DESC, p.oraInizio DESC")
+    List<Prenotazioni> findStoricoByLogin(@Param("login") String login, @Param("oggi") LocalDate oggi);
 
     @Query(
         """
@@ -70,6 +90,7 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         LEFT JOIN FETCH u.user
         LEFT JOIN FETCH p.sala
         LEFT JOIN FETCH p.evento e
+        LEFT JOIN FETCH e.prenotazione
         WHERE p.utente.user.login = :login
         AND p.data >= :oggi
         ORDER BY p.data ASC, p.oraInizio ASC

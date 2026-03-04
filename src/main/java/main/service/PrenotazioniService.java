@@ -114,13 +114,52 @@ public class PrenotazioniService {
 
     /**
      * Update a prenotazioni.
+     * Valida i dati, verifica che la prenotazione esista e controlla i conflitti
+     * con altre prenotazioni CONFIRMED della stessa sala, escludendo se stessa.
      *
      * @param dto the entity to save.
      * @return the persisted entity.
      */
     public PrenotazioniDTO update(PrenotazioniDTO dto) {
         LOG.debug("Request to update Prenotazioni : {}", dto);
+
+        // Verifica che la prenotazione esista
+        prenotazioniRepository
+            .findById(dto.getId())
+            .orElseThrow(() -> new EntityNotFoundException("Prenotazione non trovata: " + dto.getId()));
+
         Prenotazioni entity = prenotazioniMapper.toEntity(dto);
+
+        // Carica la sala con lock per evitare race condition
+        if (entity.getSala() != null && entity.getSala().getId() != null) {
+            UUID salaId = entity.getSala().getId();
+            Sale sala = saleRepository
+                .findByIdWithLock(salaId)
+                .orElseThrow(() -> new EntityNotFoundException("Sala non trovata: " + salaId));
+            entity.setSala(sala);
+        }
+
+        // Valida i dati (stessi controlli della creazione)
+        validaPrenotazione(entity);
+
+        // Controlla conflitti escludendo la prenotazione stessa (evita falso positivo su se stessa)
+        if (entity.getSala() != null && entity.getData() != null && entity.getOraInizio() != null && entity.getOraFine() != null) {
+            boolean conflitto = prenotazioniRepository.existsOverlappingConfirmedExcluding(
+                entity.getSala(),
+                entity.getData(),
+                entity.getOraInizio(),
+                entity.getOraFine(),
+                dto.getId()
+            );
+            if (conflitto) {
+                throw new IllegalStateException(
+                    "Impossibile aggiornare la prenotazione: esiste già una prenotazione confermata per la sala '" +
+                    entity.getSala().getNome() +
+                    "' in questo orario."
+                );
+            }
+        }
+
         entity = prenotazioniRepository.save(entity);
         return prenotazioniMapper.toDto(entity);
     }
@@ -264,7 +303,18 @@ public class PrenotazioniService {
     @Transactional(readOnly = true)
     public List<PrenotazioniDTO> getStoricoPrenotazioni() {
         LocalDate oggi = LocalDate.now();
-        return prenotazioniRepository.findStorico(oggi).stream().map(prenotazioniMapper::toDto).toList();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = auth != null && auth.getAuthorities().stream().anyMatch(a -> AuthoritiesConstants.ADMIN.equals(a.getAuthority()));
+
+        if (isAdmin) {
+            // L'amministratore vede lo storico completo di tutti gli utenti
+            return prenotazioniRepository.findStorico(oggi).stream().map(prenotazioniMapper::toDto).toList();
+        }
+
+        // L'utente normale vede solo il proprio storico
+        String username = getAuthenticatedUsername();
+        return prenotazioniRepository.findStoricoByLogin(username, oggi).stream().map(prenotazioniMapper::toDto).toList();
     }
 
     @Transactional(readOnly = true)
@@ -316,8 +366,10 @@ public class PrenotazioniService {
      */
 
     private void validaPrenotazione(Prenotazioni prenotazioni) {
-        if (prenotazioni.getOraInizio().isAfter(prenotazioni.getOraFine())) {
-            throw new IllegalArgumentException("L'ora di inizio deve essere inferiore all'ora di fine");
+        if (!prenotazioni.getOraInizio().isBefore(prenotazioni.getOraFine())) {
+            throw new IllegalArgumentException(
+                "L'ora di inizio deve essere strettamente inferiore all'ora di fine (durata minima: 1 minuto)"
+            );
         }
         if (prenotazioni.getData().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("La data della prenotazione non deve essere nel passato");

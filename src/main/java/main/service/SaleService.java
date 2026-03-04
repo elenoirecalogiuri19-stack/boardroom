@@ -1,5 +1,6 @@
 package main.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -44,6 +45,8 @@ public class SaleService {
     }
 
     public SaleDTO update(SaleDTO saleDTO) {
+        LOG.debug("Request to update Sale : {}", saleDTO);
+        saleRepository.findById(saleDTO.getId()).orElseThrow(() -> new EntityNotFoundException("Sala non trovata: " + saleDTO.getId()));
         Sale sale = saleMapper.toEntity(saleDTO);
         sale = saleRepository.save(sale);
         return saleMapper.toDto(sale);
