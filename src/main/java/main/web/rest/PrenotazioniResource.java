@@ -14,7 +14,6 @@ import main.repository.PrenotazioniRepository;
 import main.security.AuthoritiesConstants;
 import main.service.PrenotazioniService;
 import main.service.dto.PrenotazioniDTO;
-import main.service.mapper.PrenotazioniMapper;
 import main.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -37,7 +35,6 @@ import tech.jhipster.web.util.ResponseUtil;
  */
 @RestController
 @RequestMapping("/api/prenotazionis")
-@Transactional
 public class PrenotazioniResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(PrenotazioniResource.class);
@@ -51,16 +48,9 @@ public class PrenotazioniResource {
 
     private final PrenotazioniRepository prenotazioniRepository;
 
-    private final PrenotazioniMapper prenotazioniMapper;
-
-    public PrenotazioniResource(
-        PrenotazioniService prenotazioniService,
-        PrenotazioniRepository prenotazioniRepository,
-        PrenotazioniMapper prenotazioniMapper
-    ) {
+    public PrenotazioniResource(PrenotazioniService prenotazioniService, PrenotazioniRepository prenotazioniRepository) {
         this.prenotazioniService = prenotazioniService;
         this.prenotazioniRepository = prenotazioniRepository;
-        this.prenotazioniMapper = prenotazioniMapper;
     }
 
     /**
@@ -182,7 +172,6 @@ public class PrenotazioniResource {
      * US2: Semplificato per evitare errori di compilazione con il Service.
      */
     @GetMapping("")
-    @Transactional(readOnly = true)
     public ResponseEntity<List<PrenotazioniDTO>> getAllPrenotazionis(
         @org.springdoc.core.annotations.ParameterObject Pageable pageable,
         @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload,
@@ -271,13 +260,8 @@ public class PrenotazioniResource {
      *
      */
     @GetMapping("/verifica-qr/{codice}")
-    @Transactional(readOnly = true)
     public ResponseEntity<PrenotazioniDTO> verificaQrCode(@PathVariable String codice) {
         LOG.debug("REST request to verify QR code : {}", codice);
-        return prenotazioniRepository
-            .findByCodiceQr(codice)
-            .map(prenotazioniMapper::toDto)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+        return prenotazioniService.findByCodiceQr(codice).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 }

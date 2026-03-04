@@ -188,6 +188,12 @@ public class PrenotazioniService {
         return findAll(pageable);
     }
 
+    @Transactional(readOnly = true)
+    public Optional<PrenotazioniDTO> findByCodiceQr(String codice) {
+        LOG.debug("Request to find Prenotazioni by QR code : {}", codice);
+        return prenotazioniRepository.findByCodiceQr(codice).map(prenotazioniMapper::toDto);
+    }
+
     /**
      * Cancellazione fisica riservata agli amministratori.
      * Rimuove il record dal DB senza passare per il cambio di stato.
