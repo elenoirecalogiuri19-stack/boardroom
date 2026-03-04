@@ -303,7 +303,18 @@ public class PrenotazioniService {
     @Transactional(readOnly = true)
     public List<PrenotazioniDTO> getStoricoPrenotazioni() {
         LocalDate oggi = LocalDate.now();
-        return prenotazioniRepository.findStorico(oggi).stream().map(prenotazioniMapper::toDto).toList();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = auth != null && auth.getAuthorities().stream().anyMatch(a -> AuthoritiesConstants.ADMIN.equals(a.getAuthority()));
+
+        if (isAdmin) {
+            // L'amministratore vede lo storico completo di tutti gli utenti
+            return prenotazioniRepository.findStorico(oggi).stream().map(prenotazioniMapper::toDto).toList();
+        }
+
+        // L'utente normale vede solo il proprio storico
+        String username = getAuthenticatedUsername();
+        return prenotazioniRepository.findStoricoByLogin(username, oggi).stream().map(prenotazioniMapper::toDto).toList();
     }
 
     @Transactional(readOnly = true)
