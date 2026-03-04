@@ -173,7 +173,6 @@ public class EventiService {
             .findByIdWithPrenotazioneAndSala(id)
             .orElseThrow(() -> new EntityNotFoundException("Evento non trovato"));
 
-        // ── 1. Verifica disponibilità posti usando prenotazione.numPersone ────────
         Integer limitePartecipanti = evento.getPrenotazione() != null ? evento.getPrenotazione().getNumPersone() : null;
         if (limitePartecipanti != null) {
             long postiOccupati = prenotazioneEventoPubblicoRepository.countByEventoId(evento.getId());
@@ -183,7 +182,6 @@ public class EventiService {
             }
         }
 
-        // ── 2. Genera codice prenotazione: {codiceEvento}-{codicePersona} ─────────
         String codiceEvento = evento.getId().toString().replace("-", "").substring(0, 8);
         long sequenza = prenotazioneEventoPubblicoRepository.nextSequenzaPerEvento(evento.getId());
         String primaLettera = dto.getNome() != null && !dto.getNome().isEmpty()
@@ -192,7 +190,6 @@ public class EventiService {
         String codicePersona = primaLettera + String.format("%02d", sequenza);
         String codicePrenotazione = codiceEvento + "-" + codicePersona;
 
-        // ── 3. Salva la prenotazione pubblica ─────────────────────────────────────
         PrenotazioneEventoPubblico prenPub = new PrenotazioneEventoPubblico();
         prenPub.setEvento(evento);
         prenPub.setNome(dto.getNome());
@@ -201,7 +198,6 @@ public class EventiService {
         prenPub.setCodicePrenotazione(codicePrenotazione);
         prenotazioneEventoPubblicoRepository.save(prenPub);
 
-        // ── 4. Genera QR e invia email ────────────────────────────────────────────
         String qrCod = qrCodeGenerator.generateQRCodeBase64(codicePrenotazione);
         mailService.sendPrenotazioneEventoPublico(evento, dto, codicePrenotazione, qrCod);
 

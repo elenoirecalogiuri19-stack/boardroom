@@ -1,6 +1,7 @@
 package main.web.rest;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.net.URISyntaxException;
@@ -64,7 +65,7 @@ public class PrenotazioniResource {
 
     /**
      * {@code POST /prenotazionis} : Creazione diretta riservata agli amministratori.
-     * Imposta lo stato a CONFIRMED senza passare per il flusso WAITING.
+     * Imposta lo stato a CONFIRMED solo se non esistono conflitti con prenotazioni già confermate.
      * Gli utenti devono usare POST /prenotta.
      */
     @PostMapping
@@ -74,11 +75,20 @@ public class PrenotazioniResource {
         if (prenotazioniDTO.getId() != null) {
             throw new BadRequestAlertException("A new prenotazioni cannot already have an ID", ENTITY_NAME, "idexists");
         }
-
-        PrenotazioniDTO result = prenotazioniService.save(prenotazioniDTO);
-        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result.getId()).toUri())
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
+        try {
+            PrenotazioniDTO result = prenotazioniService.save(prenotazioniDTO);
+            return ResponseEntity.created(
+                ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result.getId()).toUri()
+            )
+                .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+                .body(result);
+        } catch (IllegalStateException e) {
+            LOG.warn("Conflitto rilevato durante la creazione admin della prenotazione: {}", e.getMessage());
+            throw new BadRequestAlertException(e.getMessage(), ENTITY_NAME, "conflitto");
+        } catch (EntityNotFoundException e) {
+            LOG.warn("Risorsa non trovata durante la creazione admin della prenotazione: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     /**

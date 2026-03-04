@@ -362,6 +362,57 @@ class PrenotazioniServiceTest {
     }
 
     // ─────────────────────────────────────────────────────────────
+    // save() — creazione admin: verifica conflitti prima di CONFIRMED
+    // ─────────────────────────────────────────────────────────────
+
+    @Test
+    void save_admin_shouldPersistAsConfirmed_whenNoConflict() {
+        PrenotazioniDTO dto = buildPrenotazioneDTOValida();
+
+        when(prenotazioniMapper.toEntity(dto)).thenReturn(prenotazione);
+        when(saleRepository.findByIdWithLock(sala.getId())).thenReturn(Optional.of(sala));
+        when(statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED)).thenReturn(Optional.of(statoConfirmed));
+        when(prenotazioniRepository.existsOverlappingConfirmedPrenotazione(any(), any(), any(), any())).thenReturn(false);
+        when(prenotazioniRepository.save(any())).thenReturn(prenotazione);
+        when(prenotazioniMapper.toDto(any(Prenotazioni.class))).thenReturn(dto);
+
+        PrenotazioniDTO result = prenotazioniService.save(dto);
+
+        assertThat(result).isNotNull();
+        assertThat(prenotazione.getStato()).isEqualTo(statoConfirmed);
+        verify(prenotazioniRepository).existsOverlappingConfirmedPrenotazione(any(), any(), any(), any());
+        verify(prenotazioniRepository).save(prenotazione);
+    }
+
+    @Test
+    void save_admin_shouldThrowIllegalState_whenConflictExists() {
+        PrenotazioniDTO dto = buildPrenotazioneDTOValida();
+
+        when(prenotazioniMapper.toEntity(dto)).thenReturn(prenotazione);
+        when(saleRepository.findByIdWithLock(sala.getId())).thenReturn(Optional.of(sala));
+        when(statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED)).thenReturn(Optional.of(statoConfirmed));
+        when(prenotazioniRepository.existsOverlappingConfirmedPrenotazione(any(), any(), any(), any())).thenReturn(true);
+
+        assertThatThrownBy(() -> prenotazioniService.save(dto)).isInstanceOf(IllegalStateException.class).hasMessageContaining("Sala Test");
+
+        verify(prenotazioniRepository, never()).save(any());
+    }
+
+    @Test
+    void save_admin_shouldThrowEntityNotFound_whenSalaNonEsiste() {
+        PrenotazioniDTO dto = buildPrenotazioneDTOValida();
+
+        when(prenotazioniMapper.toEntity(dto)).thenReturn(prenotazione);
+        when(saleRepository.findByIdWithLock(any(UUID.class))).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> prenotazioniService.save(dto))
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessageContaining("Sala non trovata");
+
+        verify(prenotazioniRepository, never()).save(any());
+    }
+
+    // ─────────────────────────────────────────────────────────────
     // nuovoPrenotazioni() — flusso utente: WAITING, sovrapposizioni, utente da SecurityContext
     // ─────────────────────────────────────────────────────────────
 

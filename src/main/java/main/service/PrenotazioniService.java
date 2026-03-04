@@ -66,16 +66,45 @@ public class PrenotazioniService {
     }
 
     /**
-     * Save a prenotazioni.
+     * Save a prenotazioni (admin).
+     * Imposta lo stato a CONFIRMED solo se non esistono conflitti con prenotazioni già confermate.
+     * In caso di sovrapposizione lancia IllegalStateException per evitare doppioni silenziosi.
      *
      * @param dto the entity to save.
      * @return the persisted entity.
      */
     public PrenotazioniDTO save(PrenotazioniDTO dto) {
-        LOG.debug("Request to save Prenotazioni : {}", dto);
+        LOG.debug("Request to save Prenotazioni (admin) : {}", dto);
 
         Prenotazioni entity = prenotazioniMapper.toEntity(dto);
+
+        // Carica la sala con lock per evitare race condition concorrenti
+        if (entity.getSala() != null && entity.getSala().getId() != null) {
+            UUID salaId = entity.getSala().getId();
+            Sale sala = saleRepository
+                .findByIdWithLock(salaId)
+                .orElseThrow(() -> new EntityNotFoundException("Sala non trovata: " + salaId));
+            entity.setSala(sala);
+        }
+
         applyDefaultConfirmedState(entity);
+
+        // Verifica conflitti prima di salvare come CONFIRMED
+        if (entity.getSala() != null && entity.getData() != null && entity.getOraInizio() != null && entity.getOraFine() != null) {
+            boolean conflitto = prenotazioniRepository.existsOverlappingConfirmedPrenotazione(
+                entity.getSala(),
+                entity.getData(),
+                entity.getOraInizio(),
+                entity.getOraFine()
+            );
+            if (conflitto) {
+                throw new IllegalStateException(
+                    "Impossibile creare la prenotazione: esiste già una prenotazione confermata per la sala '" +
+                    entity.getSala().getNome() +
+                    "' in questo orario."
+                );
+            }
+        }
 
         entity = prenotazioniRepository.save(entity);
         return prenotazioniMapper.toDto(entity);
