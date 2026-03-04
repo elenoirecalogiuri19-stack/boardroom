@@ -1,7 +1,7 @@
 <div class="mie-prenotazioni-container" [class.blur-content]="showDeleteModal()">
   <div class="header-section">
     <h1>Le tue Prenotazioni</h1>
-    <p>Gestisci e monitora lo stato delle tue prenotazioni.</p>
+    <p>Visualizza e gestisci le tue prenotazioni future.</p>
   </div>
 
   <div class="list-container">
@@ -9,9 +9,11 @@
       <div class="event-card-wrapper" [class.is-expanded]="isExpanded(pren.id)">
         <div class="event-card-row">
           <div class="action-column">
-            <button class="btn-action btn-edit" [routerLink]="['/eventi', pren.eventoId, 'edit']">
-              <span>📝 Modifica</span>
-            </button>
+            @if (pren.eventoId) {
+              <button class="btn-action btn-edit" [routerLink]="['/eventi', pren.eventoId, 'edit']">
+                <span>📝 Modifica</span>
+              </button>
+            }
             <button class="btn-action btn-delete" (click)="chiediConfermaEliminazione(pren.id)">
               <span>🗑️ Elimina</span>
             </button>
@@ -85,7 +87,7 @@
       </div>
     } @empty {
       <div class="empty-state">
-        <p>Nessuna prenotazione trovata nel tuo archivio.</p>
+        <p>Nessuna prenotazione futura trovata.</p>
       </div>
     }
   </div>

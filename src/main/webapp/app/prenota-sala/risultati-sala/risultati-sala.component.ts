@@ -6,6 +6,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faArrowLeft, faDoorOpen, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { SaleApiService, ISalaDTO } from 'app/services/sale-api.service';
 import { PrenotazioniApiService } from 'app/services/prenotazioni-api.service';
+import { NotificationService } from 'app/shared/notification/notification.service';
 
 export interface Sala {
   id: string;
@@ -39,6 +40,7 @@ export class RisultatiSalaComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private saleApiService = inject(SaleApiService);
   private prenotazioniApi = inject(PrenotazioniApiService);
+  private notificationService = inject(NotificationService);
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -92,6 +94,7 @@ export class RisultatiSalaComponent implements OnInit {
         error: () => {
           this.isLoading = false;
           this.showPrivacyModal = false;
+          this.notificationService.show('Errore durante la creazione della prenotazione. Riprova.', 'error');
         },
       });
   }

@@ -41,7 +41,7 @@ export class CreaEventoComponent implements OnInit {
       this.evento.data = params['data'];
       this.evento.ora = params['ora'];
       this.prenotazioneId = params['prenotazioneId'];
-      this.capienzaRicerca = params['persone'] ? Number(params['persone']) : 0;
+      this.capienzaRicerca = params['numPersone'] ? Number(params['numPersone']) : 0;
 
       if (!this.evento.salaId) {
         this.router.navigate(['/prenota-sala']);
@@ -88,7 +88,8 @@ export class CreaEventoComponent implements OnInit {
       queryParams: {
         data: this.evento.data,
         ora: this.evento.ora,
-        persone: this.capienzaRicerca,
+        numPersone: this.capienzaRicerca,
+        capienza: this.capienzaRicerca,
         salaId: this.evento.salaId,
         apriModal: 'true',
       },

@@ -42,7 +42,9 @@
           [disabled]="isLoading || !evento.titolo"
           [class.btn-loading]="isLoading"
         >
-          <span *ngIf="isLoading" class="minimal-loader"></span>
+          @if (isLoading) {
+            <span class="minimal-loader"></span>
+          }
           <span>{{ isLoading ? '' : 'Finalizza' }}</span>
         </button>
       </div>
