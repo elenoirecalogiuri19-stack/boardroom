@@ -315,7 +315,7 @@ public class PrenotazioniService {
      *
      */
 
-    public void validaPrenotazione(Prenotazioni prenotazioni) {
+    private void validaPrenotazione(Prenotazioni prenotazioni) {
         if (prenotazioni.getOraInizio().isAfter(prenotazioni.getOraFine())) {
             throw new IllegalArgumentException("L'ora di inizio deve essere inferiore all'ora di fine");
         }
