@@ -62,6 +62,20 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         @Param("oraFine") LocalTime oraFine
     );
 
+    @Query(
+        "SELECT COUNT(p) > 0 FROM Prenotazioni p WHERE p.sala = :sala AND p.data = :data " +
+        "AND ((p.oraInizio < :oraFine) AND (p.oraFine > :oraInizio)) " +
+        "AND p.stato.codice = main.domain.enumeration.StatoCodice.CONFIRMED " +
+        "AND p.id <> :excludeId"
+    )
+    boolean existsOverlappingConfirmedExcluding(
+        @Param("sala") Sale sala,
+        @Param("data") LocalDate data,
+        @Param("oraInizio") LocalTime oraInizio,
+        @Param("oraFine") LocalTime oraFine,
+        @Param("excludeId") UUID excludeId
+    );
+
     @Query("SELECT p FROM Prenotazioni p WHERE p.data < :oggi ORDER BY p.data DESC, p.oraInizio DESC ")
     List<Prenotazioni> findStorico(@Param("oggi") LocalDate oggi);
 
