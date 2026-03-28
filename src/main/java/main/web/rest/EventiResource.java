@@ -63,7 +63,7 @@ public class EventiResource {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<EventiDTO> createEventi(@Valid @RequestBody EventiDTO eventiDTO) throws URISyntaxException {
         LOG.debug("REST request to save Eventi : {}", eventiDTO);
         validaNewEvento(eventiDTO);

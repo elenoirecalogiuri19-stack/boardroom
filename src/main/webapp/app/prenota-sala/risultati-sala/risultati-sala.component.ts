@@ -47,7 +47,7 @@ export class RisultatiSalaComponent implements OnInit {
       this.dataRicerca = params['data'] ?? '';
       this.oraRicerca = params['ora'] ?? '';
       this.capienzaRicerca = Number(params['capienza'] ?? 0);
-      this.numPersoneRicerca = Number(params['numPersone'] ?? 1);
+      this.numPersoneRicerca = Math.max(1, Number(params['numPersone'] ?? 1));
       this.caricaSaleDisponibili();
     });
   }
