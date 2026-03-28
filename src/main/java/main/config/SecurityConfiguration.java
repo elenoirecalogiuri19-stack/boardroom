@@ -117,7 +117,7 @@ public class SecurityConfiguration {
                     .hasAuthority(AuthoritiesConstants.ADMIN)
                     .requestMatchers(mvc.pattern("/management/**"))
                     .hasAuthority(AuthoritiesConstants.ADMIN)
-                    .requestMatchers(mvc.pattern("/api/prenotazionis/crea"))
+                    .requestMatchers(mvc.pattern(HttpMethod.POST, "/api/prenotazionis/prenotta"))
                     .authenticated()
                     .requestMatchers(mvc.pattern("/api/prenotazionis/*/conferma"))
                     .authenticated()
