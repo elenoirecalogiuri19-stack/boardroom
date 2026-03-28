@@ -76,10 +76,31 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         @Param("excludeId") UUID excludeId
     );
 
-    @Query("SELECT p FROM Prenotazioni p WHERE p.data < :oggi ORDER BY p.data DESC, p.oraInizio DESC ")
+    @Query(
+        """
+        SELECT p FROM Prenotazioni p
+        LEFT JOIN FETCH p.stato
+        LEFT JOIN FETCH p.utente u
+        LEFT JOIN FETCH u.user
+        LEFT JOIN FETCH p.sala
+        WHERE p.data < :oggi
+        ORDER BY p.data DESC, p.oraInizio DESC
+        """
+    )
     List<Prenotazioni> findStorico(@Param("oggi") LocalDate oggi);
 
-    @Query("SELECT p FROM Prenotazioni p WHERE p.data < :oggi AND p.utente.user.login = :login ORDER BY p.data DESC, p.oraInizio DESC")
+    @Query(
+        """
+        SELECT p FROM Prenotazioni p
+        LEFT JOIN FETCH p.stato
+        LEFT JOIN FETCH p.utente u
+        LEFT JOIN FETCH u.user
+        LEFT JOIN FETCH p.sala
+        WHERE p.data < :oggi
+        AND u.user.login = :login
+        ORDER BY p.data DESC, p.oraInizio DESC
+        """
+    )
     List<Prenotazioni> findStoricoByLogin(@Param("login") String login, @Param("oggi") LocalDate oggi);
 
     @Query(

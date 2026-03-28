@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 import main.domain.StatiPrenotazione;
 import main.domain.enumeration.StatoCodice;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +15,8 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface StatiPrenotazioneRepository extends JpaRepository<StatiPrenotazione, UUID> {
+    String STATI_CACHE = "main.domain.StatiPrenotazione";
+
+    @Cacheable(cacheNames = STATI_CACHE, key = "#codice.name()")
     Optional<StatiPrenotazione> findByCodice(@NotNull StatoCodice codice);
 }

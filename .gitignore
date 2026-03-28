@@ -151,3 +151,10 @@ Desktop.ini
 ######################
 coverage/
 .nyc_output/
+
+######################
+# Secrets locali
+######################
+.env
+.env.local
+*.env
