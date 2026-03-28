@@ -18,6 +18,7 @@ import main.repository.SaleRepository;
 import main.repository.StatiPrenotazioneRepository;
 import main.repository.UtentiRepository;
 import main.security.AuthoritiesConstants;
+import main.service.QrCodeGenerator;
 import main.service.dto.PrenotazioniDTO;
 import main.service.mapper.PrenotazioniMapper;
 import main.web.rest.errors.UtenteNonAutenticatoException;
@@ -51,18 +52,22 @@ public class PrenotazioniService {
 
     private final PrenotazioniMapper prenotazioniMapper;
 
+    private final QrCodeGenerator qrCodeGenerator;
+
     public PrenotazioniService(
         PrenotazioniRepository prenotazioniRepository,
         StatiPrenotazioneRepository statiPrenotazioneRepository,
         UtentiRepository utentiRepository,
         SaleRepository saleRepository,
-        PrenotazioniMapper prenotazioniMapper
+        PrenotazioniMapper prenotazioniMapper,
+        QrCodeGenerator qrCodeGenerator
     ) {
         this.prenotazioniRepository = prenotazioniRepository;
         this.statiPrenotazioneRepository = statiPrenotazioneRepository;
         this.utentiRepository = utentiRepository;
         this.saleRepository = saleRepository;
         this.prenotazioniMapper = prenotazioniMapper;
+        this.qrCodeGenerator = qrCodeGenerator;
     }
 
     /**
@@ -106,6 +111,13 @@ public class PrenotazioniService {
                     "' in questo orario."
                 );
             }
+        }
+
+        // Genera il codice QR univoco per la prenotazione admin (stato CONFIRMED diretto)
+        if (entity.getCodiceQr() == null || entity.getCodiceQr().isBlank()) {
+            String codice = "SALA-" + UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
+            entity.setCodiceQr(codice);
+            LOG.debug("Codice QR generato per prenotazione admin: {}", codice);
         }
 
         entity = prenotazioniRepository.save(entity);
@@ -294,6 +306,13 @@ public class PrenotazioniService {
             .findByCodice(StatoCodice.CONFIRMED)
             .orElseThrow(() -> new EntityNotFoundException("Stato CONFIRMED non trovato"));
         pren.setStato(statoConfirmed);
+
+        // Genera il codice QR univoco se non è già presente
+        if (pren.getCodiceQr() == null || pren.getCodiceQr().isBlank()) {
+            String codice = "SALA-" + UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
+            pren.setCodiceQr(codice);
+            LOG.debug("Codice QR generato per prenotazione {}: {}", prenotazioneId, codice);
+        }
 
         pren = prenotazioniRepository.save(pren);
 
