@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 import main.repository.EventiRepository;
 import main.repository.PrenotazioneEventoPubblicoRepository;
+import main.security.AuthoritiesConstants;
 import main.service.EventiService;
 import main.service.dto.EventiDTO;
 import main.service.dto.PrenotazioniEmailDTO;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -61,6 +63,7 @@ public class EventiResource {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<EventiDTO> createEventi(@Valid @RequestBody EventiDTO eventiDTO) throws URISyntaxException {
         LOG.debug("REST request to save Eventi : {}", eventiDTO);
         validaNewEvento(eventiDTO);
@@ -79,6 +82,7 @@ public class EventiResource {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<EventiDTO> updateEventi(
         @PathVariable(value = "id", required = false) UUID id,
         @Valid @RequestBody EventiDTO eventiDTO
@@ -106,6 +110,7 @@ public class EventiResource {
     }
 
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<EventiDTO> partialUpdateEventi(
         @PathVariable(value = "id", required = false) UUID id,
         @NotNull @RequestBody EventiDTO eventiDTO
@@ -143,6 +148,7 @@ public class EventiResource {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> deleteEventi(@PathVariable("id") UUID id) {
         eventiService.delete(id);
         return ResponseEntity.noContent()

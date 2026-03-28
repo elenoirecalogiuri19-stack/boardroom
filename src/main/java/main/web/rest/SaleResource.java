@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
+import main.security.AuthoritiesConstants;
 import main.service.SaleService;
 import main.service.dto.SaleDTO;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,6 +27,7 @@ public class SaleResource {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<SaleDTO> createSale(@RequestBody SaleDTO saleDTO) {
         LOG.debug("REST request to save Sale : {}", saleDTO);
         SaleDTO result = saleService.save(saleDTO);
@@ -32,6 +35,7 @@ public class SaleResource {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<SaleDTO> updateSale(@PathVariable(value = "id") final UUID id, @RequestBody SaleDTO saleDTO) {
         LOG.debug("REST request to update Sale : {}, {}", id, saleDTO);
         saleDTO.setId(id);
@@ -58,6 +62,7 @@ public class SaleResource {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> deleteSale(@PathVariable("id") UUID id) {
         LOG.debug("REST request to delete Sale : {}", id);
         saleService.delete(id);
