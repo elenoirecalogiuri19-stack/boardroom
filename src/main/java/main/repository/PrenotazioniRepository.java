@@ -27,10 +27,6 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         return this.findOneWithToOneRelationships(id);
     }
 
-    default List<Prenotazioni> findAllWithEagerRelationships() {
-        return this.findAllWithToOneRelationships();
-    }
-
     default Page<Prenotazioni> findAllWithEagerRelationships(Pageable pageable) {
         return this.findAllWithToOneRelationships(pageable);
     }
@@ -40,11 +36,6 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         countQuery = "select count(prenotazioni) from Prenotazioni prenotazioni"
     )
     Page<Prenotazioni> findAllWithToOneRelationships(Pageable pageable);
-
-    @Query(
-        "select prenotazioni from Prenotazioni prenotazioni left join fetch prenotazioni.stato left join fetch prenotazioni.utente left join fetch prenotazioni.sala"
-    )
-    List<Prenotazioni> findAllWithToOneRelationships();
 
     @Query(
         "select prenotazioni from Prenotazioni prenotazioni left join fetch prenotazioni.stato left join fetch prenotazioni.utente left join fetch prenotazioni.sala where prenotazioni.id =:id"

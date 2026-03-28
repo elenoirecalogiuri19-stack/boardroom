@@ -1,5 +1,5 @@
 import { ApplicationConfig, LOCALE_ID, importProvidersFrom, inject } from '@angular/core';
-import { BrowserModule, Title } from '@angular/platform-browser';
+import { Title } from '@angular/platform-browser';
 import {
   NavigationError,
   Router,
@@ -48,8 +48,7 @@ if (environment.DEBUG_INFO_ENABLED) {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes, ...routerFeatures),
-    importProvidersFrom(BrowserModule),
-    importProvidersFrom(ServiceWorkerModule.register('ngsw-worker.js', { enabled: false })),
+    importProvidersFrom(ServiceWorkerModule.register('ngsw-worker.js', { enabled: !environment.DEBUG_INFO_ENABLED })),
 
     provideHttpClient(withInterceptors([loadingInterceptor]), withInterceptorsFromDi()),
 
