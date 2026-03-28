@@ -1,7 +1,6 @@
 package main.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -27,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -267,7 +267,7 @@ public class PrenotazioniService {
      *
      * @param id the id of the entity.
      */
-    public void deletePrenotazione(UUID id) throws AccessDeniedException {
+    public void deletePrenotazione(UUID id) {
         LOG.debug("Request to cancel Prenotazioni : {}", id);
 
         String username = getAuthenticatedUsername();
@@ -297,6 +297,18 @@ public class PrenotazioniService {
         Prenotazioni pren = prenotazioniRepository
             .findById(prenotazioneId)
             .orElseThrow(() -> new EntityNotFoundException("Prenotazione non trovato"));
+
+        // Verifica che solo il proprietario o un admin possa confermare la prenotazione
+        String username = getAuthenticatedUsername();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth != null && auth.getAuthorities().stream().anyMatch(a -> AuthoritiesConstants.ADMIN.equals(a.getAuthority()));
+        if (!isAdmin) {
+            boolean isOwner =
+                pren.getUtente() != null && pren.getUtente().getUser() != null && username.equals(pren.getUtente().getUser().getLogin());
+            if (!isOwner) {
+                throw new AccessDeniedException("Non autorizzato a confermare questa prenotazione");
+            }
+        }
 
         verificaStatoWaiting(pren);
         saleRepository.findByIdWithLock(pren.getSala().getId()).orElseThrow(() -> new EntityNotFoundException("Sala non trovata"));
@@ -424,7 +436,7 @@ public class PrenotazioniService {
         return auth.getName();
     }
 
-    private void verificaPermessiCancellazione(Prenotazioni pren, String username) throws AccessDeniedException {
+    private void verificaPermessiCancellazione(Prenotazioni pren, String username) {
         boolean isOwner =
             pren.getUtente() != null && pren.getUtente().getUser() != null && username.equals(pren.getUtente().getUser().getLogin());
         if (!isOwner) {
