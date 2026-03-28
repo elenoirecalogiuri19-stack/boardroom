@@ -444,25 +444,6 @@ public class PrenotazioniService {
         }
     }
 
-    private void validaRiferimenti(PrenotazioniDTO dto) {
-        if (dto.getUtente() == null || dto.getUtente().getId() == null) {
-            throw new IllegalArgumentException("Utente non è valido: ID mancante");
-        }
-        if (dto.getSala() == null || dto.getSala().getId() == null) {
-            throw new IllegalArgumentException("Sala non è valida: ID mancante");
-        }
-    }
-
-    private void collegaUtenteESala(Prenotazioni pren) {
-        UUID utenteId = pren.getUtente().getId();
-        UUID salaId = pren.getSala().getId();
-
-        Utenti ut = utentiRepository.findById(utenteId).orElseThrow(() -> new EntityNotFoundException("Utente non trovato"));
-        Sale sa = saleRepository.findByIdWithLock(salaId).orElseThrow(() -> new EntityNotFoundException("Sala non trovata"));
-        pren.setUtente(ut);
-        pren.setSala(sa);
-    }
-
     private void impostaStatoIniziale(Prenotazioni pren) {
         StatiPrenotazione statoWaiting = statiPrenotazioneRepository
             .findByCodice(StatoCodice.WAITING)
@@ -550,19 +531,14 @@ public class PrenotazioniService {
     public void aggiornaPrenotazioniScadute() {
         LocalDateTime limite = LocalDateTime.now().minusMinutes(5);
 
-        List<Prenotazioni> scadute = prenotazioniRepository.findExpiredWaiting(StatoCodice.WAITING, limite);
-        if (scadute.isEmpty()) {
-            return;
-        }
-
         StatiPrenotazione rejected = statiPrenotazioneRepository
             .findByCodice(StatoCodice.REJECTED)
             .orElseThrow(() -> new EntityNotFoundException("Stato REJECTED non trovato"));
 
-        scadute.forEach(p -> p.setStato(rejected));
+        int aggiornate = prenotazioniRepository.aggiornaScadute(rejected, limite);
 
-        prenotazioniRepository.saveAll(scadute);
-
-        LOG.debug("Aggiornate {} prenotazioni da WAITING a REJECTED", scadute.size());
+        if (aggiornate > 0) {
+            LOG.debug("Aggiornate {} prenotazioni da WAITING a REJECTED", aggiornate);
+        }
     }
 }

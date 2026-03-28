@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 import main.domain.Prenotazioni;
 import main.domain.Sale;
+import main.domain.StatiPrenotazione;
 import main.domain.enumeration.StatoCodice;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -131,6 +132,17 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         """
     )
     List<Prenotazioni> findExpiredWaiting(@Param("stato") StatoCodice stato, @Param("limite") LocalDateTime limite);
+
+    @Modifying
+    @Query(
+        """
+        UPDATE Prenotazioni p
+        SET p.stato = :statoRejected
+        WHERE p.stato.codice = main.domain.enumeration.StatoCodice.WAITING
+          AND p.createdAt < :limite
+        """
+    )
+    int aggiornaScadute(@Param("statoRejected") StatiPrenotazione statoRejected, @Param("limite") LocalDateTime limite);
 
     Optional<Prenotazioni> findByCodiceQr(String codiceQr);
 }
