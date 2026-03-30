@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -141,7 +143,6 @@ public class PrenotazioniResource {
      * @param id the id of the prenotazioniDTO to save.
      * @param prenotazioniDTO the prenotazioniDTO to update.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated prenotazioniDTO,
-     * or with status {@code 400 (Bad Request)} if the prenotazioniDTO is not valid,
      * or with status {@code 404 (Not Found)} if the prenotazioniDTO is not found,
      * or with status {@code 500 (Internal Server Error)} if the prenotazioniDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
@@ -168,7 +169,6 @@ public class PrenotazioniResource {
      * @param pageable the pagination information.
      * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many).
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of prenotazionis in body.
-     * US2: Semplificato per evitare errori di compilazione con il Service.
      */
     @GetMapping("")
     public ResponseEntity<List<PrenotazioniDTO>> getAllPrenotazionis(
@@ -204,6 +204,40 @@ public class PrenotazioniResource {
         LOG.debug("REST request to get odierne prenotazioni");
         return ResponseEntity.ok(prenotazioniService.getPrenotazioniOdierne());
     }
+
+    // ── CALENDARIO ────────────────────────────────────────────────────────────
+    /**
+     * {@code GET /prenotazionis/calendario} : recupera tutte le prenotazioni in un
+     * intervallo di date per la vista calendario mensile.
+     *
+     * Esempio: GET /api/prenotazionis/calendario?dataInizio=2026-03-01&dataFine=2026-03-31
+     *
+     * Admin: riceve tutte le prenotazioni di tutte le sale.
+     * Utente: riceve solo le proprie prenotazioni.
+     *
+     * @param dataInizio primo giorno dell'intervallo (formato ISO: YYYY-MM-DD)
+     * @param dataFine   ultimo giorno dell'intervallo (formato ISO: YYYY-MM-DD)
+     * @return lista di PrenotazioniDTO
+     */
+    @GetMapping("/calendario")
+    public ResponseEntity<List<PrenotazioniDTO>> getPrenotazioniCalendario(
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInizio,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFine
+    ) {
+        LOG.debug("REST request to get prenotazioni calendario da {} a {}", dataInizio, dataFine);
+
+        if (dataInizio == null || dataFine == null) {
+            throw new BadRequestAlertException("dataInizio e dataFine sono obbligatori", ENTITY_NAME, "missingparams");
+        }
+        if (dataFine.isBefore(dataInizio)) {
+            throw new BadRequestAlertException("dataFine non può essere precedente a dataInizio", ENTITY_NAME, "invalidrange");
+        }
+
+        List<PrenotazioniDTO> result = prenotazioniService.findByDataBetween(dataInizio, dataFine);
+        return ResponseEntity.ok(result);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * {@code DELETE /prenotazionis/:id} : cancellazione logica per l'utente proprietario.
@@ -243,9 +277,7 @@ public class PrenotazioniResource {
     }
 
     /**
-     *
-     * Endpoint per  la conferma della prenotazione
-     *
+     * Endpoint per la conferma della prenotazione
      */
     @PostMapping("/{id}/conferma")
     public ResponseEntity<PrenotazioniDTO> confermaPrenotazioni(@PathVariable UUID id) {
@@ -254,9 +286,7 @@ public class PrenotazioniResource {
     }
 
     /**
-     *
      * GET /prenotazionis/verifica-qr/{codice}
-     *
      */
     @GetMapping("/verifica-qr/{codice}")
     public ResponseEntity<PrenotazioniDTO> verificaQrCode(@PathVariable String codice) {

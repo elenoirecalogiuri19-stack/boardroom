@@ -359,6 +359,39 @@ public class PrenotazioniService {
             .toList();
     }
 
+    // ── CALENDARIO ────────────────────────────────────────────────────────────
+    /**
+     * Recupera tutte le prenotazioni in un intervallo di date per la vista calendario.
+     * Admin: vede tutte le prenotazioni. Utente: vede solo le proprie.
+     *
+     * @param dataInizio primo giorno dell'intervallo (incluso)
+     * @param dataFine   ultimo giorno dell'intervallo (incluso)
+     * @return lista di DTO ordinata per data e ora di inizio
+     */
+    @Transactional(readOnly = true)
+    public List<PrenotazioniDTO> findByDataBetween(LocalDate dataInizio, LocalDate dataFine) {
+        LOG.debug("Request to get prenotazioni calendario da {} a {}", dataInizio, dataFine);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth != null && auth.getAuthorities().stream().anyMatch(a -> AuthoritiesConstants.ADMIN.equals(a.getAuthority()));
+
+        List<Prenotazioni> risultati = prenotazioniRepository.findByDataBetween(dataInizio, dataFine);
+
+        if (!isAdmin) {
+            // Utente normale: filtra solo le proprie prenotazioni
+            String username = getAuthenticatedUsername();
+            risultati = risultati
+                .stream()
+                .filter(
+                    p -> p.getUtente() != null && p.getUtente().getUser() != null && username.equals(p.getUtente().getUser().getLogin())
+                )
+                .toList();
+        }
+
+        return risultati.stream().map(prenotazioniMapper::toDto).toList();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+
     public PrenotazioniDTO nuovoPrenotazioni(PrenotazioniDTO dto) {
         LOG.debug("Request to nuovo Prenotazioni : {}", dto);
 

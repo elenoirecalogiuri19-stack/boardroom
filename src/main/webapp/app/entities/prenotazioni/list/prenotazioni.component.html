@@ -2,7 +2,14 @@
   <h2 id="page-heading" data-cy="PrenotazioniHeading">
     <span>Prenotazionis</span>
 
-    <div class="d-flex justify-content-end">
+    <div class="d-flex justify-content-end gap-2">
+      <!-- ── Bottone Vista Calendario (nuovo) ─────────────── -->
+      <a routerLink="/prenotazioni/calendar" class="btn btn-outline-secondary" title="Vista calendario mensile">
+        <fa-icon icon="calendar-alt"></fa-icon>
+        <span class="d-none d-md-inline ms-1">Calendario</span>
+      </a>
+      <!-- ────────────────────────────────────────────────── -->
+
       <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
         <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
         <span>Refresh list</span>
@@ -36,28 +43,24 @@
             <th scope="col" jhiSortBy="id">
               <div class="d-flex">
                 <span>Id</span>
-
                 <fa-icon class="p-1" icon="sort"></fa-icon>
               </div>
             </th>
             <th scope="col" jhiSortBy="data">
               <div class="d-flex">
                 <span>Data</span>
-
                 <fa-icon class="p-1" icon="sort"></fa-icon>
               </div>
             </th>
             <th scope="col" jhiSortBy="oraInizio">
               <div class="d-flex">
                 <span>Ora Inizio</span>
-
                 <fa-icon class="p-1" icon="sort"></fa-icon>
               </div>
             </th>
             <th scope="col" jhiSortBy="oraFine">
               <div class="d-flex">
                 <span>Ora Fine</span>
-
                 <fa-icon class="p-1" icon="sort"></fa-icon>
               </div>
             </th>

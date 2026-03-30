@@ -136,4 +136,24 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
     int aggiornaScadute(@Param("statoRejected") StatiPrenotazione statoRejected, @Param("limite") LocalDateTime limite);
 
     Optional<Prenotazioni> findByCodiceQr(String codiceQr);
+
+    // ── CALENDARIO ────────────────────────────────────────────────────────────
+    /**
+     * Recupera tutte le prenotazioni in un intervallo di date (usato dalla vista calendario).
+     * Esegue eager fetch di stato, utente e sala per evitare N+1.
+     */
+    @Query(
+        """
+        SELECT p FROM Prenotazioni p
+        LEFT JOIN FETCH p.stato
+        LEFT JOIN FETCH p.utente u
+        LEFT JOIN FETCH u.user
+        LEFT JOIN FETCH p.sala
+        WHERE p.data >= :dataInizio
+          AND p.data <= :dataFine
+        ORDER BY p.data ASC, p.oraInizio ASC
+        """
+    )
+    List<Prenotazioni> findByDataBetween(@Param("dataInizio") LocalDate dataInizio, @Param("dataFine") LocalDate dataFine);
+    // ─────────────────────────────────────────────────────────────────────────
 }

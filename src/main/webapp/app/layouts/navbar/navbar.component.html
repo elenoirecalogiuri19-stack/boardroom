@@ -35,6 +35,15 @@
           </a>
         </li>
 
+        <!-- ── Calendario (visibile a tutti gli utenti loggati) ── -->
+        <li class="nav-item" routerLinkActive="active">
+          <a class="nav-link" (click)="navigazioneProtetta('/prenotazioni/calendar')" style="cursor: pointer">
+            <fa-icon icon="calendar-alt" class="me-1"></fa-icon>
+            <span>Calendario</span>
+          </a>
+        </li>
+        <!-- ─────────────────────────────────────────────────── -->
+
         @if (hasAnyAuthority('ROLE_ADMIN')) {
           <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" routerLinkActive="active">
             <a class="nav-link dropdown-toggle admin-link" ngbDropdownToggle href="javascript:void(0);" id="entity-menu">
@@ -45,6 +54,12 @@
               <li><a class="dropdown-item" routerLink="/utenti" (click)="collapseNavbar()">Utenti</a></li>
               <li><a class="dropdown-item" routerLink="/stati-prenotazione" (click)="collapseNavbar()">Stati</a></li>
               <li><a class="dropdown-item" routerLink="/prenotazioni" (click)="collapseNavbar()">Prenotazioni</a></li>
+              <!-- Calendario admin: vede tutte le sale -->
+              <li>
+                <a class="dropdown-item" routerLink="/prenotazioni/calendar" (click)="collapseNavbar()">
+                  <fa-icon icon="calendar-alt" [fixedWidth]="true"></fa-icon> Calendario sale
+                </a>
+              </li>
               <li><a class="dropdown-item" routerLink="/eventi" (click)="collapseNavbar()">Eventi</a></li>
             </ul>
           </li>

@@ -10,6 +10,14 @@ const prenotazioniRoute: Routes = [
     data: {},
     canActivate: [UserRouteAccessService],
   },
+  // ── Vista Calendario (nuova) ──────────────────────────────
+  {
+    path: 'calendar',
+    loadComponent: () => import('./calendar/prenotazioni-calendar.component').then(m => m.PrenotazioniCalendarComponent),
+    data: {},
+    canActivate: [UserRouteAccessService],
+  },
+  // ─────────────────────────────────────────────────────────
   {
     path: ':id/view',
     loadComponent: () => import('./detail/prenotazioni-detail.component').then(m => m.PrenotazioniDetailComponent),
