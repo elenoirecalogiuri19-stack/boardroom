@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
@@ -18,11 +18,13 @@ import { NotificationService } from 'app/shared/notification/notification.servic
   imports: [SharedModule, RouterModule],
 })
 export default class HomeComponent implements OnInit, OnDestroy {
-  @ViewChild('carousel') carousel!: ElementRef;
+  @ViewChild('heroViewport') heroViewport!: ElementRef<HTMLElement>;
 
   account = signal<Account | null>(null);
   eventi = signal<IEventi[]>([]);
   isLoading = signal<boolean>(true);
+
+  activeSlide = 0;
 
   private readonly destroy$ = new Subject<void>();
   private readonly accountService = inject(AccountService);
@@ -39,9 +41,11 @@ export default class HomeComponent implements OnInit, OnDestroy {
       .subscribe(account => this.account.set(account));
   }
 
-  scroll(offset: number): void {
-    if (this.carousel) {
-      this.carousel.nativeElement.scrollBy({ left: offset, behavior: 'smooth' });
+  goToSlide(index: number): void {
+    this.activeSlide = index;
+    const track = this.heroViewport?.nativeElement?.querySelector('.hero-track') as HTMLElement | null;
+    if (track) {
+      track.style.transform = `translateX(-${index * 100}%)`;
     }
   }
 
@@ -53,11 +57,17 @@ export default class HomeComponent implements OnInit, OnDestroy {
       .subscribe({
         next: data => {
           this.eventi.set(data);
+          this.activeSlide = 0;
+          setTimeout(() => this.goToSlide(0), 0);
         },
         error: () => {
           this.notificationService.show('Errore nel caricamento degli eventi pubblici', 'error');
         },
       });
+  }
+
+  vaiADettagli(evento: IEventi): void {
+    this.router.navigate(['/eventi', evento.id, 'view']);
   }
 
   vaiAlleMiePrenotazioni(): void {
@@ -70,10 +80,6 @@ export default class HomeComponent implements OnInit, OnDestroy {
     } else {
       this.router.navigate([destinazione]);
     }
-  }
-
-  vaiADettagli(evento: IEventi): void {
-    this.router.navigate(['/eventi', evento.id, 'view']);
   }
 
   ngOnDestroy(): void {

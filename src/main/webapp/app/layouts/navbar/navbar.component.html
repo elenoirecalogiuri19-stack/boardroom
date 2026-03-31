@@ -19,7 +19,13 @@
       <ul class="navbar-nav ms-auto align-items-center">
         <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <a class="nav-link" routerLink="/" (click)="collapseNavbar()">
-            <span>Home</span>
+            <span>Bacheca</span>
+          </a>
+        </li>
+
+        <li class="nav-item" routerLinkActive="active">
+          <a class="nav-link" (click)="navigazioneProtetta('/mie-prenotazioni')" style="cursor: pointer">
+            <span>Le mie prenotazioni</span>
           </a>
         </li>
 
@@ -30,31 +36,22 @@
         </li>
 
         <li class="nav-item" routerLinkActive="active">
-          <a class="nav-link" (click)="navigazioneProtetta('/mie-prenotazioni')" style="cursor: pointer">
-            <span>Le mie prenotazioni</span>
-          </a>
-        </li>
-
-        <!-- ── Calendario (visibile a tutti gli utenti loggati) ── -->
-        <li class="nav-item" routerLinkActive="active">
           <a class="nav-link" (click)="navigazioneProtetta('/prenotazioni/calendar')" style="cursor: pointer">
             <fa-icon icon="calendar-alt" class="me-1"></fa-icon>
             <span>Calendario</span>
           </a>
         </li>
-        <!-- ─────────────────────────────────────────────────── -->
 
         @if (hasAnyAuthority('ROLE_ADMIN')) {
           <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" routerLinkActive="active">
             <a class="nav-link dropdown-toggle admin-link" ngbDropdownToggle href="javascript:void(0);" id="entity-menu">
               <span>Gestione</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow-lg" ngbDropdownMenu aria-labelledby="entity-menu">
+            <ul class="dropdown-menu dropdown-menu-end" ngbDropdownMenu aria-labelledby="entity-menu">
               <li><a class="dropdown-item" routerLink="/sale" (click)="collapseNavbar()">Sale</a></li>
               <li><a class="dropdown-item" routerLink="/utenti" (click)="collapseNavbar()">Utenti</a></li>
               <li><a class="dropdown-item" routerLink="/stati-prenotazione" (click)="collapseNavbar()">Stati</a></li>
               <li><a class="dropdown-item" routerLink="/prenotazioni" (click)="collapseNavbar()">Prenotazioni</a></li>
-              <!-- Calendario admin: vede tutte le sale -->
               <li>
                 <a class="dropdown-item" routerLink="/prenotazioni/calendar" (click)="collapseNavbar()">
                   <fa-icon icon="calendar-alt" [fixedWidth]="true"></fa-icon> Calendario sale
@@ -68,7 +65,7 @@
             <a class="nav-link dropdown-toggle admin-link" ngbDropdownToggle href="javascript:void(0);" id="admin-menu">
               <span>Amministrazione</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow-lg" ngbDropdownMenu aria-labelledby="admin-menu">
+            <ul class="dropdown-menu dropdown-menu-end" ngbDropdownMenu aria-labelledby="admin-menu">
               <li>
                 <a class="dropdown-item" routerLink="/admin/user-management" (click)="collapseNavbar()">
                   <fa-icon icon="users" [fixedWidth]="true"></fa-icon> <span>Gestione utenti</span>
@@ -109,7 +106,7 @@
           </li>
         }
 
-        <li class="nav-item ms-lg-3">
+        <li class="nav-item ms-lg-2">
           @let accountRef = account();
           @if (accountRef !== null) {
             <a class="nav-link p-0 profile-link-wrapper" routerLink="/profilo-utente" (click)="collapseNavbar()" title="Vai al mio profilo">
@@ -121,10 +118,7 @@
               </div>
             </a>
           } @else {
-            <a class="nav-link login-link-green" (click)="login()" style="cursor: pointer">
-              <fa-icon icon="user" class="me-2"></fa-icon>
-              <span>Accedi</span>
-            </a>
+            <button class="btn btn-login-green" (click)="login()">Login</button>
           }
         </li>
       </ul>

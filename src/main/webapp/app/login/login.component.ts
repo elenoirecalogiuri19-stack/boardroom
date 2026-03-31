@@ -17,6 +17,7 @@ export default class LoginComponent implements OnInit, AfterViewInit {
   username = viewChild<ElementRef>('username');
   authenticationError = signal(false);
   isLoading = false;
+  showPassword = false;
 
   loginForm = new FormGroup({
     username: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -46,6 +47,10 @@ export default class LoginComponent implements OnInit, AfterViewInit {
     setTimeout(() => {
       this.username()?.nativeElement.focus();
     }, 200);
+  }
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
   }
 
   login(): void {

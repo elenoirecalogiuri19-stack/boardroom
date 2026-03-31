@@ -1,16 +1,31 @@
 <div class="login-wrapper">
   <div class="login-card">
+    <div class="login-header">
+      <h2 class="login-title">Bentornato</h2>
+      <p class="login-subtitle">Accedi per gestire le tue prenotazioni</p>
+    </div>
+
     @if (authenticationError()) {
       <div class="alert alert-danger">Email o password errati.</div>
     }
 
     <form (ngSubmit)="login()" [formGroup]="loginForm" class="login-form">
       <div class="input-group">
-        <input #username type="text" class="figma-input" placeholder="Username" formControlName="username" />
+        <label class="field-label">EMAIL</label>
+        <input #username type="email" class="figma-input" placeholder="info@gmail.com" formControlName="username" />
       </div>
 
-      <div class="input-group">
-        <input type="password" class="figma-input" placeholder="Password" formControlName="password" />
+      <div class="input-group password-group">
+        <div class="password-label-row">
+          <label class="field-label">PASSWORD</label>
+          <a routerLink="/account/reset/request" class="green-link forgot-link">Password dimenticata?</a>
+        </div>
+        <div class="password-input-wrapper">
+          <input [type]="showPassword ? 'text' : 'password'" class="figma-input" placeholder="••••••••" formControlName="password" />
+          <button type="button" class="eye-btn" (click)="togglePassword()">
+            <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+          </button>
+        </div>
       </div>
 
       <button type="submit" class="figma-btn" [disabled]="isLoading">
@@ -19,11 +34,8 @@
     </form>
 
     <div class="figma-footer">
-      <a routerLink="/account/reset/request" class="green-link">Password dimenticata?</a>
-      <div class="register-section">
-        <span class="small-text">Non hai un account?</span>
-        <a routerLink="/account/register" class="green-link"><strong>Crea un account</strong></a>
-      </div>
+      <span class="small-text">Non hai un account?</span>
+      <a routerLink="/account/register" class="green-link"><strong>Registrati</strong></a>
     </div>
   </div>
 </div>
