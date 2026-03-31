@@ -16,6 +16,8 @@ public interface PrenotazioniMapper extends EntityMapper<PrenotazioniDTO, Prenot
     @Mapping(target = "evento", source = "evento")
     @Mapping(target = "eventoId", source = "evento.id")
     @Mapping(target = "numPersone", source = "numPersone")
+    // Espone l'ID della serie ricorrente nel DTO — null se prenotazione singola
+    @Mapping(target = "ricorrenzaId", source = "ricorrenza.id")
     PrenotazioniDTO toDto(Prenotazioni entity);
 
     @Override
@@ -23,5 +25,6 @@ public interface PrenotazioniMapper extends EntityMapper<PrenotazioniDTO, Prenot
     @Mapping(target = "sala", source = "sala")
     @Mapping(target = "evento", ignore = true)
     @Mapping(target = "numPersone", source = "numPersone")
+    @Mapping(target = "ricorrenza", ignore = true)
     Prenotazioni toEntity(PrenotazioniDTO dto);
 }

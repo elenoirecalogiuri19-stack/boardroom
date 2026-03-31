@@ -14,6 +14,9 @@ export interface IRicorrenza {
   oraInizio: string; // HH:mm
   oraFine: string; // HH:mm
   numPersone?: number;
+  // Titolo e descrizione da propagare a tutte le istanze della serie
+  titoloEvento?: string;
+  descrizioneEvento?: string;
   // Campi risposta
   istanzeCreate?: number;
   istanzeConflitto?: number;

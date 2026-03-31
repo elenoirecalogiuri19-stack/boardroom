@@ -367,6 +367,8 @@ export class CreaEventoComponent implements OnInit {
       oraInizio: this.evento.oraInizio,
       oraFine: this.evento.oraFine,
       numPersone: this.capienzaRicerca,
+      titoloEvento: this.evento.titolo || undefined,
+      descrizioneEvento: this.evento.descrizione || undefined,
     };
 
     this.ricorrenzaService.crea(dto).subscribe({

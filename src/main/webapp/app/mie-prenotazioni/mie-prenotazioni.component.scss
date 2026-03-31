@@ -273,7 +273,7 @@ $status-wait-text: #475569;
       background: #e74c3c;
       color: white;
       &:hover {
-        background: darken(#e74c3c, 8%);
+        background: #c0392b;
         transform: translateY(-1px);
       }
     }
@@ -291,50 +291,70 @@ $status-wait-text: #475569;
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Ricorrenze – stili aggiuntivi (non toccano quelli esistenti)
-// ─────────────────────────────────────────────────────────────
-
-// Header row con bottone ricorrente
-.header-section {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-
-  .header-text {
-    h1,
-    p {
-      margin: 0;
-    }
+// ── Fix: data-status basato su codice (non descrizione) ──────
+.status-pill {
+  &[data-status='confirmed'] {
+    background: #d4edda;
+    color: #155724;
+  }
+  &[data-status='cancelled'] {
+    background: #f0f0f0;
+    color: #6c757d;
+    text-decoration: line-through;
+  }
+  &[data-status='waiting'] {
+    background: #fff3cd;
+    color: #856404;
+  }
+  &[data-status='rejected'] {
+    background: #f8d7da;
+    color: #721c24;
   }
 }
 
-.btn-ricorrente {
+// ── Card cancellata: visivamente attenuata ───────────────────
+.event-card-wrapper.is-cancelled {
+  opacity: 0.65;
+  border-left: 3px solid #ced4da !important;
+
+  .title-highlight {
+    text-decoration: line-through;
+    color: #6c757d !important;
+  }
+}
+
+// ── Placeholder nella colonna azioni (card cancellata) ───────
+.cancelled-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 40px;
+
+  .cancelled-icon {
+    font-size: 1.2rem;
+    opacity: 0.5;
+  }
+}
+
+// ── Badge "ricorrente" inline accanto al titolo ──────────────
+.badge-ricorrente {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 9px 18px;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #dbeafe;
+  color: #3b82f6;
+  margin-left: 6px;
+  vertical-align: middle;
   flex-shrink: 0;
-
-  &:hover {
-    background: #2563eb;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
-  }
 }
 
-// Sezione serie ricorrenti
+// ── Stili serie ricorrenti (copiati dal file integrazione) ───
+
 .ricorrenze-section {
   margin-bottom: 28px;
 }
@@ -357,7 +377,6 @@ $status-wait-text: #475569;
   gap: 12px;
 }
 
-// Card singola serie
 .ric-card {
   background: #ffffff;
   border: 1.5px solid #e5e7eb;
@@ -437,7 +456,6 @@ $status-wait-text: #475569;
       background: #fffbeb;
       color: #b45309;
       border: 1px solid #fde68a;
-
       &:hover {
         background: #fef3c7;
       }
@@ -447,7 +465,6 @@ $status-wait-text: #475569;
       background: #fef2f2;
       color: #b91c1c;
       border: 1px solid #fecaca;
-
       &:hover {
         background: #fee2e2;
       }
