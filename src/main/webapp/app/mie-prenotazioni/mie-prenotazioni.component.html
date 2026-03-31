@@ -1,9 +1,82 @@
-<div class="mie-prenotazioni-container" [class.blur-content]="showDeleteModal()">
+<div class="mie-prenotazioni-container" [class.blur-content]="showDeleteModal() || showCancellaSerieModal()">
+  <!-- ── HEADER con bottone Ricorrente ──────────────────── -->
   <div class="header-section">
-    <h1>Le tue Prenotazioni</h1>
-    <p>Visualizza e gestisci le tue prenotazioni future.</p>
+    <div class="header-text">
+      <h1>Le tue Prenotazioni</h1>
+      <p>Visualizza e gestisci le tue prenotazioni future.</p>
+    </div>
+    <button class="btn-ricorrente" (click)="mostraFormRicorrenza.set(true)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="1 4 1 10 7 10"></polyline>
+        <path d="M3.51 15a9 9 0 1 0 .49-4.5"></path>
+      </svg>
+      Prenotazione ricorrente
+    </button>
   </div>
 
+  <!-- ── SEZIONE SERIE RICORRENTI ───────────────────────── -->
+  @if (ricorrenze().length > 0) {
+    <div class="ricorrenze-section">
+      <h2 class="ricorrenze-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="1 4 1 10 7 10"></polyline>
+          <path d="M3.51 15a9 9 0 1 0 .49-4.5"></path>
+        </svg>
+        Serie ricorrenti attive ({{ ricorrenze().length }})
+      </h2>
+
+      <div class="ricorrenze-grid">
+        @for (r of ricorrenze(); track r.id) {
+          <div class="ric-card">
+            <div class="ric-card__badge">{{ getFrequenzaLabel(r.frequenza) }}</div>
+
+            <div class="ric-card__sala">{{ r.salaNome ?? 'Sala' }}</div>
+
+            <div class="ric-card__orario">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              {{ r.oraInizio }} – {{ r.oraFine }}
+            </div>
+
+            @if (r.giorniSettimana && r.giorniSettimana.length > 0) {
+              <div class="ric-card__giorni">{{ getGiorniLabel(r.giorniSettimana) }}</div>
+            }
+
+            <div class="ric-card__date">
+              <span>Dal {{ r.dataInizio }}</span>
+              @if (r.dataFine) {
+                <span>al {{ r.dataFine }}</span>
+              }
+              @if (r.numOccorrenze) {
+                <span>· {{ r.numOccorrenze }} volte</span>
+              }
+            </div>
+
+            <div class="ric-card__actions">
+              <button
+                class="ric-card__btn ric-card__btn--warn"
+                (click)="chiediCancellazioneSerie(r.id, true)"
+                title="Cancella solo le future"
+              >
+                Cancella future
+              </button>
+              <button
+                class="ric-card__btn ric-card__btn--danger"
+                (click)="chiediCancellazioneSerie(r.id, false)"
+                title="Cancella tutta la serie"
+              >
+                Cancella serie
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ── LISTA PRENOTAZIONI SINGOLE ─────────────────────── -->
   <div class="list-container">
     @for (pren of prenotazioni(); track pren.id) {
       <div class="event-card-wrapper" [class.is-expanded]="isExpanded(pren.id)">
@@ -93,6 +166,7 @@
   </div>
 </div>
 
+<!-- ── MODAL elimina prenotazione singola ─────────────── -->
 @if (showDeleteModal()) {
   <div class="delete-overlay">
     <div class="delete-modal">
@@ -104,4 +178,31 @@
       </div>
     </div>
   </div>
+}
+
+<!-- ── MODAL cancella serie ricorrente ────────────────── -->
+@if (showCancellaSerieModal()) {
+  <div class="delete-overlay">
+    <div class="delete-modal">
+      <h2 class="modal-title">
+        {{ cancellaSoloFuture() ? 'Cancella prenotazioni future' : 'Cancella intera serie' }}
+      </h2>
+      <p class="modal-subtitle">
+        @if (cancellaSoloFuture()) {
+          Verranno cancellate tutte le prenotazioni future di questa serie. Le prenotazioni passate resteranno invariate.
+        } @else {
+          Verranno cancellate <strong>tutte</strong> le prenotazioni della serie, incluse quelle passate.
+        }
+      </p>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" (click)="annullaCancellazioneSerie()">Annulla</button>
+        <button class="btn-modal-confirm" (click)="confermaCancellazioneSerie()">Conferma</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── FORM ricorrenza (slide-up panel) ───────────────── -->
+@if (mostraFormRicorrenza()) {
+  <jhi-ricorrenza-form (creata)="onRicorrenzaCreata($event)" (annullata)="onRicorrenzaAnnullata()"> </jhi-ricorrenza-form>
 }

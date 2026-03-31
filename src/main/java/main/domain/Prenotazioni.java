@@ -67,6 +67,18 @@ public class Prenotazioni implements Serializable {
     @Column(name = "num_persone")
     private Integer numPersone;
 
+    // ── RICORRENZA ────────────────────────────────────────────────────────────
+    /**
+     * Collegamento alla serie ricorrente di appartenenza.
+     * Null se la prenotazione è singola (non ricorrente).
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ricorrenza_id")
+    @JsonIgnoreProperties(value = { "istanze" }, allowSetters = true)
+    private Ricorrenza ricorrenza;
+
+    // ─────────────────────────────────────────────────────────────────────────
+
     public UUID getId() {
         return id;
     }
@@ -188,6 +200,14 @@ public class Prenotazioni implements Serializable {
 
     public void setNumPersone(Integer numPersone) {
         this.numPersone = numPersone;
+    }
+
+    public Ricorrenza getRicorrenza() {
+        return ricorrenza;
+    }
+
+    public void setRicorrenza(Ricorrenza ricorrenza) {
+        this.ricorrenza = ricorrenza;
     }
 
     @Override

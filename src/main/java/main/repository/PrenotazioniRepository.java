@@ -138,10 +138,6 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
     Optional<Prenotazioni> findByCodiceQr(String codiceQr);
 
     // ── CALENDARIO ────────────────────────────────────────────────────────────
-    /**
-     * Recupera tutte le prenotazioni in un intervallo di date (usato dalla vista calendario).
-     * Esegue eager fetch di stato, utente e sala per evitare N+1.
-     */
     @Query(
         """
         SELECT p FROM Prenotazioni p
@@ -155,5 +151,23 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         """
     )
     List<Prenotazioni> findByDataBetween(@Param("dataInizio") LocalDate dataInizio, @Param("dataFine") LocalDate dataFine);
-    // ─────────────────────────────────────────────────────────────────────────
+
+    // ── RICORRENZA ────────────────────────────────────────────────────────────
+
+    /** Tutte le istanze di una serie */
+    List<Prenotazioni> findByRicorrenzaId(UUID ricorrenzaId);
+
+    /** Istanze future (da oggi incluso) di una serie — usato per cancellazione parziale */
+    @Query(
+        """
+        SELECT p FROM Prenotazioni p
+        WHERE p.ricorrenza.id = :ricorrenzaId
+          AND p.data >= :dataInizio
+        ORDER BY p.data ASC
+        """
+    )
+    List<Prenotazioni> findByRicorrenzaIdAndDataGreaterThanEqual(
+        @Param("ricorrenzaId") UUID ricorrenzaId,
+        @Param("dataInizio") LocalDate dataInizio
+    );
 }

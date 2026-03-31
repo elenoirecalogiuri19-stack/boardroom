@@ -49,7 +49,6 @@ export default class PrenotaSalaComponent implements OnInit {
       this.notificationService.show('Seleziona una data per continuare', 'error');
       return;
     }
-
     if (!this.oraSelezionata) {
       this.notificationService.show('Seleziona una fascia oraria per continuare', 'error');
       return;
@@ -64,7 +63,6 @@ export default class PrenotaSalaComponent implements OnInit {
     }
 
     this.caricamento = true;
-
     this.ricercaService.salvaRicerca({
       data: this.dataSelezionata,
       ora: this.oraSelezionata,

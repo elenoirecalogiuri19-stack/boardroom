@@ -290,3 +290,167 @@ $status-wait-text: #475569;
     transform: scale(1);
   }
 }
+
+// ─────────────────────────────────────────────────────────────
+// Ricorrenze – stili aggiuntivi (non toccano quelli esistenti)
+// ─────────────────────────────────────────────────────────────
+
+// Header row con bottone ricorrente
+.header-section {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  .header-text {
+    h1,
+    p {
+      margin: 0;
+    }
+  }
+}
+
+.btn-ricorrente {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+  }
+}
+
+// Sezione serie ricorrenti
+.ricorrenze-section {
+  margin-bottom: 28px;
+}
+
+.ricorrenze-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+
+.ricorrenze-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+// Card singola serie
+.ric-card {
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: box-shadow 0.15s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  &__badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: #eff6ff;
+    color: #3b82f6;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    width: fit-content;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__sala {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+    margin-top: 2px;
+  }
+
+  &__orario {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.875rem;
+    color: #4b5563;
+    font-weight: 500;
+  }
+
+  &__giorni {
+    font-size: 0.8rem;
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  &__date {
+    display: flex;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: #9ca3af;
+    flex-wrap: wrap;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid #f3f4f6;
+  }
+
+  &__btn {
+    flex: 1;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &--warn {
+      background: #fffbeb;
+      color: #b45309;
+      border: 1px solid #fde68a;
+
+      &:hover {
+        background: #fef3c7;
+      }
+    }
+
+    &--danger {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+
+      &:hover {
+        background: #fee2e2;
+      }
+    }
+  }
+}
