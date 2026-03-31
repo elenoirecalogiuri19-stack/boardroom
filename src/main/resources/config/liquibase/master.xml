@@ -33,7 +33,7 @@
   <include file="config/liquibase/changelog/20260302000002_added_codice_qr_to_prenotazioni.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260303000001_add_num_persone_to_prenotazioni.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260304000002_create_prenotazione_evento_pubblico.xml" relativeToChangelogFile="false"/>
-  <include file="config/liquibase/changelog/20260330000001_create_ricorrenza.xml"
-           relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260330000001_create_ricorrenza.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260401000001_create_promemoria.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

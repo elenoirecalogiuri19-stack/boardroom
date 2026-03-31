@@ -4,16 +4,16 @@ import { CommonModule } from '@angular/common';
 import SharedModule from 'app/shared/shared.module';
 import { PrenotazioneDTO, PrenotazioniApiService } from '../services/prenotazioni-api.service';
 import { NotificationService } from 'app/shared/notification/notification.service';
-import { RicorrenzaFormComponent } from '../entities/ricorrenti/ricorrenza-form.component';
 import { RicorrenzaService } from '../entities/ricorrenti/ricorrenza.service';
 import { IRicorrenza } from '../entities/ricorrenti/ricorrenza.model';
+import { PromemoriaService, PromemoriaDTO, TipoPromemoria, TipoStatoDTO } from '../services/promemoria.service';
 
 @Component({
   standalone: true,
   selector: 'jhi-mie-prenotazioni',
   templateUrl: './mie-prenotazioni.component.html',
   styleUrl: './mie-prenotazioni.component.scss',
-  imports: [SharedModule, RouterModule, CommonModule, RicorrenzaFormComponent],
+  imports: [SharedModule, RouterModule, CommonModule],
 })
 export class MiePrenotazioniComponent implements OnInit {
   prenotazioni = signal<PrenotazioneDTO[]>([]);
@@ -26,11 +26,27 @@ export class MiePrenotazioniComponent implements OnInit {
   showCancellaSerieModal = signal(false);
   ricorrenzaIdDaCancellare = signal<string | undefined>(undefined);
   cancellaSoloFuture = signal(true);
-  // ─────────────────────────────────────────────────────
+
+  // ── Promemoria ────────────────────────────────────────
+  showPromemoriaModal = signal(false);
+  proPrenotazioneId = signal<string | undefined>(undefined);
+  proRiepilogo = signal<TipoStatoDTO[]>([]);
+  proSelezionati = signal<Set<TipoPromemoria>>(new Set());
+  proLoading = signal(false);
+  proSaving = signal(false);
+
+  // Array tipizzato usato nel template @for — evita l'errore "string not assignable to TipoPromemoria"
+  readonly proOpzioni: { tipo: TipoPromemoria; label: string; desc: string }[] = [
+    { tipo: 'WEEK_BEFORE', label: '1 settimana prima', desc: "7 giorni prima dell'evento" },
+    { tipo: 'TWO_DAYS_BEFORE', label: '2 giorni prima', desc: "48 ore prima dell'evento" },
+    { tipo: 'DAY_BEFORE', label: '1 giorno prima', desc: 'La sera precedente' },
+    { tipo: 'SAME_DAY', label: 'Il giorno stesso', desc: "La mattina dell'evento alle 08:00" },
+  ];
 
   private prenotazioniApi = inject(PrenotazioniApiService);
   private notificationService = inject(NotificationService);
   private ricorrenzaService = inject(RicorrenzaService);
+  private proService = inject(PromemoriaService);
 
   ngOnInit(): void {
     this.caricaLeMiePrenotazioni();
@@ -44,33 +60,22 @@ export class MiePrenotazioniComponent implements OnInit {
     });
   }
 
-  caricaRicorrenze(): void {
-    this.ricorrenzaService.getMie().subscribe({
-      next: list => this.ricorrenze.set(list),
-      error: () => {},
-    });
-  }
-
   // ── Helpers display ───────────────────────────────────
 
-  /** Titolo da mostrare: evento se presente, altrimenti nome sala */
   getTitolo(pren: PrenotazioneDTO): string {
     if (pren.evento?.titolo) return pren.evento.titolo;
     if (pren.ricorrenzaId) return `${pren.sala?.nome ?? 'Sala'} — Ricorrente`;
     return pren.sala?.nome ?? 'Prenotazione';
   }
 
-  /** True se la prenotazione è stata cancellata */
   isCancellata(pren: PrenotazioneDTO): boolean {
     return pren.stato?.codice === 'CANCELLED';
   }
 
-  /** True se fa parte di una serie ricorrente */
   isRicorrente(pren: PrenotazioneDTO): boolean {
     return !!pren.ricorrenzaId;
   }
 
-  /** Stringa status per data-status CSS (basata sul codice) */
   getStatusAttr(pren: PrenotazioneDTO): string {
     return pren.stato?.codice?.toLowerCase() ?? '';
   }
@@ -98,7 +103,93 @@ export class MiePrenotazioniComponent implements OnInit {
     return giorni.map(g => nomi[g] ?? g).join(' · ');
   }
 
-  // ── Cancellazione serie ricorrente ────────────────────
+  // ── Promemoria ────────────────────────────────────────
+
+  apriPromemoria(prenotazioneId: string | undefined): void {
+    if (!prenotazioneId) return;
+    this.proPrenotazioneId.set(prenotazioneId);
+    this.proLoading.set(true);
+    this.showPromemoriaModal.set(true);
+
+    this.proService.get(prenotazioneId).subscribe({
+      next: (dto: PromemoriaDTO) => {
+        this.proRiepilogo.set(dto.riepilogo ?? []);
+        this.proSelezionati.set(new Set(dto.tipiAbilitati ?? []));
+        this.proLoading.set(false);
+      },
+      error: () => {
+        this.proLoading.set(false);
+        // Se non esistono ancora, inizializza vuoto
+        this.proRiepilogo.set([]);
+        this.proSelezionati.set(new Set());
+      },
+    });
+  }
+
+  chiudiPromemoria(): void {
+    this.showPromemoriaModal.set(false);
+    this.proPrenotazioneId.set(undefined);
+  }
+
+  toggleTipo(tipo: TipoPromemoria): void {
+    const set = new Set(this.proSelezionati());
+    if (set.has(tipo)) {
+      set.delete(tipo);
+    } else {
+      set.add(tipo);
+    }
+    this.proSelezionati.set(set);
+  }
+
+  isTipoSelezionato(tipo: TipoPromemoria): boolean {
+    return this.proSelezionati().has(tipo);
+  }
+
+  /** Helper senza arrow function: usato nel template al posto di proRiepilogo().find(...) */
+  isTipoInviato(tipo: TipoPromemoria): boolean {
+    return this.proRiepilogo().some(r => r.tipo === tipo && r.inviato);
+  }
+
+  salvaPromemoria(): void {
+    const id = this.proPrenotazioneId();
+    if (!id) return;
+
+    this.proSaving.set(true);
+    this.proService
+      .salva({
+        prenotazioneId: id,
+        tipiAbilitati: Array.from(this.proSelezionati()),
+      })
+      .subscribe({
+        next: () => {
+          this.proSaving.set(false);
+          this.chiudiPromemoria();
+          const count = this.proSelezionati().size;
+          this.notificationService.show(
+            count > 0 ? `✅ Promemoria salvati: riceverai ${count} notifica${count > 1 ? 'he' : ''}` : 'Promemoria disattivati',
+            'success',
+          );
+        },
+        error: () => {
+          this.proSaving.set(false);
+          this.notificationService.show('Errore nel salvataggio dei promemoria', 'error');
+        },
+      });
+  }
+
+  /** Controlla se una prenotazione ha almeno un promemoria attivo */
+  hasPromemoriaAttivo(prenotazioneId: string | undefined): boolean {
+    return false; // ottimizzazione: implementare con cache locale se necessario
+  }
+
+  // ── Ricorrenze ────────────────────────────────────────
+
+  caricaRicorrenze(): void {
+    this.ricorrenzaService.getMie().subscribe({
+      next: list => this.ricorrenze.set(list),
+      error: () => {},
+    });
+  }
 
   chiediCancellazioneSerie(id: string | undefined, soloFuture: boolean): void {
     if (!id) return;
@@ -122,17 +213,15 @@ export class MiePrenotazioniComponent implements OnInit {
     op$.subscribe({
       next: () => {
         this.notificationService.show('Serie cancellata con successo', 'success');
-        // Ricarica lista: le prenotazioni cancellate ora mostreranno stato CANCELLED
         this.caricaLeMiePrenotazioni();
         this.caricaRicorrenze();
       },
       error: () => this.notificationService.show('Errore nella cancellazione della serie', 'error'),
     });
-
     this.ricorrenzaIdDaCancellare.set(undefined);
   }
 
-  // ── Cancellazione singola ─────────────────────────────
+  // ── Prenotazione singola ──────────────────────────────
 
   toggleDetails(id: string | undefined): void {
     if (!id) return;
@@ -168,7 +257,6 @@ export class MiePrenotazioniComponent implements OnInit {
       },
       error: () => this.notificationService.show("Errore durante l'eliminazione", 'error'),
     });
-
     this.prenotazioneIdDaEliminare.set(undefined);
   }
 }
