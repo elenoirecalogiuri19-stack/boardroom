@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import main.domain.Eventi;
 import main.domain.Prenotazioni;
 import main.domain.Ricorrenza;
 import main.domain.Sale;
@@ -16,6 +17,8 @@ import main.domain.StatiPrenotazione;
 import main.domain.Utenti;
 import main.domain.enumeration.Frequenza;
 import main.domain.enumeration.StatoCodice;
+import main.domain.enumeration.TipoEvento;
+import main.repository.EventiRepository;
 import main.repository.PrenotazioniRepository;
 import main.repository.RicorrenzaRepository;
 import main.repository.SaleRepository;
@@ -38,11 +41,11 @@ public class RicorrenzaService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RicorrenzaService.class);
 
-    /** Limite di sicurezza: max occorrenze generabili per serie */
     private static final int MAX_OCCORRENZE = 365;
 
     private final RicorrenzaRepository ricorrenzaRepository;
     private final PrenotazioniRepository prenotazioniRepository;
+    private final EventiRepository eventiRepository;
     private final SaleRepository saleRepository;
     private final UtentiRepository utentiRepository;
     private final StatiPrenotazioneRepository statiRepository;
@@ -50,12 +53,14 @@ public class RicorrenzaService {
     public RicorrenzaService(
         RicorrenzaRepository ricorrenzaRepository,
         PrenotazioniRepository prenotazioniRepository,
+        EventiRepository eventiRepository,
         SaleRepository saleRepository,
         UtentiRepository utentiRepository,
         StatiPrenotazioneRepository statiRepository
     ) {
         this.ricorrenzaRepository = ricorrenzaRepository;
         this.prenotazioniRepository = prenotazioniRepository;
+        this.eventiRepository = eventiRepository;
         this.saleRepository = saleRepository;
         this.utentiRepository = utentiRepository;
         this.statiRepository = statiRepository;
@@ -66,11 +71,14 @@ public class RicorrenzaService {
     /**
      * Crea una nuova regola di ricorrenza e genera tutte le occorrenze (strategia EAGER).
      *
+     * FIX: ora crea un evento PRIVATO per OGNI istanza della serie, così tutte
+     * le prenotazioni ricorrenti hanno titolo, descrizione e stato CONFIRMED.
+     *
      * Flusso:
      *  1. Valida input
      *  2. Calcola tutte le date candidate
      *  3. Per ogni data, verifica conflitti con prenotazioni CONFIRMED esistenti
-     *  4. Crea la prenotazione in stato WAITING se non c'è conflitto, la salta altrimenti
+     *  4. Crea la prenotazione in stato CONFIRMED + crea un evento PRIVATO collegato
      *  5. Ritorna il DTO con conteggio create/skippate e date conflitto
      */
     public RicorrenzaDTO creaRicorrenza(RicorrenzaDTO dto) {
@@ -84,15 +92,22 @@ public class RicorrenzaService {
 
         Utenti utente = caricaUtenteAutenticato();
 
-        StatiPrenotazione statoWaiting = statiRepository
-            .findByCodice(StatoCodice.WAITING)
-            .orElseThrow(() -> new EntityNotFoundException("Stato WAITING non trovato"));
-
+        // Tutte le istanze ricorrenti vanno in CONFIRMED direttamente —
+        // l'utente ha già scelto consapevolmente la serie, non serve validazione manuale
         StatiPrenotazione statoConfirmed = statiRepository
             .findByCodice(StatoCodice.CONFIRMED)
             .orElseThrow(() -> new EntityNotFoundException("Stato CONFIRMED non trovato"));
 
-        // Salva la regola
+        // Titolo e descrizione da propagare (con fallback se non forniti)
+        String titolo = (dto.getTitoloEvento() != null && !dto.getTitoloEvento().isBlank())
+            ? dto.getTitoloEvento()
+            : "Prenotazione ricorrente — " + sala.getNome();
+
+        String descrizione = (dto.getDescrizioneEvento() != null && !dto.getDescrizioneEvento().isBlank())
+            ? dto.getDescrizioneEvento()
+            : "Evento ricorrente · " + dto.getFrequenza().name().toLowerCase();
+
+        // Salva la regola di ricorrenza
         Ricorrenza ricorrenza = new Ricorrenza();
         ricorrenza.setFrequenza(dto.getFrequenza());
         ricorrenza.setDataInizio(dto.getDataInizio());
@@ -112,10 +127,9 @@ public class RicorrenzaService {
         List<LocalDate> dateCandidate = calcolaDate(dto);
         LOG.debug("Date candidate calcolate: {}", dateCandidate.size());
 
-        // Genera le prenotazioni
+        // Genera prenotazioni + eventi per ogni data
         int create = 0;
         List<LocalDate> dateConflitto = new ArrayList<>();
-        boolean primaIstanza = true;
 
         for (LocalDate data : dateCandidate) {
             boolean conflitto = prenotazioniRepository.existsOverlappingConfirmedPrenotazione(
@@ -127,12 +141,11 @@ public class RicorrenzaService {
 
             if (conflitto) {
                 dateConflitto.add(data);
-                LOG.debug("Conflitto trovato per data {}, skip", data);
-                // La prima data è quella della prenotazione singola già creata — non saltarla
-                primaIstanza = false;
+                LOG.debug("Conflitto per data {}, skip", data);
                 continue;
             }
 
+            // 1. Crea la prenotazione — tutte CONFIRMED
             Prenotazioni p = new Prenotazioni();
             p.setData(data);
             p.setOraInizio(dto.getOraInizio());
@@ -140,18 +153,24 @@ public class RicorrenzaService {
             p.setSala(sala);
             p.setUtente(utente);
             p.setNumPersone(dto.getNumPersone());
-            // Prima occorrenza (= il giorno già prenotato e confermato) → CONFIRMED
-            // Tutte le successive → WAITING, in attesa di conferma
-            p.setStato(primaIstanza ? statoConfirmed : statoWaiting);
+            p.setStato(statoConfirmed);
             p.setRicorrenza(ricorrenza);
-            prenotazioniRepository.save(p);
+            p = prenotazioniRepository.save(p);
+
+            // 2. Crea l'evento PRIVATO collegato alla prenotazione
+            //    → così ogni istanza ha titolo e descrizione nella lista
+            Eventi evento = new Eventi();
+            evento.setTitolo(titolo);
+            evento.setDescrizione(descrizione);
+            evento.setTipo(TipoEvento.PRIVATO);
+            evento.setPrenotazione(p);
+            eventiRepository.save(evento);
+
             create++;
-            primaIstanza = false;
         }
 
         LOG.debug("Ricorrenza {}: create={}, conflitti={}", ricorrenza.getId(), create, dateConflitto.size());
 
-        // Componi risposta
         dto.setId(ricorrenza.getId());
         dto.setSalaNome(sala.getNome());
         dto.setIstanzeCreate(create);
@@ -162,12 +181,8 @@ public class RicorrenzaService {
 
     // ── CANCELLAZIONE ─────────────────────────────────────────────────────────
 
-    /**
-     * Cancella tutte le prenotazioni future della serie (da oggi incluso).
-     * La regola di ricorrenza rimane per storico.
-     */
     public void cancellaSerieDaOggi(UUID ricorrenzaId) {
-        Ricorrenza r = caricaRicorrenzaConPermessi(ricorrenzaId);
+        caricaRicorrenzaConPermessi(ricorrenzaId);
         LocalDate oggi = LocalDate.now();
 
         List<Prenotazioni> future = prenotazioniRepository.findByRicorrenzaIdAndDataGreaterThanEqual(ricorrenzaId, oggi);
@@ -183,11 +198,8 @@ public class RicorrenzaService {
         LOG.debug("Cancellate {} prenotazioni future della serie {}", future.size(), ricorrenzaId);
     }
 
-    /**
-     * Cancella TUTTA la serie (tutte le istanze, passate e future).
-     */
     public void cancellaTuttaSerie(UUID ricorrenzaId) {
-        Ricorrenza r = caricaRicorrenzaConPermessi(ricorrenzaId);
+        caricaRicorrenzaConPermessi(ricorrenzaId);
         StatiPrenotazione cancelled = statiRepository
             .findByCodice(StatoCodice.CANCELLED)
             .orElseThrow(() -> new EntityNotFoundException("Stato CANCELLED non trovato"));
@@ -216,20 +228,6 @@ public class RicorrenzaService {
 
     // ── CALCOLO DATE ─────────────────────────────────────────────────────────
 
-    /**
-     * Calcola tutte le date candidate per la serie in base a frequenza e configurazione.
-     *
-     * Algoritmo:
-     *  - WEEKLY / BIWEEKLY: iterazione giorno per giorno con step settimana/bisettimanale,
-     *    filtrando sui giorni della settimana selezionati.
-     *  - MONTHLY: aggiunge esattamente 1 mese alla data di inizio ad ogni iterazione.
-     *
-     * Edge case gestiti:
-     *  - Fine mese: dayjs/LocalDate gestisce automaticamente (es: 31 gen + 1 mese = 28/29 feb)
-     *  - Limite numOccorrenze: si ferma al raggiungimento del contatore
-     *  - Limite dataFine: si ferma quando la data supera dataFine
-     *  - Limite di sicurezza MAX_OCCORRENZE: evita loop infiniti
-     */
     List<LocalDate> calcolaDate(RicorrenzaDTO dto) {
         List<LocalDate> date = new ArrayList<>();
 
@@ -242,13 +240,10 @@ public class RicorrenzaService {
 
         switch (dto.getFrequenza()) {
             case WEEKLY -> {
-                // Itera settimana per settimana sui giorni selezionati
-                // Trova il lunedì della settimana di inizio
                 LocalDate inizioSettimana = cursore.with(DayOfWeek.MONDAY);
                 if (inizioSettimana.isAfter(cursore)) {
                     inizioSettimana = inizioSettimana.minusWeeks(1);
                 }
-
                 LocalDate settimana = inizioSettimana;
                 while (contatore < maxOcc && (fine == null || settimana.isBefore(fine) || settimana.isEqual(fine))) {
                     for (DayOfWeek giorno : giorniAttivi) {
@@ -268,7 +263,6 @@ public class RicorrenzaService {
                 if (inizioSettimana.isAfter(cursore)) {
                     inizioSettimana = inizioSettimana.minusWeeks(1);
                 }
-
                 LocalDate settimana = inizioSettimana;
                 while (contatore < maxOcc && (fine == null || settimana.isBefore(fine) || settimana.isEqual(fine))) {
                     for (DayOfWeek giorno : giorniAttivi) {
@@ -279,13 +273,11 @@ public class RicorrenzaService {
                             if (contatore >= maxOcc) break;
                         }
                     }
-                    settimana = settimana.plusWeeks(2); // ogni 2 settimane
+                    settimana = settimana.plusWeeks(2);
                     if (date.size() >= MAX_OCCORRENZE) break;
                 }
             }
             case MONTHLY -> {
-                // Stesso giorno del mese, mese successivo
-                // LocalDate gestisce automaticamente i fine mese (es: 31 gen → 28 feb)
                 LocalDate data = dto.getDataInizio();
                 while (contatore < maxOcc && (fine == null || !data.isAfter(fine))) {
                     date.add(data);
@@ -302,10 +294,7 @@ public class RicorrenzaService {
     // ── Helpers privati ───────────────────────────────────────────────────────
 
     private List<DayOfWeek> parseGiorni(List<String> giorni) {
-        if (giorni == null || giorni.isEmpty()) {
-            // Default: stesso giorno della settimana di dataInizio
-            return List.of();
-        }
+        if (giorni == null || giorni.isEmpty()) return List.of();
         return giorni.stream().map(g -> DayOfWeek.valueOf(g.toUpperCase())).sorted().collect(Collectors.toList());
     }
 

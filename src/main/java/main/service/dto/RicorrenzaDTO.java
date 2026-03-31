@@ -20,7 +20,9 @@ import main.domain.enumeration.Frequenza;
  *   "dataFine": "2026-06-30",
  *   "oraInizio": "09:00",
  *   "oraFine": "10:00",
- *   "numPersone": 5
+ *   "numPersone": 5,
+ *   "titoloEvento": "Stand-up mattutino",
+ *   "descrizioneEvento": "Riunione ricorrente del team"
  * }
  */
 public class RicorrenzaDTO implements Serializable {
@@ -58,16 +60,24 @@ public class RicorrenzaDTO implements Serializable {
 
     private Integer numPersone;
 
-    /** Numero di istanze effettivamente generate (popolato in risposta) */
+    // ── Dati evento da propagare a tutte le istanze ───────────
+    /**
+     * Titolo dell'evento da associare a OGNI prenotazione della serie.
+     * Viene usato per creare un evento separato per ogni istanza generata.
+     */
+    private String titoloEvento;
+
+    /**
+     * Descrizione dell'evento da propagare a tutte le istanze.
+     */
+    private String descrizioneEvento;
+
+    /** Campi risposta (popolati dopo la creazione) */
     private int istanzeCreate;
-
-    /** Istanze con conflitti non create (popolato in risposta) */
     private int istanzeConflitto;
-
-    /** Date skippate per conflitto (popolato in risposta, max 10 per leggibilità) */
     private List<LocalDate> dateConflitto;
 
-    // ── Getters & Setters ─────────────────────────────────
+    // ── Getters & Setters ─────────────────────────────────────
 
     public UUID getId() {
         return id;
@@ -155,6 +165,22 @@ public class RicorrenzaDTO implements Serializable {
 
     public void setNumPersone(Integer numPersone) {
         this.numPersone = numPersone;
+    }
+
+    public String getTitoloEvento() {
+        return titoloEvento;
+    }
+
+    public void setTitoloEvento(String titoloEvento) {
+        this.titoloEvento = titoloEvento;
+    }
+
+    public String getDescrizioneEvento() {
+        return descrizioneEvento;
+    }
+
+    public void setDescrizioneEvento(String descrizioneEvento) {
+        this.descrizioneEvento = descrizioneEvento;
     }
 
     public int getIstanzeCreate() {

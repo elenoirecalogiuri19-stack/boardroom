@@ -22,7 +22,6 @@ export class MiePrenotazioniComponent implements OnInit {
   prenotazioneIdDaEliminare = signal<string | undefined>(undefined);
 
   // ── Ricorrenze ────────────────────────────────────────
-  mostraFormRicorrenza = signal(false);
   ricorrenze = signal<IRicorrenza[]>([]);
   showCancellaSerieModal = signal(false);
   ricorrenzaIdDaCancellare = signal<string | undefined>(undefined);
@@ -45,8 +44,6 @@ export class MiePrenotazioniComponent implements OnInit {
     });
   }
 
-  // ── Ricorrenze ────────────────────────────────────────
-
   caricaRicorrenze(): void {
     this.ricorrenzaService.getMie().subscribe({
       next: list => this.ricorrenze.set(list),
@@ -54,15 +51,54 @@ export class MiePrenotazioniComponent implements OnInit {
     });
   }
 
-  onRicorrenzaCreata(res: IRicorrenza): void {
-    this.mostraFormRicorrenza.set(false);
-    this.caricaLeMiePrenotazioni();
-    this.caricaRicorrenze();
+  // ── Helpers display ───────────────────────────────────
+
+  /** Titolo da mostrare: evento se presente, altrimenti nome sala */
+  getTitolo(pren: PrenotazioneDTO): string {
+    if (pren.evento?.titolo) return pren.evento.titolo;
+    if (pren.ricorrenzaId) return `${pren.sala?.nome ?? 'Sala'} — Ricorrente`;
+    return pren.sala?.nome ?? 'Prenotazione';
   }
 
-  onRicorrenzaAnnullata(): void {
-    this.mostraFormRicorrenza.set(false);
+  /** True se la prenotazione è stata cancellata */
+  isCancellata(pren: PrenotazioneDTO): boolean {
+    return pren.stato?.codice === 'CANCELLED';
   }
+
+  /** True se fa parte di una serie ricorrente */
+  isRicorrente(pren: PrenotazioneDTO): boolean {
+    return !!pren.ricorrenzaId;
+  }
+
+  /** Stringa status per data-status CSS (basata sul codice) */
+  getStatusAttr(pren: PrenotazioneDTO): string {
+    return pren.stato?.codice?.toLowerCase() ?? '';
+  }
+
+  getFrequenzaLabel(f: string): string {
+    const map: Record<string, string> = {
+      WEEKLY: 'Settimanale',
+      BIWEEKLY: 'Bisettimanale',
+      MONTHLY: 'Mensile',
+    };
+    return map[f] ?? f;
+  }
+
+  getGiorniLabel(giorni: string[] | undefined): string {
+    if (!giorni?.length) return '';
+    const nomi: Record<string, string> = {
+      MONDAY: 'Lun',
+      TUESDAY: 'Mar',
+      WEDNESDAY: 'Mer',
+      THURSDAY: 'Gio',
+      FRIDAY: 'Ven',
+      SATURDAY: 'Sab',
+      SUNDAY: 'Dom',
+    };
+    return giorni.map(g => nomi[g] ?? g).join(' · ');
+  }
+
+  // ── Cancellazione serie ricorrente ────────────────────
 
   chiediCancellazioneSerie(id: string | undefined, soloFuture: boolean): void {
     if (!id) return;
@@ -86,6 +122,7 @@ export class MiePrenotazioniComponent implements OnInit {
     op$.subscribe({
       next: () => {
         this.notificationService.show('Serie cancellata con successo', 'success');
+        // Ricarica lista: le prenotazioni cancellate ora mostreranno stato CANCELLED
         this.caricaLeMiePrenotazioni();
         this.caricaRicorrenze();
       },
@@ -95,30 +132,7 @@ export class MiePrenotazioniComponent implements OnInit {
     this.ricorrenzaIdDaCancellare.set(undefined);
   }
 
-  getFrequenzaLabel(f: string): string {
-    const map: Record<string, string> = {
-      WEEKLY: 'Settimanale',
-      BIWEEKLY: 'Bisettimanale',
-      MONTHLY: 'Mensile',
-    };
-    return map[f] ?? f;
-  }
-
-  getGiorniLabel(giorni: string[] | undefined): string {
-    if (!giorni || giorni.length === 0) return '';
-    const nomi: Record<string, string> = {
-      MONDAY: 'Lun',
-      TUESDAY: 'Mar',
-      WEDNESDAY: 'Mer',
-      THURSDAY: 'Gio',
-      FRIDAY: 'Ven',
-      SATURDAY: 'Sab',
-      SUNDAY: 'Dom',
-    };
-    return giorni.map(g => nomi[g] ?? g).join(' · ');
-  }
-
-  // ── Prenotazioni singole ──────────────────────────────
+  // ── Cancellazione singola ─────────────────────────────
 
   toggleDetails(id: string | undefined): void {
     if (!id) return;

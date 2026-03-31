@@ -27,10 +27,17 @@ public class PrenotazioniDTO implements Serializable {
     private EventiDTO evento;
 
     private UUID salaId;
-
     private UUID eventoId;
-
     private String codiceQr;
+
+    /**
+     * ID della serie ricorrente di appartenenza.
+     * null se la prenotazione è singola.
+     * Usato nel frontend per:
+     *  - mostrare il badge "Ricorrente" nella lista
+     *  - collegare la card della serie nella sezione ricorrenze
+     */
+    private UUID ricorrenzaId;
 
     public UUID getId() {
         return id;
@@ -126,5 +133,13 @@ public class PrenotazioniDTO implements Serializable {
 
     public void setCodiceQr(String codiceQr) {
         this.codiceQr = codiceQr;
+    }
+
+    public UUID getRicorrenzaId() {
+        return ricorrenzaId;
+    }
+
+    public void setRicorrenzaId(UUID ricorrenzaId) {
+        this.ricorrenzaId = ricorrenzaId;
     }
 }
