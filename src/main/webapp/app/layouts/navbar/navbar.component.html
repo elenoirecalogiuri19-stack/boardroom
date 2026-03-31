@@ -17,6 +17,7 @@
 
     <div class="navbar-collapse collapse" id="navbarResponsive" [ngbCollapse]="isNavbarCollapsed()">
       <ul class="navbar-nav ms-auto align-items-center">
+        <!-- ── Link utente comuni ──────────────────────── -->
         <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <a class="nav-link" routerLink="/" (click)="collapseNavbar()">
             <span>Home</span>
@@ -25,90 +26,280 @@
 
         <li class="nav-item" routerLinkActive="active">
           <a class="nav-link" (click)="navigazioneProtetta('/prenota-sala')" style="cursor: pointer">
-            <span>Prenota sala</span>
+            <span>Prenota</span>
           </a>
         </li>
 
         <li class="nav-item" routerLinkActive="active">
           <a class="nav-link" (click)="navigazioneProtetta('/mie-prenotazioni')" style="cursor: pointer">
-            <span>Le mie prenotazioni</span>
+            <span>Prenotazioni</span>
           </a>
         </li>
 
-        <!-- ── Calendario (visibile a tutti gli utenti loggati) ── -->
+        <!-- Calendario (utenti loggati) -->
         <li class="nav-item" routerLinkActive="active">
           <a class="nav-link" (click)="navigazioneProtetta('/prenotazioni/calendar')" style="cursor: pointer">
-            <fa-icon icon="calendar-alt" class="me-1"></fa-icon>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="nav-icon-inline">
+              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
             <span>Calendario</span>
           </a>
         </li>
-        <!-- ─────────────────────────────────────────────────── -->
 
+        <!-- ══════════════════════════════════════════════
+             SEZIONE ADMIN — visibile solo con ROLE_ADMIN
+        ══════════════════════════════════════════════ -->
         @if (hasAnyAuthority('ROLE_ADMIN')) {
+          <!-- Separatore visivo admin -->
+          <li class="nav-item nav-admin-sep" aria-hidden="true"></li>
+
+          <!-- ── Dashboard (link diretto, sempre visibile per admin) ── -->
+          <li class="nav-item" routerLinkActive="active">
+            <a
+              class="nav-link nav-link--admin nav-link--dashboard"
+              routerLink="/admin/dashboard"
+              (click)="collapseNavbar()"
+              title="Dashboard statistiche"
+            >
+              <span class="admin-dash-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M18 20V10"></path>
+                  <path d="M12 20V4"></path>
+                  <path d="M6 20v-6"></path>
+                </svg>
+              </span>
+              <span>Dashboard</span>
+            </a>
+          </li>
+
+          <!-- ── Dropdown: Gestione entità ──────────────── -->
           <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" routerLinkActive="active">
-            <a class="nav-link dropdown-toggle admin-link" ngbDropdownToggle href="javascript:void(0);" id="entity-menu">
+            <a class="nav-link nav-link--admin dropdown-toggle" ngbDropdownToggle href="javascript:void(0);" id="entity-menu">
+              <span class="admin-menu-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                  <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                  <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                  <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                </svg>
+              </span>
               <span>Gestione</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow-lg" ngbDropdownMenu aria-labelledby="entity-menu">
-              <li><a class="dropdown-item" routerLink="/sale" (click)="collapseNavbar()">Sale</a></li>
-              <li><a class="dropdown-item" routerLink="/utenti" (click)="collapseNavbar()">Utenti</a></li>
-              <li><a class="dropdown-item" routerLink="/stati-prenotazione" (click)="collapseNavbar()">Stati</a></li>
-              <li><a class="dropdown-item" routerLink="/prenotazioni" (click)="collapseNavbar()">Prenotazioni</a></li>
-              <!-- Calendario admin: vede tutte le sale -->
+            <ul class="dropdown-menu dropdown-menu-end admin-dropdown shadow-lg" ngbDropdownMenu aria-labelledby="entity-menu">
+              <!-- Sezione: Prenotazioni -->
+              <li class="dropdown-section-label">Prenotazioni</li>
               <li>
-                <a class="dropdown-item" routerLink="/prenotazioni/calendar" (click)="collapseNavbar()">
-                  <fa-icon icon="calendar-alt" [fixedWidth]="true"></fa-icon> Calendario sale
+                <a class="dropdown-item admin-dropdown-item" routerLink="/prenotazioni" (click)="collapseNavbar()">
+                  <span class="item-icon item-icon--blue">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                  </span>
+                  <div class="item-text">
+                    <span class="item-label">Prenotazioni</span>
+                    <span class="item-desc">Tutte le prenotazioni</span>
+                  </div>
                 </a>
               </li>
-              <li><a class="dropdown-item" routerLink="/eventi" (click)="collapseNavbar()">Eventi</a></li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/prenotazioni/calendar" (click)="collapseNavbar()">
+                  <span class="item-icon item-icon--blue">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="1 4 1 10 7 10"></polyline>
+                      <path d="M3.51 15a9 9 0 1 0 .49-4.5"></path>
+                    </svg>
+                  </span>
+                  <div class="item-text">
+                    <span class="item-label">Calendario sale</span>
+                    <span class="item-desc">Vista mensile occupazione</span>
+                  </div>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/stati-prenotazione" (click)="collapseNavbar()">
+                  <span class="item-icon item-icon--yellow">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </span>
+                  <div class="item-text">
+                    <span class="item-label">Stati prenotazione</span>
+                    <span class="item-desc">Gestisci i flussi di stato</span>
+                  </div>
+                </a>
+              </li>
+
+              <li class="dropdown-divider"></li>
+
+              <!-- Sezione: Struttura -->
+              <li class="dropdown-section-label">Struttura</li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/sale" (click)="collapseNavbar()">
+                  <span class="item-icon item-icon--green">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                  </span>
+                  <div class="item-text">
+                    <span class="item-label">Sale</span>
+                    <span class="item-desc">Crea e gestisci le sale</span>
+                  </div>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/eventi" (click)="collapseNavbar()">
+                  <span class="item-icon item-icon--purple">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon
+                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                      ></polygon>
+                    </svg>
+                  </span>
+                  <div class="item-text">
+                    <span class="item-label">Eventi</span>
+                    <span class="item-desc">Gestione eventi pubblici</span>
+                  </div>
+                </a>
+              </li>
+
+              <li class="dropdown-divider"></li>
+
+              <!-- Sezione: Utenti -->
+              <li class="dropdown-section-label">Utenti</li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/utenti" (click)="collapseNavbar()">
+                  <span class="item-icon item-icon--orange">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                  </span>
+                  <div class="item-text">
+                    <span class="item-label">Utenti</span>
+                    <span class="item-desc">Profili e anagrafiche</span>
+                  </div>
+                </a>
+              </li>
             </ul>
           </li>
 
+          <!-- ── Dropdown: Amministrazione sistema ──────── -->
           <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" routerLinkActive="active">
-            <a class="nav-link dropdown-toggle admin-link" ngbDropdownToggle href="javascript:void(0);" id="admin-menu">
-              <span>Amministrazione</span>
+            <a class="nav-link nav-link--admin dropdown-toggle" ngbDropdownToggle href="javascript:void(0);" id="admin-menu">
+              <span class="admin-menu-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"></path>
+                </svg>
+              </span>
+              <span>Sistema</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow-lg" ngbDropdownMenu aria-labelledby="admin-menu">
+            <ul class="dropdown-menu dropdown-menu-end admin-dropdown shadow-lg" ngbDropdownMenu aria-labelledby="admin-menu">
+              <li class="dropdown-section-label">Monitoraggio</li>
               <li>
-                <a class="dropdown-item" routerLink="/admin/user-management" (click)="collapseNavbar()">
-                  <fa-icon icon="users" [fixedWidth]="true"></fa-icon> <span>Gestione utenti</span>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/user-management" (click)="collapseNavbar()">
+                  <span class="item-icon item-icon--blue">
+                    <fa-icon icon="users" [fixedWidth]="true"></fa-icon>
+                  </span>
+                  <div class="item-text">
+                    <span class="item-label">Gestione utenti</span>
+                    <span class="item-desc">Account e autorizzazioni</span>
+                  </div>
                 </a>
               </li>
               <li>
-                <a class="dropdown-item" routerLink="/admin/metrics" (click)="collapseNavbar()">
-                  <fa-icon icon="tachometer-alt" [fixedWidth]="true"></fa-icon> <span>Metriche</span>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/metrics" (click)="collapseNavbar()">
+                  <span class="item-icon item-icon--green">
+                    <fa-icon icon="tachometer-alt" [fixedWidth]="true"></fa-icon>
+                  </span>
+                  <div class="item-text">
+                    <span class="item-label">Metriche JVM</span>
+                    <span class="item-desc">Memoria, thread, GC</span>
+                  </div>
                 </a>
               </li>
               <li>
-                <a class="dropdown-item" routerLink="/admin/health" (click)="collapseNavbar()">
-                  <fa-icon icon="heart" [fixedWidth]="true"></fa-icon> <span>Integrità</span>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/health" (click)="collapseNavbar()">
+                  <span class="item-icon item-icon--green">
+                    <fa-icon icon="heart" [fixedWidth]="true"></fa-icon>
+                  </span>
+                  <div class="item-text">
+                    <span class="item-label">Integrità</span>
+                    <span class="item-desc">Health check servizi</span>
+                  </div>
+                </a>
+              </li>
+
+              <li class="dropdown-divider"></li>
+
+              <li class="dropdown-section-label">Configurazione</li>
+              <li>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/configuration" (click)="collapseNavbar()">
+                  <span class="item-icon item-icon--purple">
+                    <fa-icon icon="cogs" [fixedWidth]="true"></fa-icon>
+                  </span>
+                  <div class="item-text">
+                    <span class="item-label">Configurazione</span>
+                    <span class="item-desc">Proprietà applicazione</span>
+                  </div>
                 </a>
               </li>
               <li>
-                <a class="dropdown-item" routerLink="/admin/configuration" (click)="collapseNavbar()">
-                  <fa-icon icon="cogs" [fixedWidth]="true"></fa-icon> <span>Configurazione</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" routerLink="/admin/logs" (click)="collapseNavbar()">
-                  <fa-icon icon="tasks" [fixedWidth]="true"></fa-icon> <span>Log</span>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/logs" (click)="collapseNavbar()">
+                  <span class="item-icon item-icon--yellow">
+                    <fa-icon icon="tasks" [fixedWidth]="true"></fa-icon>
+                  </span>
+                  <div class="item-text">
+                    <span class="item-label">Log</span>
+                    <span class="item-desc">Livelli di logging</span>
+                  </div>
                 </a>
               </li>
               <li *ngIf="openAPIEnabled">
-                <a class="dropdown-item" routerLink="/admin/docs" (click)="collapseNavbar()">
-                  <fa-icon icon="book" [fixedWidth]="true"></fa-icon> <span>API</span>
+                <a class="dropdown-item admin-dropdown-item" routerLink="/admin/docs" (click)="collapseNavbar()">
+                  <span class="item-icon item-icon--orange">
+                    <fa-icon icon="book" [fixedWidth]="true"></fa-icon>
+                  </span>
+                  <div class="item-text">
+                    <span class="item-label">API Docs</span>
+                    <span class="item-desc">Swagger / OpenAPI</span>
+                  </div>
                 </a>
               </li>
+
               <li class="dropdown-divider"></li>
               <li>
-                <a class="dropdown-item" href="./h2-console/" target="_blank" (click)="collapseNavbar()">
-                  <fa-icon icon="database" [fixedWidth]="true"></fa-icon> <span>Database</span>
+                <a
+                  class="dropdown-item admin-dropdown-item admin-dropdown-item--muted"
+                  href="./h2-console/"
+                  target="_blank"
+                  (click)="collapseNavbar()"
+                >
+                  <span class="item-icon item-icon--gray">
+                    <fa-icon icon="database" [fixedWidth]="true"></fa-icon>
+                  </span>
+                  <div class="item-text">
+                    <span class="item-label">Database</span>
+                    <span class="item-desc">Console H2 ↗</span>
+                  </div>
                 </a>
               </li>
             </ul>
           </li>
         }
+        <!-- ── Fine sezione admin ──────────────────────── -->
 
+        <!-- Avatar / Login -->
         <li class="nav-item ms-lg-3">
           @let accountRef = account();
           @if (accountRef !== null) {
