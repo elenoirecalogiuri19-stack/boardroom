@@ -10,12 +10,23 @@
           @for (evento of eventi(); track evento.id; let i = $index) {
             <div class="hero-slide">
               <div class="hero-img-col">
-                <div class="hero-img-placeholder">
-                  <span class="hero-img-sala">{{ evento.salaNome }}</span>
-                </div>
+                @if (evento.salaImageUrl) {
+                  <img
+                    class="hero-img"
+                    [src]="evento.salaImageUrl"
+                    [alt]="evento.salaNome ?? 'Sala'"
+                    loading="lazy"
+                    (error)="onHeroImgError($event)"
+                  />
+                } @else {
+                  <div class="hero-img-placeholder">
+                    <span class="hero-img-sala">{{ evento.salaNome }}</span>
+                  </div>
+                }
               </div>
 
               <div class="hero-info-col">
+                <span class="hero-badge">Evento pubblico</span>
                 <h2 class="hero-title">{{ evento.titolo }}</h2>
                 <div class="hero-meta">
                   <p class="hero-meta-row"><span class="hero-meta-label">Sala:</span> {{ evento.salaNome }}</p>
@@ -23,6 +34,17 @@
                     <span class="hero-meta-label">Data/Ora:</span>
                     {{ evento.data | date: 'dd MMMM' }} &ndash; {{ evento.oraInizio | slice: 0 : 5 }} / {{ evento.oraFine | slice: 0 : 5 }}
                   </p>
+                  @if (evento.numPersone) {
+                    <p class="hero-meta-row">
+                      <span class="hero-meta-label">Posti:</span>
+                      <span [class.hero-esaurito]="evento.eventoPieno">
+                        {{ evento.postiOccupati ?? 0 }} / {{ evento.numPersone }}
+                        @if (evento.eventoPieno) {
+                          <em> — Esaurito</em>
+                        }
+                      </span>
+                    </p>
+                  }
                 </div>
                 <div class="hero-actions">
                   <button class="hero-link" (click)="vaiADettagli(evento)">Vedi dettagli</button>
@@ -49,6 +71,51 @@
       delle nostre sale più prestigiose. Prenota la tua prossima riunione in ambienti moderni, tecnologici e pronti a ospitare le tue idee.
     </p>
   </div>
+
+  <!-- ── Sezione card eventi ─────────────────────────────── -->
+  @if (eventi().length > 0) {
+    <div class="eventi-section">
+      <h3 class="eventi-section__title">Eventi in programma</h3>
+      <div class="eventi-grid">
+        @for (evento of eventi(); track evento.id) {
+          <div class="evento-card" (click)="vaiADettagli(evento)">
+            <!-- Immagine sala -->
+            <div class="evento-card__img-wrap">
+              @if (evento.salaImageUrl) {
+                <img
+                  class="evento-card__img"
+                  [src]="evento.salaImageUrl"
+                  [alt]="evento.salaNome ?? 'Sala'"
+                  loading="lazy"
+                  (error)="onCardImgError($event)"
+                />
+              } @else {
+                <div class="evento-card__img-placeholder">🏛️</div>
+              }
+              @if (evento.eventoPieno) {
+                <span class="evento-card__badge evento-card__badge--esaurito">Esaurito</span>
+              } @else {
+                <span class="evento-card__badge">{{ evento.prezzo }}€</span>
+              }
+            </div>
+
+            <!-- Info -->
+            <div class="evento-card__body">
+              <span class="evento-card__sala">{{ evento.salaNome }}</span>
+              <h4 class="evento-card__titolo">{{ evento.titolo }}</h4>
+              <div class="evento-card__meta">
+                <span>📅 {{ evento.data | date: 'dd MMM' }}</span>
+                <span>🕐 {{ evento.oraInizio | slice: 0 : 5 }}</span>
+                @if (evento.numPersone) {
+                  <span [class.text-danger]="evento.eventoPieno"> 👥 {{ evento.postiOccupati ?? 0 }}/{{ evento.numPersone }} </span>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
 
   <div class="feature-strip">
     <div class="feature-item">

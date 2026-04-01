@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, inject, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
@@ -15,7 +16,7 @@ import { NotificationService } from 'app/shared/notification/notification.servic
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
   standalone: true,
-  imports: [SharedModule, RouterModule],
+  imports: [SharedModule, RouterModule, CommonModule],
 })
 export default class HomeComponent implements OnInit, OnDestroy {
   @ViewChild('heroViewport') heroViewport!: ElementRef<HTMLElement>;
@@ -80,6 +81,22 @@ export default class HomeComponent implements OnInit, OnDestroy {
     } else {
       this.router.navigate([destinazione]);
     }
+  }
+
+  /** Fallback carosello: se l'immagine non carica mostra il placeholder verde */
+  onHeroImgError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
+    const placeholder = img.closest('.hero-img-col')?.querySelector('.hero-img-placeholder') as HTMLElement | null;
+    if (placeholder) placeholder.style.display = 'flex';
+  }
+
+  /** Fallback card evento: se l'immagine non carica mostra il placeholder emoji */
+  onCardImgError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
+    const placeholder = img.closest('.evento-card__img-wrap')?.querySelector('.evento-card__img-placeholder') as HTMLElement | null;
+    if (placeholder) placeholder.style.display = 'flex';
   }
 
   ngOnDestroy(): void {

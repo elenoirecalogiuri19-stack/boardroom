@@ -49,6 +49,12 @@ public class SaleResource {
         return ResponseEntity.ok().body(saleService.findAll(Pageable.unpaged()).getContent());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<SaleDTO> getSale(@PathVariable UUID id) {
+        LOG.debug("REST request to get Sale : {}", id);
+        return saleService.findOne(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/disponibili")
     public ResponseEntity<List<SaleDTO>> getAllFreeSales(
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,

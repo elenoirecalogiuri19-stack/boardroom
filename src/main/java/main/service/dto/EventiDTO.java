@@ -29,6 +29,9 @@ public class EventiDTO implements Serializable {
     private LocalTime oraFine;
     private String salaNome;
 
+    /** URL immagine della sala (es: /uploads/sale/uuid.jpg). Null = nessuna foto. */
+    private String salaImageUrl;
+
     private UUID prenotazioneId;
 
     /** Numero massimo di partecipanti ammessi all'evento pubblico. */
@@ -110,6 +113,14 @@ public class EventiDTO implements Serializable {
 
     public void setSalaNome(String salaNome) {
         this.salaNome = salaNome;
+    }
+
+    public String getSalaImageUrl() {
+        return salaImageUrl;
+    }
+
+    public void setSalaImageUrl(String salaImageUrl) {
+        this.salaImageUrl = salaImageUrl;
     }
 
     public String getDescrizione() {
