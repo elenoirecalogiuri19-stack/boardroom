@@ -472,3 +472,19 @@ $br-dark: #1a1a1a;
     }
   }
 }
+
+// ── Frecce di navigazione carosello ──────────────────────────
+
+.hero-viewport {
+  position: relative;
+  user-select: none;
+  cursor: grab;
+
+  &.hero-dragging {
+    cursor: grabbing;
+
+    .hero-track {
+      transition: none; // disabilita animazione durante il drag
+    }
+  }
+}

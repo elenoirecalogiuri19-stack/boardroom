@@ -5,7 +5,17 @@
     }
 
     @if (!isLoading() && eventi().length > 0) {
-      <div class="hero-viewport" #heroViewport>
+      <div
+        class="hero-viewport"
+        #heroViewport
+        (mousedown)="onDragStart($event)"
+        (mousemove)="onDragMove($event)"
+        (mouseup)="onDragEnd($event)"
+        (mouseleave)="onDragEnd($event)"
+        (touchstart)="onTouchStart($event)"
+        (touchend)="onTouchEnd($event)"
+        [class.hero-dragging]="isDragging"
+      >
         <div class="hero-track">
           @for (evento of eventi(); track evento.id; let i = $index) {
             <div class="hero-slide">
