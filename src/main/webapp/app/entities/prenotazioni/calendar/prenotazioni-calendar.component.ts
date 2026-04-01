@@ -124,6 +124,8 @@ export class PrenotazioniCalendarComponent implements OnInit, OnDestroy {
     let list = this.prenotazioni();
     const sala = this.selectedSalaId();
     const stato = this.selectedStato();
+    // Le prenotazioni cancellate non devono apparire nel calendario
+    list = list.filter(p => p.stato?.codice !== 'CANCELLED');
     if (sala) list = list.filter(p => p.sala?.id === sala);
     if (stato) list = list.filter(p => p.stato?.codice === stato);
     return list;

@@ -12,7 +12,24 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EventiRepository extends JpaRepository<Eventi, UUID> {
-    @Query("SELECT e FROM Eventi e LEFT JOIN e.prenotazione p " + "WHERE e.tipo = :tipo AND (p IS NULL OR p.stato.codice = :stato)")
+    /**
+     * Carica tutti gli eventi pubblici confermati con JOIN FETCH su prenotazione e sala.
+     *
+     * FIX: aggiunto LEFT JOIN FETCH per caricare prenotazione eagerly.
+     * Senza FETCH, la relazione rimane lazy e il mapper non riesce a leggere
+     * prenotazione.numPersone fuori dalla sessione Hibernate, restituendo null.
+     * Questo causava "numero partecipanti = 0" per tutti gli eventi ricorrenti
+     * tranne il primo (che per coincidenza era già in sessione).
+     */
+    @Query(
+        """
+        SELECT e FROM Eventi e
+        LEFT JOIN FETCH e.prenotazione p
+        LEFT JOIN FETCH p.sala
+        WHERE e.tipo = :tipo
+          AND (p IS NULL OR p.stato.codice = :stato)
+        """
+    )
     List<Eventi> findPublicConfirmed(@Param("tipo") TipoEvento tipo, @Param("stato") StatoCodice stato);
 
     @Query(

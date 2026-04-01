@@ -27,6 +27,18 @@ public interface PromemoriaRepository extends JpaRepository<Promemoria, UUID> {
      *
      * Eager fetch di prenotazione, sala, utente, user per evitare N+1.
      */
+    /**
+     * Query principale dello scheduler.
+     *
+     * FIX: JPQL non supporta l'aritmetica sulle date (:oggi + 7).
+     * Le date target vengono calcolate in Java e passate come parametri separati.
+     *
+     * Parametri:
+     *  :dataOggi      → oggi (per SAME_DAY)
+     *  :dataUnGiorno  → oggi + 1 (per DAY_BEFORE)
+     *  :dataDueGiorni → oggi + 2 (per TWO_DAYS_BEFORE)
+     *  :dataSettimana → oggi + 7 (per WEEK_BEFORE)
+     */
     @Query(
         """
         SELECT pr FROM Promemoria pr
@@ -40,17 +52,22 @@ public interface PromemoriaRepository extends JpaRepository<Promemoria, UUID> {
           AND pr.inviato = false
           AND (
                (pr.tipo = main.domain.enumeration.TipoPromemoria.WEEK_BEFORE
-                AND p.data = :oggi + 7)
+                AND p.data = :dataSettimana)
             OR (pr.tipo = main.domain.enumeration.TipoPromemoria.TWO_DAYS_BEFORE
-                AND p.data = :oggi + 2)
+                AND p.data = :dataDueGiorni)
             OR (pr.tipo = main.domain.enumeration.TipoPromemoria.DAY_BEFORE
-                AND p.data = :oggi + 1)
+                AND p.data = :dataUnGiorno)
             OR (pr.tipo = main.domain.enumeration.TipoPromemoria.SAME_DAY
-                AND p.data = :oggi)
+                AND p.data = :dataOggi)
           )
         """
     )
-    List<Promemoria> findDaInviareOggi(@Param("oggi") LocalDate oggi);
+    List<Promemoria> findDaInviareOggi(
+        @Param("dataOggi") LocalDate dataOggi,
+        @Param("dataUnGiorno") LocalDate dataUnGiorno,
+        @Param("dataDueGiorni") LocalDate dataDueGiorni,
+        @Param("dataSettimana") LocalDate dataSettimana
+    );
 
     /** Tutti i promemoria di una prenotazione (per visualizzazione frontend) */
     List<Promemoria> findByPrenotazioneId(UUID prenotazioneId);

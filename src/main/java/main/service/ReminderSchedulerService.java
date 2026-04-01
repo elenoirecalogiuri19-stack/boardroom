@@ -50,9 +50,15 @@ public class ReminderSchedulerService {
     @Transactional
     public void inviaPromemoriaGiornalieri() {
         LocalDate oggi = LocalDate.now();
-        LOG.info("=== ReminderScheduler avviato per il {} ===", oggi);
 
-        List<Promemoria> daInviare = proRepository.findDaInviareOggi(oggi);
+        // FIX: calcolo in Java — JPQL non supporta :oggi + 7
+        LocalDate dataUnGiorno = oggi.plusDays(1);
+        LocalDate dataDueGiorni = oggi.plusDays(2);
+        LocalDate dataSettimana = oggi.plusDays(7);
+
+        LOG.info("=== ReminderScheduler avviato [{}] — target: +1={}, +2={}, +7={} ===", oggi, dataUnGiorno, dataDueGiorni, dataSettimana);
+
+        List<Promemoria> daInviare = proRepository.findDaInviareOggi(oggi, dataUnGiorno, dataDueGiorni, dataSettimana);
         LOG.info("Trovati {} promemoria da inviare", daInviare.size());
 
         int inviati = 0;

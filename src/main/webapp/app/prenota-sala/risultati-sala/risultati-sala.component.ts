@@ -87,6 +87,7 @@ export class RisultatiSalaComponent implements OnInit {
                 ora: this.oraRicerca,
                 pubblico: isPubblico,
                 prenotazioneId: pren.id,
+                numPersone: this.numPersoneRicerca,
               },
             })
             .finally(() => (this.isLoading = false));

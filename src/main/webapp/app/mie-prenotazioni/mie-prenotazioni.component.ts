@@ -191,6 +191,28 @@ export class MiePrenotazioniComponent implements OnInit {
     });
   }
 
+  /**
+   * Restituisce le serie ricorrenti da mostrare nella card section.
+   * Nasconde le serie in cui TUTTE le prenotazioni collegate sono CANCELLED.
+   * Usa le prenotazioni già caricate in memoria — nessuna chiamata extra al backend.
+   */
+  get ricorrenzeAttive(): IRicorrenza[] {
+    return this.ricorrenze().filter(r => !this.isSerieInteramenteCancellata(r.id));
+  }
+
+  /**
+   * True se tutte le prenotazioni della serie hanno stato CANCELLED.
+   * Una serie è considerata "attiva" se ha almeno una prenotazione non cancellata.
+   */
+  isSerieInteramenteCancellata(ricorrenzaId: string | undefined): boolean {
+    if (!ricorrenzaId) return false;
+    const prenotazioniSerie = this.prenotazioni().filter(p => p.ricorrenzaId === ricorrenzaId);
+    // Se non ci sono prenotazioni caricate per questa serie (es. tutte passate)
+    // non nascondiamo la card — manteniamo comportamento conservativo
+    if (prenotazioniSerie.length === 0) return false;
+    return prenotazioniSerie.every(p => p.stato?.codice === 'CANCELLED');
+  }
+
   chiediCancellazioneSerie(id: string | undefined, soloFuture: boolean): void {
     if (!id) return;
     this.ricorrenzaIdDaCancellare.set(id);
