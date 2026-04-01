@@ -6,13 +6,13 @@
     </div>
 
     @if (authenticationError()) {
-      <div class="alert alert-danger">Email o password errati.</div>
+      <div class="alert alert-danger">Username o password errati.</div>
     }
 
     <form (ngSubmit)="login()" [formGroup]="loginForm" class="login-form">
       <div class="input-group">
-        <label class="field-label">EMAIL</label>
-        <input #username type="email" class="figma-input" placeholder="info@gmail.com" formControlName="username" />
+        <label class="field-label">USERNAME</label>
+        <input #username type="text" class="figma-input" placeholder="Il tuo username" formControlName="username" />
       </div>
 
       <div class="input-group password-group">
