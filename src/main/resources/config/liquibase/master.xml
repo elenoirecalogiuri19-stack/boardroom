@@ -4,21 +4,21 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-  <property name="now"          value="now()"        dbms="h2"/>
-  <property name="floatType"    value="float4"       dbms="h2"/>
-  <property name="uuidType"     value="varchar(36)"  dbms="h2"/>
-  <property name="datetimeType" value="datetime(6)"  dbms="h2"/>
-  <property name="timeType"     value="time(6)"      dbms="h2"/>
-  <property name="clobType"     value="clob"         dbms="h2"/>
-  <property name="blobType"     value="blob"         dbms="h2"/>
+  <property name="now"          value="now()"       dbms="h2"/>
+  <property name="floatType"    value="float4"      dbms="h2"/>
+  <property name="uuidType"     value="varchar(36)" dbms="h2"/>
+  <property name="datetimeType" value="datetime(6)" dbms="h2"/>
+  <property name="timeType"     value="time(6)"     dbms="h2"/>
+  <property name="clobType"     value="clob"        dbms="h2"/>
+  <property name="blobType"     value="blob"        dbms="h2"/>
 
-  <property name="now"          value="now()"        dbms="mysql"/>
-  <property name="floatType"    value="float"        dbms="mysql"/>
-  <property name="clobType"     value="clob"         dbms="mysql"/>
-  <property name="blobType"     value="longblob"     dbms="mysql"/>
-  <property name="uuidType"     value="varchar(36)"  dbms="mysql"/>
-  <property name="datetimeType" value="datetime(6)"  dbms="mysql"/>
-  <property name="timeType"     value="time(6)"      dbms="mysql"/>
+  <property name="now"          value="now()"       dbms="mysql"/>
+  <property name="floatType"    value="float"       dbms="mysql"/>
+  <property name="clobType"     value="clob"        dbms="mysql"/>
+  <property name="blobType"     value="longblob"    dbms="mysql"/>
+  <property name="uuidType"     value="varchar(36)" dbms="mysql"/>
+  <property name="datetimeType" value="datetime(6)" dbms="mysql"/>
+  <property name="timeType"     value="time(6)"     dbms="mysql"/>
 
   <!-- Schema iniziale e entità base -->
   <include file="config/liquibase/changelog/00000000000000_initial_schema.xml"                  relativeToChangelogFile="false"/>
@@ -41,5 +41,8 @@
   <include file="config/liquibase/changelog/20260330000001_create_ricorrenza.xml"     relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260401000001_create_promemoria.xml"     relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260402000001_add_image_url_to_sale.xml" relativeToChangelogFile="false"/>
+
+  <!-- FIX #01 — Indice composto per ottimizzazione findFreeSales (anti-join) -->
+  <include file="config/liquibase/changelog/20260401100001_add_perf_indexes.xml"      relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

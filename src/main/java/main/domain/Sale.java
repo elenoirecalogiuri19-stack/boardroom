@@ -7,14 +7,14 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-/**
- * A Sale.
- */
 @Entity
 @Table(name = "sale")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE) // FIX #06 — AGGIUNTO
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class Sale implements Serializable {
 
@@ -147,7 +147,7 @@ public class Sale implements Serializable {
         return this;
     }
 
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
+    // jhipster-needle-entity-add-getters-setters
 
     @Override
     public boolean equals(Object o) {
@@ -164,8 +164,7 @@ public class Sale implements Serializable {
     @Override
     public String toString() {
         return (
-            "Sale{" +
-            "id=" +
+            "Sale{id=" +
             getId() +
             ", nome='" +
             getNome() +

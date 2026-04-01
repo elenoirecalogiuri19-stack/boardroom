@@ -1,5 +1,6 @@
 package main.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
@@ -16,7 +17,6 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import tech.jhipster.config.JHipsterProperties;
 
-@Service
 public class MailService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MailService.class);
@@ -91,16 +91,6 @@ public class MailService {
         );
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Email prenotazione evento pubblico
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * FIX #02: rendering sincrono → EmailDispatcher per invio asincrono.
-     *
-     * FIX extra: il RuntimeException di sendPromemoriaPrenotazione non viene
-     * più inghiottito silenziosamente — EmailDispatcher logga tutto.
-     */
     public void sendPrenotazioneEventoPublico(Eventi evento, PrenotazioniEmailDTO dto, String codicePre, String qrCod) {
         // 1. Render (CPU, veloce — nessun I/O)
         Context ctx = new Context();
@@ -134,18 +124,6 @@ public class MailService {
         );
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Promemoria prenotazioni
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * PRIMA: @Async + RuntimeException inghiottita dall'AsyncUncaughtExceptionHandler
-     *        → promemoria falliti sparivano senza trace
-     *
-     * DOPO: rendering sincrono, invio via EmailDispatcher con retry automatico.
-     * Se l'SMTP fallisce, EmailDispatcher riprova 3 volte con backoff esponenziale
-     * e logga l'errore definitivo (non più silenzioso).
-     */
     public void sendPromemoriaPrenotazione(
         String email,
         String nomeUtente,
