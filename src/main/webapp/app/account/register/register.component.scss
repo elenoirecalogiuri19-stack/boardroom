@@ -1,118 +1,264 @@
-$br-primary: #4a8c40;
-$br-dark: #2c3e50;
+$boardroom-green: #4a8c40;
+$br-soft: #555555;
+$br-dark: #1a1a1a;
+$white: #ffffff;
+$bg-page: #ebebeb;
+$border-color: #d8d8d8;
+$label-color: #888888;
 
-.text-muted,
-p.text-center {
-  color: $br-primary !important;
-  font-weight: 600;
+:host {
+  display: block;
+  background-color: $bg-page;
+  min-height: calc(100vh - 100px);
 }
 
-::ng-deep {
-  .form-control,
-  #login,
-  input.form-control {
-    background-color: #ffffff !important;
-    background-image: none !important;
-    border: 1.5px solid #f0f0f0 !important;
-    color: #333 !important;
-    box-shadow: none !important;
-
-    &:hover {
-      background-color: #ffffff !important;
-      border-color: #dcdcdc !important;
-    }
-  }
-
-  .form-control:focus,
-  #login:focus,
-  input.form-control:focus {
-    background-color: #ffffff !important;
-    border-color: $br-primary !important;
-    box-shadow: 0 8px 20px rgba(74, 140, 64, 0.12) !important;
-    outline: none !important;
-  }
-
-  input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0px 1000px white inset !important;
-    -webkit-text-fill-color: #333 !important;
-  }
-}
-
-.register-container {
-  padding: 160px 0 80px;
-  background-color: #ffffff;
-  min-height: 100vh;
+.register-wrapper {
+  width: 100%;
+  min-height: calc(100vh - 100px);
   display: flex;
-  align-items: flex-start;
   justify-content: center;
+  align-items: flex-start;
+  padding: 60px 20px 80px;
+  background-color: $bg-page;
 }
 
 .register-card {
-  background: #ffffff;
+  background: $white;
   width: 100%;
-  max-width: 600px;
-  padding: 60px;
-  border-radius: 25px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06);
-  border: 1px solid #f2f2f2;
+  max-width: 560px;
+  padding: 56px 64px;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  h1 {
-    color: $br-dark;
-    font-weight: 800;
-    font-size: 2.2rem;
-    margin-bottom: 30px;
-    text-align: center;
+.register-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.register-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: $br-dark;
+  margin-bottom: 6px;
+}
+
+.register-subtitle {
+  font-size: 0.9rem;
+  color: $br-soft;
+  margin: 0;
+}
+
+.register-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.row-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.input-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: $label-color;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.68rem;
+}
+
+.figma-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid $border-color;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: $br-dark;
+  background-color: $white;
+  box-sizing: border-box;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &::placeholder {
+    color: #c0c0c0;
   }
 
-  .form-label {
-    font-weight: 700;
-    color: $br-dark;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    display: block;
+  &:focus {
+    outline: none;
+    border-color: $boardroom-green;
+    box-shadow: 0 0 0 3px rgba($boardroom-green, 0.12);
+  }
+}
+
+.password-input-wrapper {
+  position: relative;
+
+  .figma-input {
+    padding-right: 44px;
+  }
+}
+
+.eye-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #aaaaaa;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $br-soft;
+  }
+}
+
+// Barra forza password
+.strength-bar-wrapper {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  width: 100%;
+}
+
+.strength-block {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background-color: #e0e0e0;
+  transition: background-color 0.35s ease;
+
+  &.active[data-level='1'] {
+    background-color: #e74c3c;
   }
 
-  .form-control {
-    border-radius: 12px !important;
-    padding: 14px 18px !important;
-    transition: all 0.3s ease;
+  &.active[data-level='2'] {
+    background-color: #f39c12;
   }
 
-  .btn-primary {
-    background-color: $br-primary !important;
-    border: none !important;
-    font-weight: 800;
-    border-radius: 50px;
-    padding: 16px;
-    width: 100%;
-    text-transform: uppercase;
-    color: white !important;
-    margin-top: 20px;
-    transition: all 0.3s;
+  &.active[data-level='3'] {
+    background-color: $boardroom-green;
+  }
+}
 
-    &:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(74, 140, 64, 0.2);
-    }
+.strength-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-top: 2px;
+  transition: color 0.3s ease;
+}
 
-    &:disabled {
-      background-color: #d1e2cf !important;
-      cursor: not-allowed;
-    }
+.figma-btn {
+  background-color: $boardroom-green !important;
+  color: $white !important;
+  border: none !important;
+  border-radius: 50px;
+  width: 100%;
+  height: 52px;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-top: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px rgba($boardroom-green, 0.25);
+
+  &:hover:not(:disabled) {
+    background-color: darken($boardroom-green, 6%) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba($boardroom-green, 0.2);
   }
 
-  .login-footer {
-    margin-top: 30px;
-    text-align: center;
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
 
-    .login-link {
-      color: $br-primary;
-      font-weight: 800;
-      text-decoration: none;
-      &:hover {
-        text-decoration: underline;
-      }
-    }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.figma-footer {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.small-text {
+  color: $br-soft;
+}
+
+.green-link {
+  color: $boardroom-green !important;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.alert {
+  width: 100%;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.88rem;
+  margin-bottom: 8px;
+
+  &.alert-success {
+    background-color: rgba($boardroom-green, 0.1);
+    color: darken($boardroom-green, 10%);
+    border: 1px solid rgba($boardroom-green, 0.2);
+  }
+
+  &.alert-danger {
+    background-color: #fff0f0;
+    color: #c0392b;
+    border: 1px solid #f5c6cb;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-card {
+    padding: 32px 24px;
+  }
+
+  .row-group {
+    grid-template-columns: 1fr;
   }
 }

@@ -5,13 +5,12 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 
 import { EMAIL_ALREADY_USED_TYPE, LOGIN_ALREADY_USED_TYPE } from 'app/config/error.constants';
 import SharedModule from 'app/shared/shared.module';
-import PasswordStrengthBarComponent from '../password/password-strength-bar/password-strength-bar.component';
 import { RegisterService } from './register.service';
 
 @Component({
   selector: 'jhi-register',
   standalone: true,
-  imports: [SharedModule, RouterModule, FormsModule, ReactiveFormsModule, PasswordStrengthBarComponent],
+  imports: [SharedModule, RouterModule, FormsModule, ReactiveFormsModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
@@ -25,6 +24,7 @@ export default class RegisterComponent implements AfterViewInit {
   success = signal(false);
 
   isLoading = false;
+  showPassword = false;
 
   registerForm = new FormGroup({
     login: new FormControl('', {
@@ -53,6 +53,25 @@ export default class RegisterComponent implements AfterViewInit {
     }, 0);
   }
 
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  get passwordStrength(): number {
+    const pwd = this.registerForm.controls.password.value;
+    if (!pwd) return 0;
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd) && /[^a-zA-Z0-9]/.test(pwd)) score++;
+    return score;
+  }
+
+  get strengthLabel(): string {
+    const labels = ['', 'Debole', 'Media', 'Forte'];
+    return labels[this.passwordStrength];
+  }
+
   register(): void {
     this.doNotMatch.set(false);
     this.error.set(false);
@@ -65,7 +84,6 @@ export default class RegisterComponent implements AfterViewInit {
       this.doNotMatch.set(true);
     } else {
       this.isLoading = true;
-
       const { login, firstName, lastName, email, numeroDiTelefono, nomeAzienda } = this.registerForm.getRawValue();
       this.registerService.save({ login, firstName, lastName, numeroDiTelefono, nomeAzienda, email, password, langKey: 'it' }).subscribe({
         next: () => {
