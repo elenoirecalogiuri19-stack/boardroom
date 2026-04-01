@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faArrowLeft, faDoorOpen, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faDoorOpen, faChevronRight, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { SaleApiService, ISalaDTO } from 'app/services/sale-api.service';
 import { PrenotazioniApiService } from 'app/services/prenotazioni-api.service';
 import { NotificationService } from 'app/shared/notification/notification.service';
@@ -12,6 +12,7 @@ export interface Sala {
   id: string;
   nome: string;
   capienza: number;
+  imageUrl?: string | null;
 }
 
 @Component({
@@ -25,6 +26,15 @@ export class RisultatiSalaComponent implements OnInit {
   faArrowLeft = faArrowLeft;
   faDoorOpen = faDoorOpen;
   faChevronRight = faChevronRight;
+  faUsers = faUsers;
+
+  /** Fallback se l'immagine non si carica: nasconde il tag img e mostra il placeholder */
+  onImgError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
+    const placeholder = img.closest('.room-img-col')?.querySelector('.room-img-placeholder') as HTMLElement;
+    if (placeholder) placeholder.style.display = 'flex';
+  }
 
   dataRicerca = '';
   oraRicerca = '';
@@ -87,7 +97,6 @@ export class RisultatiSalaComponent implements OnInit {
                 ora: this.oraRicerca,
                 pubblico: isPubblico,
                 prenotazioneId: pren.id,
-                numPersone: this.numPersoneRicerca,
               },
             })
             .finally(() => (this.isLoading = false));
@@ -121,6 +130,7 @@ export class RisultatiSalaComponent implements OnInit {
             id: s.id!.toString(),
             nome: s.nome || 'Sala Executive',
             capienza: s.capienza || 0,
+            imageUrl: s.imageUrl ?? null,
           }));
         this.isLoading = false;
       },

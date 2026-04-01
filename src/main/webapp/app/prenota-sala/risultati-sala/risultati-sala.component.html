@@ -27,18 +27,30 @@
     <div class="rooms-list">
       @for (item of sale; track item.id) {
         <div class="room-card">
+          <!-- Immagine sala con fallback placeholder -->
+          <div class="room-img-col">
+            @if (item.imageUrl) {
+              <img class="room-img" [src]="item.imageUrl" [alt]="'Foto ' + item.nome" loading="lazy" (error)="onImgError($event)" />
+            } @else {
+              <div class="room-img-placeholder">
+                <fa-icon [icon]="faDoorOpen" class="placeholder-icon"></fa-icon>
+              </div>
+            }
+          </div>
+
           <div class="card-content">
             <h3 class="room-name">{{ item.nome }}</h3>
             <div class="room-meta">
-              <div class="avatar-circle">
-                <fa-icon [icon]="faDoorOpen"></fa-icon>
-              </div>
               <div class="text-info">
-                <span class="info-title">Capienza: {{ item.capienza }} persone</span>
+                <span class="info-title">
+                  <fa-icon [icon]="faUsers" class="me-1"></fa-icon>
+                  Capienza: {{ item.capienza }} persone
+                </span>
                 <span class="info-desc">Disponibile nella fascia selezionata</span>
               </div>
             </div>
           </div>
+
           <div class="card-action">
             <button class="btn-book" (click)="apriSceltaPrivacy(item)" [disabled]="isLoading">
               <span>Prenota</span>

@@ -40,5 +40,6 @@
   <!-- Nuove tabelle aggiunte nelle sessioni recenti -->
   <include file="config/liquibase/changelog/20260330000001_create_ricorrenza.xml"     relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260401000001_create_promemoria.xml"     relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260402000001_add_image_url_to_sale.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>
