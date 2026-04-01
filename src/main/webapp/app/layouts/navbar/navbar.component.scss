@@ -1,36 +1,30 @@
 $br-green: #4a8c40;
-$br-dark: #334155;
-$br-soft: #64748b;
+$br-dark: #1a1a1a;
+$br-soft: #555555;
 $white: #ffffff;
-$nav-height: 70px; // ← ridotto da 120px a 70px
-
-// ── Colori admin ──────────────────────────────────────────────
-$admin-accent: #3b82f6;
-$admin-bg: #eff6ff;
+$nav-height: 100px;
 
 .boardroom-nav {
   height: $nav-height !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(15px) !important;
-  -webkit-backdrop-filter: blur(15px) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
-  padding: 0 2% !important; // ← ridotto da 4%
+  background: $white !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 0 3% !important;
   display: flex;
   align-items: center;
-  transition: all 0.3s ease;
   z-index: 1030;
+  box-shadow: none;
 }
 
 .navbar-brand.logo {
   padding: 0 !important;
-  margin-right: 16px; // ← ridotto da 30px
+  margin-right: 0;
   display: flex;
   align-items: center;
 }
 
 .nav-logo {
-  height: 52px !important; // ← ridotto da 100px
-  max-height: 52px !important;
+  height: 90px !important;
+  max-height: 90px !important;
   width: auto;
   object-fit: contain;
   transition: transform 0.3s ease;
@@ -41,253 +35,72 @@ $admin-bg: #eff6ff;
 }
 
 .navbar-nav {
+  gap: 4px;
+
   .nav-item {
-    padding: 0 6px; // ← ridotto da 15px
+    padding: 0 6px;
   }
 
   .nav-link {
-    color: $br-dark !important;
-    font-size: 0.78rem !important; // ← ridotto da 0.95rem
-    font-weight: 700 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.6px; // ← ridotto da 1px
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
     cursor: pointer;
-    position: relative;
+    color: $br-soft !important;
+    padding: 6px 10px !important;
+    border-radius: 6px;
     display: flex;
     align-items: center;
-    gap: 5px;
-    padding: 6px 4px !important; // ← compatto
+    transition:
+      color 0.2s ease,
+      background 0.2s ease;
 
-    &:not(.login-link-green):not(.p-0)::after {
-      content: '';
-      position: absolute;
-      bottom: -3px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background-color: $br-green;
-      transition: width 0.3s ease;
-    }
-
-    &:not(.login-link-green):hover,
-    &:not(.login-link-green).active {
-      color: $br-green !important;
-      &::after {
-        width: 100%;
-      }
-    }
-
-    // ── Admin link ────────────────────────────────────
-    &.nav-link--admin {
+    &:hover {
       color: $br-dark !important;
-      font-size: 0.75rem !important;
-      letter-spacing: 0.4px;
-
-      &::after {
-        background-color: $admin-accent;
-      }
-      &:hover,
-      &.active {
-        color: $admin-accent !important;
-      }
+      background: rgba(0, 0, 0, 0.04);
     }
 
-    // ── Dashboard: badge colorato ─────────────────────
-    &.nav-link--dashboard {
-      padding: 4px 10px !important;
-      border-radius: 7px;
-      border: 1.5px solid $admin-accent;
-      color: $admin-accent !important;
-      font-size: 0.72rem !important;
-      letter-spacing: 0.4px;
-      transition: all 0.2s ease;
-
-      &::after {
-        display: none;
-      }
-
-      &:hover {
-        background: $admin-accent !important;
-        color: $white !important;
-        transform: translateY(-1px);
-        box-shadow: 0 3px 10px rgba($admin-accent, 0.3);
-        .admin-dash-icon {
-          color: $white;
-        }
-      }
-
-      &.active {
-        background: $admin-accent !important;
-        color: $white !important;
-        .admin-dash-icon {
-          color: $white;
-        }
-        &::after {
-          display: none;
-        }
-      }
-    }
-
-    &.login-link-green {
+    &.active-link,
+    &.active {
       color: $br-green !important;
-      transition: all 0.2s ease;
-      fa-icon {
-        font-size: 1rem;
-      }
-      &:hover {
-        opacity: 0.7;
-        transform: translateY(-1px);
-      }
+      font-weight: 600 !important;
     }
   }
 }
 
-// ── Icona inline nei link ────────────────────────────────────
-.nav-icon-inline {
-  flex-shrink: 0;
-  opacity: 0.7;
+.nav-item.active > .nav-link {
+  color: $br-green !important;
+  font-weight: 600 !important;
 }
 
-// ── Separatore admin ──────────────────────────────────────────
-.nav-admin-sep {
-  width: 1px;
-  height: 24px;
-  background: #e2e8f0;
-  margin: 0 6px;
-  padding: 0 !important;
-  align-self: center;
-  flex-shrink: 0;
-}
-
-// ── Icona nei link admin ──────────────────────────────────────
-.admin-menu-icon,
-.admin-dash-icon {
-  display: flex;
-  align-items: center;
-  color: $admin-accent;
-  transition: color 0.2s;
-}
-
-// ── Dropdown admin ────────────────────────────────────────────
-.admin-dropdown {
-  min-width: 280px !important;
-  padding: 8px 0 !important;
-  border-radius: 14px !important;
-  border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12) !important;
-
-  // Sezione label (es: "Prenotazioni", "Struttura")
-  .dropdown-section-label {
-    padding: 6px 16px 4px;
-    font-size: 0.68rem;
-    font-weight: 800;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    list-style: none;
-    pointer-events: none;
-  }
-
-  .dropdown-divider {
-    margin: 6px 12px;
-    border-color: #f1f5f9;
-  }
-}
-
-// Item dropdown admin con icona + testo doppio
-.admin-dropdown-item {
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  padding: 8px 16px !important;
-  border-radius: 8px;
-  margin: 1px 6px;
-  transition: background 0.15s ease;
+.btn-login-green {
+  background-color: $br-green;
+  color: $white !important;
+  border: none;
+  border-radius: 50px;
+  padding: 9px 26px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 8px;
 
   &:hover {
-    background: #f8fafc !important;
-    color: $br-dark !important;
+    background-color: darken($br-green, 8%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($br-green, 0.35);
   }
 
-  &:active,
-  &.active {
-    background: $admin-bg !important;
-    color: $admin-accent !important;
-  }
-
-  &--muted {
-    opacity: 0.7;
-    &:hover {
-      opacity: 1;
-    }
+  &:active {
+    transform: translateY(0);
   }
 }
 
-// Icona colorata a sinistra dell'item
-.item-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
-  flex-shrink: 0;
-  font-size: 0.8rem;
-
-  &--blue {
-    background: #eff6ff;
-    color: #3b82f6;
-  }
-  &--green {
-    background: #ecfdf5;
-    color: #10b981;
-  }
-  &--purple {
-    background: #f5f3ff;
-    color: #8b5cf6;
-  }
-  &--yellow {
-    background: #fffbeb;
-    color: #f59e0b;
-  }
-  &--orange {
-    background: #fff7ed;
-    color: #f97316;
-  }
-  &--gray {
-    background: #f8fafc;
-    color: #64748b;
-  }
-}
-
-// Testo doppio: label principale + descrizione
-.item-text {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-
-.item-label {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: #1e293b;
-  line-height: 1.2;
-}
-
-.item-desc {
-  font-size: 0.72rem;
-  color: #94a3b8;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-// ── Avatar ────────────────────────────────────────────────────
 .avatar-nav-wrapper {
-  width: 55px;
-  height: 55px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 2px solid $br-green;
   overflow: hidden;
@@ -296,7 +109,7 @@ $admin-bg: #eff6ff;
   justify-content: center;
   background: $white;
   transition: all 0.3s ease;
-  margin-left: 10px;
+  margin-left: 8px;
 
   &:hover {
     transform: scale(1.08);
@@ -311,16 +124,34 @@ $admin-bg: #eff6ff;
 
   .avatar-placeholder {
     color: $br-green;
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 }
 
-// ── Dropdown base (non-admin) ─────────────────────────────────
 .dropdown-menu {
   border: none;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
   padding: 10px 0;
+
+  .dropdown-item {
+    font-size: 0.88rem;
+    padding: 8px 16px;
+    color: $br-dark;
+
+    &:hover {
+      background: rgba($br-green, 0.07);
+      color: $br-green;
+    }
+  }
+}
+
+.admin-link {
+  color: $br-soft !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
 }
 
 .navbar-toggler {
@@ -330,18 +161,27 @@ $admin-bg: #eff6ff;
   }
 }
 
-// ── Responsive ───────────────────────────────────────────────
 @media (max-width: 768px) {
-  .nav-admin-sep {
-    display: none;
+  .boardroom-nav {
+    height: auto !important;
+    padding: 12px 4% !important;
   }
 
-  .admin-dropdown {
-    min-width: unset !important;
-    width: calc(100vw - 32px);
+  .navbar-nav {
+    padding: 12px 0;
+    gap: 0;
+
+    .nav-item {
+      padding: 0;
+    }
+
+    .nav-link {
+      padding: 10px 4px !important;
+    }
   }
 
-  .nav-link--dashboard {
-    width: fit-content;
+  .btn-login-green {
+    margin: 10px 0;
+    width: 100%;
   }
 }
