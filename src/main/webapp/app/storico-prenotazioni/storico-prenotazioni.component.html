@@ -4,15 +4,44 @@
     <p>Cronologia in <span class="brand-green">Boardroom</span></p>
   </header>
 
+  <!-- Filtri rapidi -->
   <nav class="filter-bar">
     <button [class.active]="filtroAttivo() === 'tutte'" (click)="applicaFiltro('tutte')">tutte</button>
     <button [class.active]="filtroAttivo() === '30giorni'" (click)="applicaFiltro('30giorni')">ultimi 30 giorni</button>
     <button [class.active]="filtroAttivo() === 'annoCorrente'" (click)="applicaFiltro('annoCorrente')">{{ annoCorrente }}</button>
+    <button [class.active]="filtroAttivo() === 'singola'" (click)="applicaFiltro('singola')">data singola</button>
+    <button [class.active]="filtroAttivo() === 'range'" (click)="applicaFiltro('range')">intervallo</button>
   </nav>
+
+  <!-- Filtro data singola -->
+  @if (filtroAttivo() === 'singola') {
+    <div class="filtro-data-box">
+      <label class="filtro-label">Seleziona una data</label>
+      <div class="filtro-row">
+        <input type="date" class="filtro-input" [(ngModel)]="filtroDataSingola" />
+        <button class="btn-cerca" (click)="cercaPerData()">Cerca</button>
+        <button class="btn-reset" (click)="resetFiltri()">Reset</button>
+      </div>
+    </div>
+  }
+
+  <!-- Filtro range date -->
+  @if (filtroAttivo() === 'range') {
+    <div class="filtro-data-box">
+      <label class="filtro-label">Seleziona un intervallo di date</label>
+      <div class="filtro-row">
+        <span class="filtro-sublabel">Dal</span>
+        <input type="date" class="filtro-input" [(ngModel)]="filtroDataDal" />
+        <span class="filtro-sublabel">Al</span>
+        <input type="date" class="filtro-input" [(ngModel)]="filtroDataAl" />
+        <button class="btn-cerca" (click)="cercaPerData()">Cerca</button>
+        <button class="btn-reset" (click)="resetFiltri()">Reset</button>
+      </div>
+    </div>
+  }
 
   @if (isLoading()) {
     <div class="loading-state">
-      <span class="main-loader"></span>
       <p>Caricamento...</p>
     </div>
   } @else {
@@ -30,12 +59,14 @@
           </div>
 
           <div class="status-side">
-            <span class="tag-concluso">Concluso</span>
+            <span class="tag-stato" [ngClass]="'tag-' + (p.stato?.codice?.toLowerCase() || 'concluso')">
+              {{ p.stato?.codice || 'CONCLUSO' }}
+            </span>
           </div>
         </div>
       } @empty {
         <div class="empty-text">
-          <p>Nessun evento passato trovato.</p>
+          <p>Nessun evento trovato per i criteri selezionati.</p>
         </div>
       }
     </div>
