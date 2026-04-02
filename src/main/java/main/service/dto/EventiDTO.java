@@ -32,6 +32,9 @@ public class EventiDTO implements Serializable {
     /** URL immagine della sala (es: /uploads/sale/uuid.jpg). Null = nessuna foto. */
     private String salaImageUrl;
 
+    /** Locandina dell'evento (base64 data URL). Se presente sostituisce l'immagine sala. */
+    private String locandinaUrl;
+
     private UUID prenotazioneId;
 
     /** Numero massimo di partecipanti ammessi all'evento pubblico. */
@@ -121,6 +124,14 @@ public class EventiDTO implements Serializable {
 
     public void setSalaImageUrl(String salaImageUrl) {
         this.salaImageUrl = salaImageUrl;
+    }
+
+    public String getLocandinaUrl() {
+        return locandinaUrl;
+    }
+
+    public void setLocandinaUrl(String locandinaUrl) {
+        this.locandinaUrl = locandinaUrl;
     }
 
     public String getDescrizione() {

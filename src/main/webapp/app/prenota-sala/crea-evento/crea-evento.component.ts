@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -58,6 +58,9 @@ export class CreaEventoComponent implements OnInit {
   isLoading = false;
   isPubblico = false;
   prenotazioneId = '';
+  locandinaPreview: string | null = null;
+  locandinaBase64: string | null = null;
+  @ViewChild('locandinaInput') locandinaInput!: ElementRef<HTMLInputElement>;
   capienzaRicerca = 0;
 
   evento = {
@@ -99,6 +102,70 @@ export class CreaEventoComponent implements OnInit {
   private ricorrenzaService = inject(RicorrenzaService);
 
   readonly oggi = new Date().toISOString().split('T')[0];
+
+  triggerLocandinaInput(): void {
+    this.locandinaInput?.nativeElement?.click();
+  }
+
+  onLocandinaChange(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) this.elaboraLocandinaFile(file);
+  }
+
+  onLocandrinaDrop(event: DragEvent): void {
+    event.preventDefault();
+    const file = event.dataTransfer?.files?.[0];
+    if (file && file.type.startsWith('image/')) this.elaboraLocandinaFile(file);
+  }
+
+  rimuoviLocandina(event: Event): void {
+    event.stopPropagation();
+    this.locandinaPreview = null;
+    this.locandinaBase64 = null;
+    if (this.locandinaInput?.nativeElement) {
+      this.locandinaInput.nativeElement.value = '';
+    }
+  }
+
+  private elaboraLocandinaFile(file: File): void {
+    if (!file.type.startsWith('image/')) {
+      this.notificationService.show('Formato non supportato. Usa JPG, PNG o WEBP.', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      const originalDataUrl = e.target?.result as string;
+      const img = new Image();
+      img.onload = () => {
+        // Ridimensiona mantenendo aspect ratio, max 1200px sul lato lungo
+        const MAX = 1200;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          if (width > height) {
+            height = Math.round((height * MAX) / width);
+            width = MAX;
+          } else {
+            width = Math.round((width * MAX) / height);
+            height = MAX;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Comprime a JPEG qualità 0.82 — ottimo rapporto qualità/peso
+        const compressed = canvas.toDataURL('image/jpeg', 0.82);
+        this.locandinaPreview = compressed;
+        this.locandinaBase64 = compressed;
+      };
+      img.src = originalDataUrl;
+    };
+    reader.readAsDataURL(file);
+  }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -341,6 +408,7 @@ export class CreaEventoComponent implements OnInit {
           prezzo: this.isPubblico ? this.evento.prezzo : null,
           tipo: this.isPubblico ? 'PUBBLICO' : 'PRIVATO',
           prenotazioneId: this.prenotazioneId,
+          locandinaUrl: this.isPubblico ? this.locandinaBase64 : null,
         })
         .toPromise();
     } catch {
@@ -527,6 +595,7 @@ export class CreaEventoComponent implements OnInit {
           prezzo: this.isPubblico ? this.evento.prezzo : null,
           tipo: this.isPubblico ? 'PUBBLICO' : 'PRIVATO',
           prenotazioneId: this.prenotazioneId,
+          locandinaUrl: this.isPubblico ? this.locandinaBase64 : null,
         })
         .subscribe({
           next: () => {

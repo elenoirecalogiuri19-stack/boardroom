@@ -166,6 +166,7 @@ public class EventiService {
         evento.setDescrizione(dto.getDescrizione());
         evento.setTipo(dto.getTipo());
         evento.setPrenotazione(prenotazione);
+        evento.setLocandinaUrl(dto.getLocandinaUrl());
         return evento;
     }
 

@@ -1,5 +1,9 @@
 <div class="home-container">
   <div class="hero-section">
+    @if (isLoading()) {
+      <div class="hero-loading">Caricamento eventi...</div>
+    }
+
     @if (!isLoading() && eventi().length > 0) {
       <div
         class="hero-viewport"
@@ -16,10 +20,10 @@
           @for (evento of eventi(); track evento.id; let i = $index) {
             <div class="hero-slide">
               <div class="hero-img-col">
-                @if (evento.salaImageUrl) {
+                @if (evento.locandinaUrl || evento.salaImageUrl) {
                   <img
-                    class="hero-img"
-                    [src]="evento.salaImageUrl"
+                    [class]="evento.locandinaUrl ? 'hero-img hero-img--locandina' : 'hero-img'"
+                    [src]="evento.locandinaUrl || evento.salaImageUrl"
                     [alt]="evento.salaNome ?? 'Sala'"
                     loading="lazy"
                     (error)="onHeroImgError($event)"
