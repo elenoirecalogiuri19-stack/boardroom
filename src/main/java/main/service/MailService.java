@@ -6,6 +6,7 @@ import java.util.Locale;
 import main.domain.Eventi;
 import main.domain.Prenotazioni;
 import main.domain.User;
+import main.domain.enumeration.TipoEvento;
 import main.service.dto.PrenotazioniEmailDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class MailService {
     private final SpringTemplateEngine templateEngine;
     private final EmailDispatcher emailDispatcher;
 
-    // Bytes del logo caricati una volta sola all'avvio (evita I/O ripetuto)
+    // Bytes del logo caricati una volta sola all'avvio
     private final byte[] logoBytes;
 
     public MailService(
@@ -43,7 +44,6 @@ public class MailService {
         this.templateEngine = templateEngine;
         this.emailDispatcher = emailDispatcher;
 
-        // Precarica il logo una volta sola → evita ClassPathResource I/O ad ogni email
         byte[] bytes;
         try {
             bytes = new ClassPathResource("imags/logo-jhipster.png").getInputStream().readAllBytes();
@@ -83,7 +83,7 @@ public class MailService {
         ctx.setVariable(USER, user);
         ctx.setVariable(BASE_URL, jHipsterProperties.getMail().getBaseUrl());
 
-        String content = templateEngine.process(templateName, ctx); // CPU only
+        String content = templateEngine.process(templateName, ctx);
         String subject = messageSource.getMessage(titleKey, null, locale);
 
         emailDispatcher.enqueue(
@@ -92,17 +92,102 @@ public class MailService {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Email prenotazione evento pubblico
+    // Email conferma prenotazione (scattata al passaggio di stato → CONFIRMED)
+    // Gestisce sia eventi pubblici (con prezzo + biglietto) che privati/sala
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * FIX #02: rendering sincrono → EmailDispatcher per invio asincrono.
+     * Invia l'email di conferma quando una prenotazione passa a stato CONFIRMED.
      *
-     * FIX extra: il RuntimeException di sendPromemoriaPrenotazione non viene
-     * più inghiottito silenziosamente — EmailDispatcher logga tutto.
+     * @param prenotazione  l'entità prenotazione appena confermata (con sala, utente, evento caricati)
+     * @param dto           dati anagrafici dell'utente (nome, cognome, email)
+     * @param codicePre     codice prenotazione alfanumerico
+     * @param qrCodeBase64  QR code in formato base64
      */
+    public void sendConfermaPrenotazione(Prenotazioni prenotazione, PrenotazioniEmailDTO dto, String codicePre, String qrCodeBase64) {
+        if (dto.getEmail() == null || dto.getEmail().isBlank()) {
+            LOG.warn("Email destinatario assente per prenotazione {}, skip invio conferma", prenotazione.getId());
+            return;
+        }
+
+        Context ctx = new Context();
+
+        // ── Dati prenotazione ─────────────────────────────────────────────
+        ctx.setVariable("nome", dto.getNome());
+        ctx.setVariable("cognome", dto.getCognome());
+        ctx.setVariable("codicePre", codicePre);
+        ctx.setVariable("dataPrenotazione", prenotazione.getData());
+        ctx.setVariable("oraInizio", prenotazione.getOraInizio());
+        ctx.setVariable("oraFine", prenotazione.getOraFine());
+
+        // ── Dati sala ─────────────────────────────────────────────────────
+        String salaNome = prenotazione.getSala() != null ? prenotazione.getSala().getNome() : "N/D";
+        int salaCapienza = prenotazione.getSala() != null ? prenotazione.getSala().getCapienza() : 0;
+        String salaImageUrl = prenotazione.getSala() != null ? prenotazione.getSala().getImageUrl() : null;
+
+        ctx.setVariable("salaNome", salaNome);
+        ctx.setVariable("salaCapienza", salaCapienza);
+        ctx.setVariable("salaImageUrl", salaImageUrl);
+
+        // ── Dati evento (se collegato) ────────────────────────────────────
+        Eventi evento = prenotazione.getEvento();
+        boolean eventoPubblico = false;
+
+        if (evento != null) {
+            ctx.setVariable("titoloEvento", evento.getTitolo());
+            ctx.setVariable("tipoEvento", evento.getTipo() != null ? evento.getTipo().name() : "PRIVATO");
+            ctx.setVariable("prezzoEvento", evento.getPrezzo());
+            eventoPubblico = TipoEvento.PUBBLICO.equals(evento.getTipo());
+        } else {
+            // Prenotazione sala senza evento associato
+            ctx.setVariable("titoloEvento", "Prenotazione sala " + salaNome);
+            ctx.setVariable("tipoEvento", "PRIVATO");
+            ctx.setVariable("prezzoEvento", null);
+        }
+
+        ctx.setVariable("eventoPubblico", eventoPubblico);
+
+        // ── Render template ───────────────────────────────────────────────
+        // L'immagine sala è un data URL base64 (es: "data:image/jpeg;base64,...")
+        // Gmail blocca i data URL inline → la passiamo come allegato cid:salaimg
+        boolean haSalaImage = salaImageUrl != null && !salaImageUrl.isBlank();
+        byte[] salaImgBytes = new byte[0];
+        String salaImgMime = "image/jpeg";
+        if (haSalaImage) {
+            try {
+                // Estrae la parte base64 pura dopo la virgola (es: "data:image/png;base64,ABC..." → "ABC...")
+                String raw = salaImageUrl.contains(",") ? salaImageUrl.substring(salaImageUrl.indexOf(',') + 1) : salaImageUrl;
+                salaImgBytes = Base64.getDecoder().decode(raw.trim());
+                if (salaImageUrl.contains("image/png")) salaImgMime = "image/png";
+                else if (salaImageUrl.contains("image/webp")) salaImgMime = "image/webp";
+                // Sostituisce il data URL con il riferimento cid nel contesto
+                ctx.setVariable("salaImageUrl", null); // evita che Thymeleaf metta il base64 nell'img src
+            } catch (Exception e) {
+                LOG.warn("Impossibile decodificare immagine sala: {}", e.getMessage());
+                haSalaImage = false;
+            }
+        }
+        ctx.setVariable("haSalaImage", haSalaImage);
+
+        String content = templateEngine.process("mail/confermaPrenotazioneEmail", ctx);
+
+        // ── Accoda l'invio (senza QR, con immagine sala come cid) ────────
+        java.util.List<InlineAttachment> allegati = new java.util.ArrayList<>();
+        allegati.add(new InlineAttachment("logoimg", logoBytes, "image/png"));
+        if (haSalaImage) {
+            allegati.add(new InlineAttachment("salaimg", salaImgBytes, salaImgMime));
+        }
+
+        emailDispatcher.enqueue(new EmailTask(dto.getEmail(), "Prenotazione confermata — " + salaNome, content, allegati));
+
+        LOG.debug("Email conferma prenotazione accodata per '{}' — prenotazione {}", dto.getEmail(), prenotazione.getId());
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Email prenotazione evento pubblico (flusso precedente — mantenuto)
+    // ─────────────────────────────────────────────────────────────────────────
+
     public void sendPrenotazioneEventoPublico(Eventi evento, PrenotazioniEmailDTO dto, String codicePre, String qrCod) {
-        // 1. Render (CPU, veloce — nessun I/O)
         Context ctx = new Context();
         ctx.setVariable("titoloEvento", evento.getTitolo());
         ctx.setVariable("descrizioneEvento", evento.getDescrizione());
@@ -120,14 +205,14 @@ public class MailService {
         ctx.setVariable("email", dto.getEmail());
         ctx.setVariable("codicePre", codicePre);
 
+        // ── Usa il template originale del biglietto evento ────────────────
         String content = templateEngine.process("mail/eventoPrenotazioneEmail", ctx);
         byte[] qrBytes = Base64.getDecoder().decode(qrCod);
 
-        // 2. Accoda (ritorna immediatamente)
         emailDispatcher.enqueue(
             new EmailTask(
                 dto.getEmail(),
-                "Conferma Prenotazione Evento",
+                "Biglietto evento — " + evento.getTitolo(),
                 content,
                 List.of(new InlineAttachment("qrcode", qrBytes, "image/png"), new InlineAttachment("logoimg", logoBytes, "image/png"))
             )
@@ -138,14 +223,6 @@ public class MailService {
     // Promemoria prenotazioni
     // ─────────────────────────────────────────────────────────────────────────
 
-    /**
-     * PRIMA: @Async + RuntimeException inghiottita dall'AsyncUncaughtExceptionHandler
-     *        → promemoria falliti sparivano senza trace
-     *
-     * DOPO: rendering sincrono, invio via EmailDispatcher con retry automatico.
-     * Se l'SMTP fallisce, EmailDispatcher riprova 3 volte con backoff esponenziale
-     * e logga l'errore definitivo (non più silenzioso).
-     */
     public void sendPromemoriaPrenotazione(
         String email,
         String nomeUtente,
@@ -156,7 +233,6 @@ public class MailService {
         String nomeSala,
         String etichettaTipo
     ) {
-        // 1. Render (CPU only)
         Context ctx = new Context();
         ctx.setVariable("nomeUtente", nomeUtente);
         ctx.setVariable("titoloEvento", titoloEvento);
@@ -168,7 +244,6 @@ public class MailService {
 
         String content = templateEngine.process("mail/promemoriaEmail", ctx);
 
-        // 2. Accoda
         emailDispatcher.enqueue(
             new EmailTask(
                 email,

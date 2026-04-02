@@ -105,6 +105,7 @@ public class EventiService {
 
         if (pren != null) {
             aggiornaStatoPrenotazioneConfermata(pren);
+            inviaEmailConfermaPrenotazione(pren, eventi);
         }
 
         return eventiMapper.toDto(eventi);
@@ -179,6 +180,46 @@ public class EventiService {
     private void aggiornaStatoPrenotazioneConfermata(Prenotazioni prenotazione) {
         statiPrenotazioneRepository.findByCodice(StatoCodice.CONFIRMED).ifPresent(prenotazione::setStato);
         prenotazioniRepository.save(prenotazione);
+    }
+
+    /**
+     * Invia l'email di conferma prenotazione all'utente dopo che lo stato
+     * è passato a CONFIRMED tramite la creazione dell'evento.
+     * Non blocca mai il flusso principale: gli errori vengono solo loggati.
+     */
+    private void inviaEmailConfermaPrenotazione(Prenotazioni pren, Eventi evento) {
+        try {
+            // Genera il codice QR dal codice prenotazione
+            if (pren.getCodiceQr() == null || pren.getCodiceQr().isBlank()) {
+                String codice = "SALA-" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
+                pren.setCodiceQr(codice);
+                prenotazioniRepository.save(pren);
+            }
+
+            String qrBase64 = qrCodeGenerator.generateQRCodeBase64(pren.getCodiceQr());
+
+            PrenotazioniEmailDTO emailDto = new PrenotazioniEmailDTO();
+            if (pren.getUtente() != null) {
+                emailDto.setNome(pren.getUtente().getNome() != null ? pren.getUtente().getNome() : "");
+                emailDto.setCognome("");
+                if (pren.getUtente().getUser() != null) {
+                    emailDto.setEmail(pren.getUtente().getUser().getEmail());
+                }
+            }
+
+            if (emailDto.getEmail() == null || emailDto.getEmail().isBlank()) {
+                LOG.warn("Email utente non disponibile per prenotazione {}, skip invio conferma", pren.getId());
+                return;
+            }
+
+            // Collega l'evento alla prenotazione per il template
+            pren.setEvento(evento);
+
+            mailService.sendConfermaPrenotazione(pren, emailDto, pren.getCodiceQr(), qrBase64);
+            LOG.debug("Email conferma inviata per prenotazione {} (evento: {})", pren.getId(), evento.getId());
+        } catch (Exception e) {
+            LOG.warn("Errore invio email conferma per prenotazione {}: {}", pren.getId(), e.getMessage());
+        }
     }
 
     @Transactional

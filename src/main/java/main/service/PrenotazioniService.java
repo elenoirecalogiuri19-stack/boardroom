@@ -19,6 +19,7 @@ import main.repository.UtentiRepository;
 import main.security.AuthoritiesConstants;
 import main.service.QrCodeGenerator;
 import main.service.dto.PrenotazioniDTO;
+import main.service.dto.PrenotazioniEmailDTO;
 import main.service.mapper.PrenotazioniMapper;
 import main.web.rest.errors.UtenteNonAutenticatoException;
 import org.slf4j.Logger;
@@ -54,13 +55,16 @@ public class PrenotazioniService {
 
     private final QrCodeGenerator qrCodeGenerator;
 
+    private final MailService mailService;
+
     public PrenotazioniService(
         PrenotazioniRepository prenotazioniRepository,
         StatiPrenotazioneRepository statiPrenotazioneRepository,
         UtentiRepository utentiRepository,
         SaleRepository saleRepository,
         PrenotazioniMapper prenotazioniMapper,
-        QrCodeGenerator qrCodeGenerator
+        QrCodeGenerator qrCodeGenerator,
+        MailService mailService
     ) {
         this.prenotazioniRepository = prenotazioniRepository;
         this.statiPrenotazioneRepository = statiPrenotazioneRepository;
@@ -68,6 +72,7 @@ public class PrenotazioniService {
         this.saleRepository = saleRepository;
         this.prenotazioniMapper = prenotazioniMapper;
         this.qrCodeGenerator = qrCodeGenerator;
+        this.mailService = mailService;
     }
 
     /**
@@ -327,6 +332,27 @@ public class PrenotazioniService {
         }
 
         pren = prenotazioniRepository.save(pren);
+
+        // ── Invio email di conferma ───────────────────────────────────────
+        try {
+            String qrBase64 = qrCodeGenerator.generateQRCodeBase64(pren.getCodiceQr());
+
+            PrenotazioniEmailDTO emailDto = new PrenotazioniEmailDTO();
+            if (pren.getUtente() != null) {
+                emailDto.setNome(pren.getUtente().getNome() != null ? pren.getUtente().getNome() : "");
+                emailDto.setCognome("");
+                if (pren.getUtente().getUser() != null) {
+                    emailDto.setEmail(pren.getUtente().getUser().getEmail());
+                }
+            }
+
+            mailService.sendConfermaPrenotazione(pren, emailDto, pren.getCodiceQr(), qrBase64);
+            LOG.debug("Email conferma accodata per prenotazione {}", pren.getId());
+        } catch (Exception e) {
+            // L'email non deve mai bloccare la conferma della prenotazione
+            LOG.warn("Errore invio email conferma per prenotazione {}: {}", pren.getId(), e.getMessage());
+        }
+        // ─────────────────────────────────────────────────────────────────
 
         return prenotazioniMapper.toDto(pren);
     }
