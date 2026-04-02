@@ -170,4 +170,75 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         @Param("ricorrenzaId") UUID ricorrenzaId,
         @Param("dataInizio") LocalDate dataInizio
     );
+
+    // ── WAITLIST ──────────────────────────────────────────────────────────────
+
+    /** Verifica se l'utente è già in waitlist per lo stesso slot/sala. */
+    @Query(
+        """
+        SELECT COUNT(p) > 0 FROM Prenotazioni p
+        WHERE p.sala = :sala
+          AND p.data = :data
+          AND p.oraInizio = :oraInizio
+          AND p.oraFine = :oraFine
+          AND p.utente = :utente
+          AND p.stato.codice = 'WAITLISTED'
+        """
+    )
+    boolean existsWaitlistPerStessoSlot(
+        @org.springframework.data.repository.query.Param("sala") main.domain.Sale sala,
+        @org.springframework.data.repository.query.Param("data") java.time.LocalDate data,
+        @org.springframework.data.repository.query.Param("oraInizio") java.time.LocalTime oraInizio,
+        @org.springframework.data.repository.query.Param("oraFine") java.time.LocalTime oraFine,
+        @org.springframework.data.repository.query.Param("utente") main.domain.Utenti utente
+    );
+
+    /** Restituisce la posizione massima occupata nella waitlist per uno slot. */
+    @Query(
+        """
+        SELECT MAX(p.posizioneWaitlist) FROM Prenotazioni p
+        WHERE p.sala = :sala
+          AND p.data = :data
+          AND p.oraInizio = :oraInizio
+          AND p.oraFine = :oraFine
+          AND p.stato.codice = 'WAITLISTED'
+        """
+    )
+    java.util.Optional<Integer> maxPosizioneWaitlist(
+        @org.springframework.data.repository.query.Param("sala") main.domain.Sale sala,
+        @org.springframework.data.repository.query.Param("data") java.time.LocalDate data,
+        @org.springframework.data.repository.query.Param("oraInizio") java.time.LocalTime oraInizio,
+        @org.springframework.data.repository.query.Param("oraFine") java.time.LocalTime oraFine
+    );
+
+    /** Restituisce la waitlist ordinata per posizione (FIFO) per uno slot. */
+    @Query(
+        """
+        SELECT p FROM Prenotazioni p
+        WHERE p.sala = :sala
+          AND p.data = :data
+          AND p.oraInizio = :oraInizio
+          AND p.oraFine = :oraFine
+          AND p.stato.codice = 'WAITLISTED'
+        ORDER BY p.posizioneWaitlist ASC
+        """
+    )
+    java.util.List<Prenotazioni> findWaitlistOrdinata(
+        @org.springframework.data.repository.query.Param("sala") main.domain.Sale sala,
+        @org.springframework.data.repository.query.Param("data") java.time.LocalDate data,
+        @org.springframework.data.repository.query.Param("oraInizio") java.time.LocalTime oraInizio,
+        @org.springframework.data.repository.query.Param("oraFine") java.time.LocalTime oraFine
+    );
+
+    /** Restituisce le prenotazioni PROMOTED con timer scaduto. */
+    @Query(
+        """
+        SELECT p FROM Prenotazioni p
+        WHERE p.stato.codice = 'PROMOTED'
+          AND p.promossaAt <= :limite
+        """
+    )
+    java.util.List<Prenotazioni> findPromotedScadute(
+        @org.springframework.data.repository.query.Param("limite") java.time.LocalDateTime limite
+    );
 }

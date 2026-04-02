@@ -5,4 +5,7 @@ public enum StatoCodice {
     CONFIRMED,
     REJECTED,
     CANCELLED,
+    WAITLISTED,
+    PROMOTED,
+    EXPIRED,
 }

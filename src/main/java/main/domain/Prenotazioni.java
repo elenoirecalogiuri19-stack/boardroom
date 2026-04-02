@@ -67,6 +67,14 @@ public class Prenotazioni implements Serializable {
     @Column(name = "num_persone")
     private Integer numPersone;
 
+    /** Posizione nella waitlist (null = non in waitlist). 1 = primo in coda. */
+    @Column(name = "posizione_waitlist")
+    private Integer posizioneWaitlist;
+
+    /** Timestamp di quando la prenotazione e' stata promossa dalla waitlist. */
+    @Column(name = "promossa_at")
+    private java.time.LocalDateTime promossaAt;
+
     // ── RICORRENZA ────────────────────────────────────────────────────────────
     /**
      * Collegamento alla serie ricorrente di appartenenza.
@@ -200,6 +208,22 @@ public class Prenotazioni implements Serializable {
 
     public void setNumPersone(Integer numPersone) {
         this.numPersone = numPersone;
+    }
+
+    public Integer getPosizioneWaitlist() {
+        return posizioneWaitlist;
+    }
+
+    public void setPosizioneWaitlist(Integer posizioneWaitlist) {
+        this.posizioneWaitlist = posizioneWaitlist;
+    }
+
+    public java.time.LocalDateTime getPromossaAt() {
+        return promossaAt;
+    }
+
+    public void setPromossaAt(java.time.LocalDateTime promossaAt) {
+        this.promossaAt = promossaAt;
     }
 
     public Ricorrenza getRicorrenza() {
