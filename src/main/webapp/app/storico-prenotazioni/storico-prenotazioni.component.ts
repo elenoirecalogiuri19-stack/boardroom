@@ -1,11 +1,13 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import SharedModule from 'app/shared/shared.module';
 import { IPrenotazioni } from 'app/entities/prenotazioni/prenotazioni.model';
 import { PrenotazioniService } from 'app/entities/prenotazioni/service/prenotazioni.service';
+import { faCalendar, faCalendarDays, faCalendarWeek } from '@fortawesome/free-solid-svg-icons';
 import dayjs from 'dayjs/esm';
+import 'dayjs/esm/locale/it';
 
 type FiltroModalita = 'tutte' | '30giorni' | 'annoCorrente' | 'singola' | 'range';
 
@@ -23,12 +25,29 @@ export class StoricoPrenotazioniComponent implements OnInit {
   isLoading = signal<boolean>(false);
   readonly annoCorrente = dayjs().year();
 
-  // Campi filtro data
   filtroDataSingola = '';
   filtroDataDal = '';
   filtroDataAl = '';
 
+  faCalendar = faCalendar;
+  faCalendarDays = faCalendarDays;
+  faCalendarRange = faCalendarWeek;
+
   private prenotazioniService = inject(PrenotazioniService);
+
+  gruppiMese = computed(() => {
+    const mesi: { mese: string; items: IPrenotazioni[] }[] = [];
+    for (const p of this.prenotazioniMostrate()) {
+      const label = dayjs(p.data).locale('it').format('MMMM YYYY').toUpperCase();
+      const existing = mesi.find(g => g.mese === label);
+      if (existing) {
+        existing.items.push(p);
+      } else {
+        mesi.push({ mese: label, items: [p] });
+      }
+    }
+    return mesi;
+  });
 
   ngOnInit(): void {
     this.loadData();
@@ -43,27 +62,24 @@ export class StoricoPrenotazioniComponent implements OnInit {
         this.applicaFiltroCorrente();
         this.isLoading.set(false);
       },
-      error: () => {
-        this.isLoading.set(false);
-      },
+      error: () => this.isLoading.set(false),
     });
   }
 
-  /** Seleziona la modalità filtro rapido e resetta i campi data */
   applicaFiltro(tipo: FiltroModalita): void {
     this.filtroAttivo.set(tipo);
-    this.filtroDataSingola = '';
-    this.filtroDataDal = '';
-    this.filtroDataAl = '';
+    if (tipo !== 'singola') this.filtroDataSingola = '';
+    if (tipo !== 'range') {
+      this.filtroDataDal = '';
+      this.filtroDataAl = '';
+    }
     this.applicaFiltroCorrente();
   }
 
-  /** Applica i filtri data personalizzati (singola o range) */
   cercaPerData(): void {
     this.applicaFiltroCorrente();
   }
 
-  /** Reset completo — torna a "tutte" */
   resetFiltri(): void {
     this.filtroAttivo.set('tutte');
     this.filtroDataSingola = '';
@@ -75,7 +91,6 @@ export class StoricoPrenotazioniComponent implements OnInit {
   private applicaFiltroCorrente(): void {
     const oggi = dayjs();
     const tipo = this.filtroAttivo();
-
     if (tipo === 'tutte') {
       this.prenotazioniMostrate.set(this.tutteLePrenotazioni);
     } else if (tipo === '30giorni') {
@@ -87,16 +102,16 @@ export class StoricoPrenotazioniComponent implements OnInit {
       const target = dayjs(this.filtroDataSingola);
       this.prenotazioniMostrate.set(this.tutteLePrenotazioni.filter(p => p.data && dayjs(p.data).isSame(target, 'day')));
     } else if (tipo === 'range') {
-      let risultati = [...this.tutteLePrenotazioni];
+      let r = [...this.tutteLePrenotazioni];
       if (this.filtroDataDal) {
         const dal = dayjs(this.filtroDataDal).startOf('day');
-        risultati = risultati.filter(p => p.data && (dayjs(p.data).isAfter(dal) || dayjs(p.data).isSame(dal, 'day')));
+        r = r.filter(p => p.data && !dayjs(p.data).isBefore(dal));
       }
       if (this.filtroDataAl) {
         const al = dayjs(this.filtroDataAl).endOf('day');
-        risultati = risultati.filter(p => p.data && (dayjs(p.data).isBefore(al) || dayjs(p.data).isSame(al, 'day')));
+        r = r.filter(p => p.data && !dayjs(p.data).isAfter(al));
       }
-      this.prenotazioniMostrate.set(risultati);
+      this.prenotazioniMostrate.set(r);
     }
   }
 

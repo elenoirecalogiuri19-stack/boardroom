@@ -1,99 +1,135 @@
 <div class="br-viewport">
   @if (eventi(); as e) {
-    <div class="br-refined-card">
-      <div class="br-photo-section">
-        @if (e.locandinaUrl || e.salaImageUrl) {
-          <img
-            [src]="e.locandinaUrl || e.salaImageUrl"
-            [alt]="e.salaNome ?? 'Sala'"
-            [class]="e.locandinaUrl ? 'br-sala-img br-sala-img--locandina' : 'br-sala-img'"
-          />
-        } @else {
-          <div class="br-sala-placeholder">🏛️</div>
-        }
-        <div class="br-overlay-tag">{{ e.tipo }}</div>
-        @if (e.eventoPieno) {
-          <div class="br-sold-out-overlay">
-            <div class="br-sold-out-badge">
-              <span class="br-sold-out-line"></span>
-              <span class="br-sold-out-text">Esaurito</span>
-              <span class="br-sold-out-line"></span>
+    <div class="br-page">
+      <div class="br-left">
+        <div class="br-photo">
+          @if (e.locandinaUrl || e.salaImageUrl) {
+            <img
+              [src]="e.locandinaUrl || e.salaImageUrl"
+              [alt]="e.salaNome ?? 'Sala'"
+              [class]="e.locandinaUrl ? 'br-sala-img br-sala-img--locandina' : 'br-sala-img'"
+            />
+          } @else {
+            <div class="br-sala-placeholder">🏛️</div>
+          }
+          @if (e.eventoPieno) {
+            <div class="br-sold-out-overlay">
+              <div class="br-sold-out-badge">
+                <span class="br-sold-out-line"></span>
+                <span class="br-sold-out-text">Esaurito</span>
+                <span class="br-sold-out-line"></span>
+              </div>
             </div>
-          </div>
+          }
+        </div>
+
+        <div class="br-meta-label">EVENTO PUBBLICO · {{ e.data | date: 'dd MMMM yyyy' : '' : 'it' | uppercase }}</div>
+        <h1 class="br-title">{{ e.titolo }}</h1>
+        @if (e.descrizione) {
+          <p class="br-desc">{{ e.descrizione }}</p>
         }
       </div>
 
-      <div class="br-body-content">
-        <div class="br-main-header">
-          <h1 class="br-title-gold">{{ e.titolo }}</h1>
+      <div class="br-right">
+        <div class="br-booking-card">
           @if (e.prezzo) {
-            <div class="br-price-chic">&euro; {{ e.prezzo }}</div>
-          }
-        </div>
-
-        <div class="br-info-row">
-          @if (e.salaNome) {
-            <div class="info-block">
-              <span class="label">LOCATION</span>
-              <span class="value">{{ e.salaNome }}</span>
-            </div>
-          }
-          @if (e.data) {
-            <div class="info-block">
-              <span class="label">DATA</span>
-              <span class="value">{{ e.data | date: 'dd MMM yyyy' : '' : 'it' }}</span>
-            </div>
-          }
-          @if (e.oraInizio && e.oraFine) {
-            <div class="info-block">
-              <span class="label">ORARIO</span>
-              <span class="value">{{ e.oraInizio | slice: 0 : 5 }} – {{ e.oraFine | slice: 0 : 5 }}</span>
+            <div class="br-price-row">
+              <span class="br-price">&euro;{{ e.prezzo }}</span>
+              <span class="br-price-per">/persona</span>
             </div>
           }
           @if (e.numPersone) {
-            <div class="info-block">
-              <span class="label">POSTI</span>
-              <span class="value" [class.br-posti-esauriti]="e.eventoPieno"> {{ e.postiOccupati ?? 0 }} / {{ e.numPersone }} </span>
+            <div class="br-seats">
+              <div class="br-seats-row">
+                <span class="br-seats-label">Posti disponibili</span>
+                <span class="br-seats-val" [class.br-posti-esauriti]="e.eventoPieno"> {{ e.postiOccupati ?? 0 }}/{{ e.numPersone }} </span>
+              </div>
+              <div class="br-bar">
+                <div class="br-bar-fill" [style.width.%]="((e.postiOccupati ?? 0) / e.numPersone) * 100"></div>
+              </div>
             </div>
+          }
+
+          @if (showForm) {
+            <div class="br-inline-form">
+              <div class="br-inline-form-label">I TUOI DATI</div>
+              <div class="br-field-row">
+                <div class="br-field">
+                  <label>NOME</label>
+                  <input type="text" [(ngModel)]="prenotazione.nome" placeholder="Mario" />
+                </div>
+                <div class="br-field">
+                  <label>COGNOME</label>
+                  <input type="text" [(ngModel)]="prenotazione.cognome" placeholder="Rossi" />
+                </div>
+              </div>
+              <div class="br-field">
+                <label>EMAIL</label>
+                <input type="email" [(ngModel)]="prenotazione.email" placeholder="info@gmail.com" />
+              </div>
+            </div>
+            <button class="br-btn-prenota" (click)="confermaPrenotazione()">Prenota ora</button>
+            <button class="br-btn-annulla" (click)="chiudiForm()">Annulla</button>
+          } @else {
+            <button class="br-btn-prenota" (click)="apriForm()" [disabled]="e.eventoPieno ?? false" [class.br-btn-disabled]="e.eventoPieno">
+              {{ e.eventoPieno ? 'Esaurito' : 'Prenota ora' }}
+            </button>
           }
         </div>
 
-        @if (e.descrizione) {
-          <p class="br-text-description">{{ e.descrizione }}</p>
-        }
-
-        <div class="br-footer-actions">
-          <button (click)="previousState()" class="br-btn-text">← Indietro</button>
-          <button (click)="apriModal()" class="br-btn-solid" [disabled]="e.eventoPieno ?? false" [class.br-btn-disabled]="e.eventoPieno">
-            {{ e.eventoPieno ? 'Esaurito' : 'Prenota Ora' }}
-          </button>
+        <div class="br-details-card">
+          @if (e.data && e.oraInizio && e.oraFine) {
+            <div class="br-detail-row">
+              <div class="br-detail-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </div>
+              <div class="br-detail-text">
+                <span class="br-detail-main">{{ e.data | date: 'EEEE dd MMMM' : '' : 'it' | titlecase }}</span>
+                <span class="br-detail-sub">{{ e.oraInizio | slice: 0 : 5 }}-{{ e.oraFine | slice: 0 : 5 }}</span>
+              </div>
+            </div>
+            <div class="br-divider"></div>
+          }
+          @if (e.salaNome) {
+            <div class="br-detail-row">
+              <div class="br-detail-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </div>
+              <div class="br-detail-text">
+                <span class="br-detail-main">{{ e.salaNome }}</span>
+                @if (e.tipo) {
+                  <span class="br-detail-sub">{{ e.tipo }}</span>
+                }
+              </div>
+            </div>
+            <div class="br-divider"></div>
+          }
+          @if (e.numPersone) {
+            <div class="br-detail-row">
+              <div class="br-detail-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <div class="br-detail-text">
+                <span class="br-detail-main">{{ e.numPersone }} partecipanti max</span>
+                <span class="br-detail-sub">{{ e.numPersone - (e.postiOccupati ?? 0) }} posti ancora liberi</span>
+              </div>
+            </div>
+          }
         </div>
       </div>
     </div>
   }
 </div>
-
-@if (showModal) {
-  <div class="br-modal-overlay" (click)="chiudiModal()">
-    <div class="br-modal-content" (click)="$event.stopPropagation()">
-      <button class="close-btn" (click)="chiudiModal()">×</button>
-      <h3>Conferma Prenotazione</h3>
-      <p>Inserisci i tuoi dati per ricevere la conferma via email</p>
-      <div class="br-form">
-        <div class="br-group">
-          <label>Nome</label>
-          <input type="text" [(ngModel)]="prenotazione.nome" placeholder="Il tuo nome" />
-        </div>
-        <div class="br-group">
-          <label>Cognome</label>
-          <input type="text" [(ngModel)]="prenotazione.cognome" placeholder="Il tuo cognome" />
-        </div>
-        <div class="br-group">
-          <label>Email</label>
-          <input type="email" [(ngModel)]="prenotazione.email" placeholder="La tua email" />
-        </div>
-        <button class="br-btn-confirm" (click)="confermaPrenotazione()">Invia Conferma</button>
-      </div>
-    </div>
-  </div>
-}
