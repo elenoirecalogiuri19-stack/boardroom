@@ -1,93 +1,133 @@
-$br-green: #4a8c40;
-$br-green-light: #edf7eb;
-$text-dark: #1a1f26;
-$text-muted: #8e9aaf;
-$border: #e5e7eb;
+$green: #3b6d11;
+$green-mid: #639922;
+$green-light: #eaf3de;
+$green-border: #c0dd97;
+$text: #1a1d21;
+$muted: #7a8394;
+$border: #e8eaed;
+$bg: #f5f6f8;
 $white: #ffffff;
-$bg: #efefef;
+$red: #a32d2d;
+$red-light: #fcebeb;
+$red-border: #f7c1c1;
+$amber: #854f0b;
+$amber-light: #faeeda;
+$amber-border: #fac775;
+$blue: #185fa5;
+$blue-light: #e6f1fb;
+$blue-border: #b5d4f4;
 
-.storico-wrapper {
+* {
+  box-sizing: border-box;
+}
+
+.storico-page {
+  font-family: inherit;
   background: $bg;
   min-height: 100vh;
-  padding: 40px 48px;
-  max-width: 860px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+.storico-body {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 36px 20px 60px;
+}
+
+.storico-card {
+  background: $white;
+  border-radius: 20px;
+  border: 1px solid $border;
+  width: 100%;
+  max-width: 1040px;
+  padding: 40px 44px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .storico-tag {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: $text-muted;
-  margin-bottom: 4px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: $green;
+  text-transform: uppercase;
+  margin-bottom: 6px;
 }
 
 .storico-title {
-  font-size: 1.85rem;
-  font-weight: 700;
-  color: $text-dark;
-  letter-spacing: -0.02em;
-  margin: 0 0 4px;
+  font-size: 1.65rem;
+  font-weight: 600;
+  color: $text;
+  letter-spacing: -0.03em;
+  margin: 0 0 5px;
+  line-height: 1.2;
 }
 
 .storico-sub {
   font-size: 0.875rem;
-  color: $text-muted;
+  color: $muted;
   margin: 0;
+  font-weight: 400;
 }
 
 .storico-sep {
   height: 1px;
   background: $border;
-  margin: 22px 0;
+  margin: 24px 0;
 }
 
 .filter-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .filter-pill {
-  padding: 7px 18px;
-  border-radius: 20px;
-  font-size: 0.8rem;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 0.83rem;
   font-weight: 500;
   cursor: pointer;
-  border: 1.5px solid $border;
-  color: $text-muted;
+  border: 1px solid $border;
+  color: $muted;
   background: $white;
   font-family: inherit;
   transition: all 0.15s;
 
   &:hover {
-    border-color: $br-green;
-    color: $br-green;
+    border-color: $green-border;
+    color: $green;
+    background: $green-light;
   }
-
   &.active {
-    background: $br-green;
+    background: $green;
     color: $white;
-    border-color: $br-green;
+    border-color: $green;
   }
 }
 
 .filter-sep {
   width: 1px;
-  height: 28px;
+  height: 22px;
   background: $border;
-  margin: 0 4px;
+  margin: 0 2px;
 }
 
 .filter-date-pill {
+  height: 34px;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 16px;
-  border-radius: 20px;
-  border: 1.5px solid $border;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid $border;
   background: $white;
   font-family: inherit;
   cursor: pointer;
@@ -95,51 +135,54 @@ $bg: #efefef;
 
   fa-icon {
     font-size: 0.8rem;
-    color: $text-muted;
+    color: $muted;
   }
 
   .filter-date-pill-text {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1px;
+    gap: 0px;
   }
 
   .filter-date-pill-label {
-    font-size: 0.58rem;
-    font-weight: 700;
+    font-size: 0.56rem;
+    font-weight: 600;
     letter-spacing: 0.1em;
-    color: $text-muted;
-    line-height: 1;
+    color: $muted;
+    line-height: 1.1;
   }
 
   .filter-date-pill-value {
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 500;
-    color: $text-dark;
-    line-height: 1;
+    color: $text;
+    line-height: 1.1;
   }
 
   &:hover {
-    border-color: $br-green;
+    border-color: $green-border;
+    background: $green-light;
     fa-icon {
-      color: $br-green;
+      color: $green;
+    }
+    .filter-date-pill-label {
+      color: darken($green, 5%);
     }
   }
 
   &.active,
   &.filled {
-    border-color: $br-green;
-    background: $br-green-light;
-
+    border-color: $green-border;
+    background: $green-light;
     fa-icon {
-      color: $br-green;
+      color: $green;
     }
     .filter-date-pill-label {
-      color: darken($br-green, 10%);
+      color: darken($green, 5%);
     }
     .filter-date-pill-value {
-      color: darken($br-green, 10%);
+      color: $green;
     }
   }
 }
@@ -149,86 +192,88 @@ $bg: #efefef;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  background: $br-green-light;
-  border: 1px solid #c0dd97;
+  background: $green-light;
+  border: 1px solid $green-border;
   border-radius: 12px;
-  padding: 14px 20px;
+  padding: 14px 18px;
   margin-bottom: 20px;
 }
 
 .date-input-label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: $br-green;
+  color: $green;
 }
 
 .date-input {
-  height: 38px;
+  height: 36px;
   padding: 0 12px;
-  border: 1px solid #97c459;
+  border: 1px solid $green-border;
   border-radius: 8px;
-  font-size: 0.875rem;
-  color: $text-dark;
+  font-size: 0.84rem;
+  color: $text;
   background: $white;
-  font-family: inherit;
   outline: none;
-  min-width: 160px;
-  transition: border-color 0.2s;
+  min-width: 155px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 
   &:focus {
-    border-color: $br-green;
-    box-shadow: 0 0 0 3px rgba($br-green, 0.12);
+    border-color: $green;
+    box-shadow: 0 0 0 3px rgba($green-mid, 0.18);
   }
 }
 
 .btn-cerca {
-  height: 38px;
-  padding: 0 20px;
-  background: darken($br-green, 8%);
+  height: 36px;
+  padding: 0 18px;
+  background: $green;
   color: $white;
   border: none;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.83rem;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
+  letter-spacing: 0.01em;
   transition: background 0.2s;
 
   &:hover {
-    background: darken($br-green, 14%);
+    background: darken($green, 8%);
   }
 }
 
 .btn-reset {
-  height: 38px;
-  padding: 0 16px;
-  background: $white;
-  color: $text-muted;
+  height: 36px;
+  padding: 0 14px;
+  background: transparent;
+  color: $muted;
   border: 1px solid $border;
   border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.83rem;
+  font-weight: 500;
   cursor: pointer;
   font-family: inherit;
   transition: all 0.2s;
 
   &:hover {
-    color: $text-dark;
-    border-color: #9ca3af;
+    color: $text;
+    border-color: darken($border, 10%);
+    background: $bg;
   }
 }
 
 .timeline-wrap {
-  display: flex;
-  gap: 0;
   position: relative;
+  display: flex;
 }
 
 .timeline-line {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 19px;
+  left: 17px;
   width: 1px;
   background: $border;
 }
@@ -241,17 +286,22 @@ $bg: #efefef;
 }
 
 .tl-month-label {
-  font-size: 0.62rem;
-  font-weight: 700;
+  font-size: 0.65rem;
+  font-weight: 600;
   letter-spacing: 0.1em;
-  color: $text-muted;
-  margin: 8px 0 10px 4px;
+  color: $muted;
+  text-transform: uppercase;
+  margin: 16px 0 8px 0;
+
+  &:first-child {
+    margin-top: 0;
+  }
 }
 
 .tl-item {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   margin-left: -40px;
 }
 
@@ -260,23 +310,27 @@ $bg: #efefef;
   flex-shrink: 0;
   display: flex;
   justify-content: center;
-  padding-top: 20px;
+  padding-top: 18px;
   position: relative;
   z-index: 1;
 }
 
 .tl-dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #c0c8d0;
-  border: 2px solid $bg;
+  background: darken($border, 8%);
+  border: 2px solid $white;
+  box-shadow: 0 0 0 1px darken($border, 8%);
 
   &.dot-green {
-    background: $br-green;
+    background: $green-mid;
+    box-shadow: 0 0 0 1px $green-mid;
   }
+
   &.dot-red {
-    background: #ef4444;
+    background: #e24b4a;
+    box-shadow: 0 0 0 1px #e24b4a;
   }
 }
 
@@ -285,21 +339,35 @@ $bg: #efefef;
   background: $white;
   border: 1px solid $border;
   border-radius: 12px;
-  padding: 14px 18px;
+  padding: 13px 16px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  transition: box-shadow 0.15s;
+  gap: 13px;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  cursor: default;
 
   &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-color: darken($border, 8%);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   }
 }
 
-.tl-card-icon {
-  font-size: 1rem;
-  color: $text-muted;
+.tl-card-icon-wrap {
+  width: 36px;
+  height: 36px;
+  background: $bg;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+
+  fa-icon {
+    font-size: 0.85rem;
+    color: $muted;
+  }
 }
 
 .tl-card-body {
@@ -308,24 +376,25 @@ $bg: #efefef;
 }
 
 .tl-card-date {
-  font-size: 0.72rem;
-  color: $text-muted;
-  margin-bottom: 2px;
+  font-size: 0.71rem;
+  color: $muted;
+  margin-bottom: 1px;
 }
 
 .tl-card-name {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 600;
-  color: $text-dark;
+  color: $text;
   margin-bottom: 2px;
+  letter-spacing: -0.01em;
 }
 
 .tl-card-meta {
-  font-size: 0.8rem;
-  color: $text-muted;
+  font-size: 0.78rem;
+  color: $muted;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
 }
 
 .tl-dot-sep {
@@ -334,6 +403,7 @@ $bg: #efefef;
   border-radius: 50%;
   background: $border;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .tl-badge {
@@ -341,42 +411,60 @@ $bg: #efefef;
   font-size: 0.7rem;
   font-weight: 600;
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: 6px;
   text-transform: capitalize;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
 }
 
 .badge-conclusa,
 .badge-concluso {
-  background: #f1f5f9;
-  color: $text-muted;
+  background: $bg;
+  color: $muted;
   border: 1px solid $border;
 }
 
 .badge-confermata,
 .badge-approvata {
-  background: #e6f1fb;
-  color: #185fa5;
-  border: 1px solid #b5d4f4;
+  background: $green-light;
+  color: $green;
+  border: 1px solid $green-border;
 }
 
 .badge-annullata,
 .badge-rifiutata {
-  background: #faece7;
-  color: #993c1d;
-  border: 1px solid #f0997b;
+  background: $red-light;
+  color: $red;
+  border: 1px solid $red-border;
 }
 
 .badge-in-attesa,
 .badge-pendente {
-  background: #faeeda;
-  color: #854f0b;
-  border: 1px solid #fac775;
+  background: $amber-light;
+  color: $amber;
+  border: 1px solid $amber-border;
 }
 
 .storico-empty {
   font-size: 0.875rem;
-  color: $text-muted;
-  font-style: italic;
-  padding: 32px 0;
+  color: $muted;
+  padding: 40px 0;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .storico-body {
+    padding: 0 0 40px;
+  }
+
+  .storico-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    padding: 24px 20px;
+    box-shadow: none;
+  }
+
+  .tl-card-meta {
+    flex-wrap: wrap;
+  }
 }
