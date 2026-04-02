@@ -19,6 +19,7 @@ public class CacheConfiguration {
 
     private GitProperties gitProperties;
     private BuildProperties buildProperties;
+
     private final javax.cache.configuration.Configuration<Object, Object> jcacheConfiguration;
 
     public CacheConfiguration(JHipsterProperties jHipsterProperties) {
@@ -38,11 +39,17 @@ public class CacheConfiguration {
     @Bean
     public JCacheManagerCustomizer cacheManagerCustomizer() {
         return cm -> {
+            // Cache sistema JHipster
             createCache(cm, main.repository.UserRepository.USERS_BY_LOGIN_CACHE);
             createCache(cm, main.repository.UserRepository.USERS_BY_EMAIL_CACHE);
             createCache(cm, main.domain.Authority.class.getName());
+
+            // Cache entità Sale — FIX #06
             createCache(cm, main.domain.Sale.class.getName());
             createCache(cm, main.domain.Sale.class.getName() + ".prenotazionis");
+            createCache(cm, "sale-list"); // ← AGGIUNTO: usato da @Cacheable su findAllCached()
+
+            // Altre entità
             createCache(cm, main.domain.Utenti.class.getName());
             createCache(cm, main.domain.StatiPrenotazione.class.getName());
             createCache(cm, main.domain.Prenotazioni.class.getName());

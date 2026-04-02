@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, inject, signal, ElementRef, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { StatsDashboardService, StatsDashboard, SalaAdmin, Periodo } from './stats-dashboard.service';
 import { NotificationService } from 'app/shared/notification/notification.service';
 
@@ -17,6 +18,7 @@ declare const Chart: any;
 export default class StatsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private statsService = inject(StatsDashboardService);
   private notify = inject(NotificationService);
+  private http = inject(HttpClient);
 
   // ── Stato UI ──────────────────────────────────────────
   isLoading = signal(true);
@@ -31,6 +33,14 @@ export default class StatsDashboardComponent implements OnInit, AfterViewInit, O
   salaForm: SalaAdmin = { nome: '', capienza: 10, descrizione: '' };
   salaLoading = signal(false);
   showDeleteConfirm = signal<string | null>(null);
+
+  // ── Upload foto sala ──────────────────────────────────
+  // SalaConFoto estende SalaAdmin localmente per non dipendere dal service
+  salaFotoSelezionata = signal<(SalaAdmin & { imageUrl?: string | null }) | null>(null);
+  fotoLoading = signal(false);
+  fotoErrore = signal<string | null>(null);
+  fileSelezionato: File | null = null;
+  isDragOver = false;
 
   // ── Istanze Chart.js ──────────────────────────────────
   private charts: any[] = [];
@@ -329,6 +339,100 @@ export default class StatsDashboardComponent implements OnInit, AfterViewInit, O
         this.caricaSale();
       },
       error: () => this.notify.show('Errore eliminazione sala', 'error'),
+    });
+  }
+
+  // ── Upload foto sala ──────────────────────────────────
+
+  apriUploadFoto(sala: SalaAdmin): void {
+    // Usa i dati gia in memoria - caricati da caricaSale() che chiama GET /api/admin/sale
+    // che passa per SaleService.findOne() che normalizza gia l'imageUrl
+    this.salaFotoSelezionata.set({ ...sala });
+    this.fileSelezionato = null;
+    this.fotoErrore.set(null);
+    this.isDragOver = false;
+  }
+
+  chiudiUploadFoto(): void {
+    if (this.fotoLoading()) return;
+    this.salaFotoSelezionata.set(null);
+    this.fileSelezionato = null;
+    this.fotoErrore.set(null);
+  }
+
+  onFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) this.impostaFile(input.files[0]);
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = true;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragOver = false;
+    const file = event.dataTransfer?.files?.[0];
+    if (file) this.impostaFile(file);
+  }
+
+  private impostaFile(file: File): void {
+    const tipiOk = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!tipiOk.includes(file.type)) {
+      this.fotoErrore.set('Formato non supportato. Usa JPG, PNG o WEBP.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.fotoErrore.set('File troppo grande. Massimo 5 MB.');
+      return;
+    }
+    this.fotoErrore.set(null);
+    this.fileSelezionato = file;
+  }
+
+  confermaUploadFoto(): void {
+    const sala = this.salaFotoSelezionata();
+    if (!sala?.id || !this.fileSelezionato) return;
+    this.fotoLoading.set(true);
+
+    const formData = new FormData();
+    formData.append('file', this.fileSelezionato);
+
+    this.http.post<SalaAdmin & { imageUrl?: string | null }>(`/api/sales/${sala.id}/immagine`, formData).subscribe({
+      next: updated => {
+        this.fotoLoading.set(false);
+        this.notify.show('Foto caricata con successo! 📷', 'success');
+        this.fileSelezionato = null;
+        // Ricarica la lista aggiornata (imageUrl normalizzato dal SaleService)
+        this.caricaSale();
+        // Aggiorna il popup con l'imageUrl corretto dalla risposta
+        const upd = updated as SalaAdmin & { imageUrl?: string | null };
+        this.salaFotoSelezionata.set({ ...sala, imageUrl: upd.imageUrl ?? null });
+      },
+      error: () => {
+        this.fotoLoading.set(false);
+        this.fotoErrore.set('Errore durante il caricamento. Riprova.');
+      },
+    });
+  }
+
+  confermaRimuoviFoto(): void {
+    const sala = this.salaFotoSelezionata();
+    if (!sala?.id) return;
+    this.fotoLoading.set(true);
+
+    this.http.delete(`/api/sales/${sala.id}/immagine`).subscribe({
+      next: () => {
+        this.fotoLoading.set(false);
+        this.notify.show('Foto rimossa', 'success');
+        this.salaFotoSelezionata.set({ ...sala, imageUrl: null });
+        this.caricaSale();
+      },
+      error: () => {
+        this.fotoLoading.set(false);
+        this.fotoErrore.set('Errore durante la rimozione.');
+      },
     });
   }
 

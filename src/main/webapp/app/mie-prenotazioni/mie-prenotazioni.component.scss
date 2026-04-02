@@ -291,7 +291,65 @@ $status-wait-text: #475569;
   }
 }
 
-// ── Fix: data-status basato su codice (non descrizione) ──────
+// ── Bottone promemoria nella action-column ────────────────────
+.btn-promemoria {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  background: #eff6ff;
+  color: #3b82f6;
+  border: 1px solid #bfdbfe;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+
+  &:hover {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+  }
+}
+
+// ── Stili extra card lista ────────────────────────────────────
+.event-card-wrapper.is-cancelled {
+  opacity: 0.65;
+  border-left: 3px solid #ced4da !important;
+
+  .title-highlight {
+    text-decoration: line-through;
+    color: #6c757d !important;
+  }
+}
+
+.cancelled-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 40px;
+  .cancelled-icon {
+    font-size: 1.2rem;
+    opacity: 0.5;
+  }
+}
+
+.badge-ricorrente {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #dbeafe;
+  color: #3b82f6;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
 .status-pill {
   &[data-status='confirmed'] {
     background: #d4edda;
@@ -312,49 +370,270 @@ $status-wait-text: #475569;
   }
 }
 
-// ── Card cancellata: visivamente attenuata ───────────────────
-.event-card-wrapper.is-cancelled {
-  opacity: 0.65;
-  border-left: 3px solid #ced4da !important;
+// ── Modal promemoria ──────────────────────────────────────────
 
-  .title-highlight {
-    text-decoration: line-through;
-    color: #6c757d !important;
-  }
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+  z-index: 1040;
 }
 
-// ── Placeholder nella colonna azioni (card cancellata) ───────
-.cancelled-placeholder {
+.modal-box {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  z-index: 1050;
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.promemoria-modal {
+  width: 460px;
+}
+
+.modal-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  min-height: 40px;
+  gap: 12px;
+  padding: 18px 22px 16px;
+  border-bottom: 1px solid #e2e8f0;
 
-  .cancelled-icon {
-    font-size: 1.2rem;
-    opacity: 0.5;
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    background: #eff6ff;
+    color: #3b82f6;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  &__sub {
+    margin: 2px 0 0;
+    font-size: 0.8125rem;
+    color: #94a3b8;
   }
 }
 
-// ── Badge "ricorrente" inline accanto al titolo ──────────────
-.badge-ricorrente {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
+.modal-close {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: #f1f5f9;
   border-radius: 50%;
-  background: #dbeafe;
-  color: #3b82f6;
-  margin-left: 6px;
-  vertical-align: middle;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 0.85rem;
   flex-shrink: 0;
+  &:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+  }
 }
 
-// ── Stili serie ricorrenti (copiati dal file integrazione) ───
+.modal-body {
+  padding: 20px 22px;
+}
 
+.pro-hint {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.pro-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 0;
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.pro-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Opzione tipo promemoria
+.pro-tipi {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pro-tipo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+
+  &:hover {
+    border-color: #3b82f6;
+    background: #f8faff;
+  }
+
+  &.selected {
+    border-color: #3b82f6;
+    background: #eff6ff;
+
+    .pro-tipo__label {
+      color: #1d4ed8;
+    }
+  }
+
+  &__check {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+
+    .selected & {
+      background: #3b82f6;
+      border-color: #3b82f6;
+    }
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  &__label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  &__desc {
+    font-size: 0.75rem;
+    color: #94a3b8;
+  }
+
+  &__sent {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #10b981;
+    background: #ecfdf5;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+}
+
+.pro-nessuno {
+  margin: 12px 0 0;
+  font-size: 0.8125rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 0 0 14px 14px;
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 130px;
+  justify-content: center;
+  transition: all 0.15s;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-secondary {
+  padding: 9px 16px;
+  background: #fff;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  &:hover {
+    background: #f1f5f9;
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+// ── Ricorrenze card ───────────────────────────────────────────
 .ricorrenze-section {
   margin-bottom: 28px;
 }
@@ -378,7 +657,7 @@ $status-wait-text: #475569;
 }
 
 .ric-card {
-  background: #ffffff;
+  background: #fff;
   border: 1.5px solid #e5e7eb;
   border-radius: 10px;
   padding: 14px 16px;
@@ -386,7 +665,6 @@ $status-wait-text: #475569;
   flex-direction: column;
   gap: 6px;
   transition: box-shadow 0.15s;
-
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
@@ -408,7 +686,6 @@ $status-wait-text: #475569;
     font-size: 1rem;
     font-weight: 700;
     color: #111827;
-    margin-top: 2px;
   }
 
   &__orario {

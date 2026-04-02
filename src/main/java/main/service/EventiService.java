@@ -117,7 +117,9 @@ public class EventiService {
 
     @Transactional(readOnly = true)
     public Optional<EventiDTO> findOne(UUID id) {
-        return eventiRepository.findById(id).map(eventiMapper::toDto);
+        // Usa la query con JOIN FETCH per caricare prenotazione e sala in eager.
+        // findById standard lascerebbe prenotazione in lazy → numPersone = null nel DTO.
+        return eventiRepository.findByIdWithPrenotazioneAndSala(id).map(eventiMapper::toDto);
     }
 
     public EventiDTO update(EventiDTO eventiDTO) {

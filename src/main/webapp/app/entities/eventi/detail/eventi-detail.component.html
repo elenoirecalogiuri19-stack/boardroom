@@ -2,7 +2,11 @@
   @if (eventi(); as e) {
     <div class="br-refined-card">
       <div class="br-photo-section">
-        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=600" alt="Sala" />
+        @if (e.salaImageUrl) {
+          <img [src]="e.salaImageUrl" [alt]="e.salaNome ?? 'Sala'" class="br-sala-img" />
+        } @else {
+          <div class="br-sala-placeholder">🏛️</div>
+        }
         <div class="br-overlay-tag">{{ e.tipo }}</div>
         @if (e.eventoPieno) {
           <div class="br-sold-out-overlay">

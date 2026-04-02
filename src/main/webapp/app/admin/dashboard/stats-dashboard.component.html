@@ -215,6 +215,7 @@
             }
           </div>
           <div class="sala-card__actions">
+            <button class="sala-btn sala-btn--photo" (click)="apriUploadFoto(sala)" title="Gestisci foto">📷</button>
             <button class="sala-btn sala-btn--edit" (click)="aprireSalaForm(sala)" title="Modifica">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -290,6 +291,80 @@
     <div class="modal-footer">
       <button class="btn-secondary" (click)="showDeleteConfirm.set(null)">Annulla</button>
       <button class="btn-danger" (click)="confermaElimina()">Elimina</button>
+    </div>
+  </div>
+}
+
+<!-- ══════════════════════════════════════════════════
+     MODAL: Upload foto sala
+══════════════════════════════════════════════════ -->
+@if (salaFotoSelezionata()) {
+  <div class="modal-overlay" (click)="chiudiUploadFoto()"></div>
+  <div class="modal-box" role="dialog">
+    <div class="modal-header">
+      <h3>📷 Foto sala — {{ salaFotoSelezionata()!.nome }}</h3>
+      <button class="modal-close" (click)="chiudiUploadFoto()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Anteprima immagine corrente -->
+      @if (salaFotoSelezionata()!.imageUrl) {
+        <div class="foto-preview">
+          <img [src]="salaFotoSelezionata()!.imageUrl!" alt="Foto attuale" class="foto-preview__img" />
+          <span class="foto-preview__label">Immagine attuale</span>
+        </div>
+      } @else {
+        <div class="foto-placeholder">
+          <span class="foto-placeholder__icon">🏛️</span>
+          <span class="foto-placeholder__text">Nessuna immagine caricata</span>
+        </div>
+      }
+
+      <!-- Zona drop / selezione file -->
+      <div
+        class="foto-drop-zone"
+        [class.foto-drop-zone--dragover]="isDragOver"
+        (dragover)="onDragOver($event)"
+        (dragleave)="isDragOver = false"
+        (drop)="onDrop($event)"
+        (click)="fileInput.click()"
+      >
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="foto-drop-zone__icon">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        @if (fileSelezionato) {
+          <span class="foto-drop-zone__text">{{ fileSelezionato.name }}</span>
+          <span class="foto-drop-zone__sub">{{ (fileSelezionato.size / 1024 / 1024).toFixed(2) }} MB</span>
+        } @else {
+          <span class="foto-drop-zone__text">Clicca o trascina un'immagine qui</span>
+          <span class="foto-drop-zone__sub">JPG, PNG, WEBP — max 5 MB</span>
+        }
+        <input #fileInput type="file" accept="image/jpeg,image/png,image/webp" (change)="onFileChange($event)" style="display: none" />
+      </div>
+
+      <!-- Errore -->
+      @if (fotoErrore()) {
+        <div class="foto-errore">⚠️ {{ fotoErrore() }}</div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <div class="footer-left">
+        @if (salaFotoSelezionata()!.imageUrl) {
+          <button class="btn-danger" (click)="confermaRimuoviFoto()" [disabled]="fotoLoading()">🗑 Rimuovi foto</button>
+        }
+      </div>
+      <div class="footer-right">
+        <button class="btn-secondary" (click)="chiudiUploadFoto()" [disabled]="fotoLoading()">Annulla</button>
+        <button class="btn-primary" (click)="confermaUploadFoto()" [disabled]="!fileSelezionato || fotoLoading()">
+          @if (fotoLoading()) {
+            <span class="btn-spinner"></span>
+          } @else {
+            Carica immagine
+          }
+        </button>
+      </div>
     </div>
   </div>
 }

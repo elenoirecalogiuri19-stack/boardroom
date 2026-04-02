@@ -12,24 +12,28 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EventiRepository extends JpaRepository<Eventi, UUID> {
-    @Query("SELECT e FROM Eventi e LEFT JOIN e.prenotazione p " + "WHERE e.tipo = :tipo AND (p IS NULL OR p.stato.codice = :stato)")
+    @Query(
+        """
+        SELECT e FROM Eventi e
+        LEFT JOIN FETCH e.prenotazione p
+        LEFT JOIN FETCH p.sala
+        LEFT JOIN FETCH p.stato s
+        WHERE e.tipo = :tipo
+          AND (p IS NULL OR s.codice = :stato)
+        """
+    )
     List<Eventi> findPublicConfirmed(@Param("tipo") TipoEvento tipo, @Param("stato") StatoCodice stato);
 
     @Query(
         """
-            select e from Eventi e
-            join fetch e.prenotazione p
-            join fetch p.sala
-            where e.id = :id
+        SELECT e FROM Eventi e
+        JOIN FETCH e.prenotazione p
+        JOIN FETCH p.sala
+        WHERE e.id = :id
         """
     )
     Optional<Eventi> findByIdWithPrenotazioneAndSala(UUID id);
 
-    /**
-     * Carica l'evento con lock pessimistico (PESSIMISTIC_WRITE).
-     * Usato in inviaEmailPrenotazione per evitare race condition
-     * sul conteggio posti degli eventi pubblici.
-     */
     @Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT e FROM Eventi e WHERE e.id = :id")
     Optional<Eventi> findByIdWithLock(@Param("id") UUID id);

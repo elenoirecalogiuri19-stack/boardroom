@@ -103,7 +103,7 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, UUID
         LEFT JOIN FETCH u.user
         LEFT JOIN FETCH p.sala
         LEFT JOIN FETCH p.evento e
-        LEFT JOIN FETCH e.prenotazione
+        LEFT JOIN FETCH p.ricorrenza
         WHERE p.utente.user.login = :login
         AND p.data >= :oggi
         ORDER BY p.data ASC, p.oraInizio ASC

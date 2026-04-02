@@ -322,3 +322,22 @@ $br-text-dark: #1e3a1a;
     color: #999;
   }
 }
+
+// ── Immagine sala dinamica nella card evento ──────────────────
+.br-sala-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.br-sala-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+  background: linear-gradient(135deg, #f0f9ee 0%, #e8f5e4 100%);
+}

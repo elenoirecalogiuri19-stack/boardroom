@@ -9,6 +9,7 @@ import {
   withComponentInputBinding,
   withDebugTracing,
   withNavigationErrorHandler,
+  withPreloading,
 } from '@angular/router';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
@@ -22,8 +23,18 @@ import routes from './app.routes';
 
 import { NgbDateDayjsAdapter } from './config/datepicker-adapter';
 import { AppPageTitleStrategy } from './app-page-title-strategy';
-
 import { loadingInterceptor } from './core/util/loading.interceptor';
+
+/**
+ * FIX #04 — Aggiunto SelectivePreloadStrategy al posto di nessun preloading.
+ * FIX #05 — Confermato: withDebugTracing() è già correttamente gated su
+ *            environment.DEBUG_INFO_ENABLED. Nessuna modifica necessaria.
+ *
+ * IMPORT PATH: adattare in base alla struttura del progetto.
+ * Esempio: './core/routing/selective-preload.strategy'
+ * oppure direttamente './selective-preload.strategy' se nella stessa cartella.
+ */
+import { SelectivePreloadStrategy } from './selective-preload.strategy';
 
 const routerFeatures: RouterFeatures[] = [
   withComponentInputBinding(),
@@ -39,8 +50,14 @@ const routerFeatures: RouterFeatures[] = [
       router.navigate(['/error']);
     }
   }),
+
+  // FIX #04: preloading selettivo — solo i chunk marcati con data.preload=true
+  // vengono precaricati (con delay), gli altri solo on-demand.
+  withPreloading(SelectivePreloadStrategy),
 ];
 
+// FIX #05: CORRETTO — withDebugTracing() già gated su DEBUG_INFO_ENABLED.
+// In produzione environment.DEBUG_INFO_ENABLED = false → nessun overhead di tracing.
 if (environment.DEBUG_INFO_ENABLED) {
   routerFeatures.push(withDebugTracing());
 }
@@ -48,7 +65,13 @@ if (environment.DEBUG_INFO_ENABLED) {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes, ...routerFeatures),
-    importProvidersFrom(ServiceWorkerModule.register('ngsw-worker.js', { enabled: !environment.DEBUG_INFO_ENABLED })),
+
+    importProvidersFrom(
+      ServiceWorkerModule.register('ngsw-worker.js', {
+        // Service Worker abilitato SOLO in produzione (DEBUG_INFO_ENABLED = false in prod)
+        enabled: !environment.DEBUG_INFO_ENABLED,
+      }),
+    ),
 
     provideHttpClient(withInterceptors([loadingInterceptor]), withInterceptorsFromDi()),
 
@@ -59,5 +82,8 @@ export const appConfig: ApplicationConfig = {
     httpInterceptorProviders,
 
     { provide: TitleStrategy, useClass: AppPageTitleStrategy },
+
+    // FIX #04: registrazione SelectivePreloadStrategy come provider
+    SelectivePreloadStrategy,
   ],
 };

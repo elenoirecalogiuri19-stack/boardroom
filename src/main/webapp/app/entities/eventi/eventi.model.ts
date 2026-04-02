@@ -11,6 +11,7 @@ export interface IEventi {
   oraInizio?: string | null;
   oraFine?: string | null;
   salaNome?: string | null;
+  salaImageUrl?: string | null;
   prenotazione?: Pick<IPrenotazioni, 'id'> | null;
   numPersone?: number | null;
   postiOccupati?: number | null;
