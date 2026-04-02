@@ -41,9 +41,32 @@
               </div>
             </div>
           }
-          <button class="br-btn-prenota" (click)="apriModal()" [disabled]="e.eventoPieno ?? false" [class.br-btn-disabled]="e.eventoPieno">
-            {{ e.eventoPieno ? 'Esaurito' : 'Prenota ora' }}
-          </button>
+
+          @if (showForm) {
+            <div class="br-inline-form">
+              <div class="br-inline-form-label">I TUOI DATI</div>
+              <div class="br-field-row">
+                <div class="br-field">
+                  <label>NOME</label>
+                  <input type="text" [(ngModel)]="prenotazione.nome" placeholder="Mario" />
+                </div>
+                <div class="br-field">
+                  <label>COGNOME</label>
+                  <input type="text" [(ngModel)]="prenotazione.cognome" placeholder="Rossi" />
+                </div>
+              </div>
+              <div class="br-field">
+                <label>EMAIL</label>
+                <input type="email" [(ngModel)]="prenotazione.email" placeholder="info@gmail.com" />
+              </div>
+            </div>
+            <button class="br-btn-confirm" (click)="confermaPrenotazione()">Prenota ora</button>
+            <button class="br-btn-annulla" (click)="chiudiForm()">Annulla</button>
+          } @else {
+            <button class="br-btn-prenota" (click)="apriForm()" [disabled]="e.eventoPieno ?? false" [class.br-btn-disabled]="e.eventoPieno">
+              {{ e.eventoPieno ? 'Esaurito' : 'Prenota ora' }}
+            </button>
+          }
         </div>
 
         <div class="br-details-card">
@@ -99,28 +122,3 @@
     </div>
   }
 </div>
-
-@if (showModal) {
-  <div class="br-modal-overlay" (click)="chiudiModal()">
-    <div class="br-modal-content" (click)="$event.stopPropagation()">
-      <button class="close-btn" (click)="chiudiModal()">×</button>
-      <h3>Conferma Prenotazione</h3>
-      <p>Inserisci i tuoi dati per ricevere la conferma via email</p>
-      <div class="br-form">
-        <div class="br-group">
-          <label>Nome</label>
-          <input type="text" [(ngModel)]="prenotazione.nome" placeholder="Il tuo nome" />
-        </div>
-        <div class="br-group">
-          <label>Cognome</label>
-          <input type="text" [(ngModel)]="prenotazione.cognome" placeholder="Il tuo cognome" />
-        </div>
-        <div class="br-group">
-          <label>Email</label>
-          <input type="email" [(ngModel)]="prenotazione.email" placeholder="La tua email" />
-        </div>
-        <button class="br-btn-confirm" (click)="confermaPrenotazione()">Invia Conferma</button>
-      </div>
-    </div>
-  </div>
-}
