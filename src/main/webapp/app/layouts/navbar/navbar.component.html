@@ -23,20 +23,35 @@
           </a>
         </li>
 
-        <li class="nav-item" routerLinkActive="active">
-          <a class="nav-link" (click)="navigazioneProtetta('/mie-prenotazioni')" style="cursor: pointer">
+        <li class="nav-item" [class.active]="isActive('/mie-prenotazioni')">
+          <a
+            class="nav-link"
+            [class.active]="isActive('/mie-prenotazioni')"
+            (click)="navigazioneProtetta('/mie-prenotazioni')"
+            style="cursor: pointer"
+          >
             <span>Le mie prenotazioni</span>
           </a>
         </li>
 
-        <li class="nav-item" routerLinkActive="active">
-          <a class="nav-link" (click)="navigazioneProtetta('/prenota-sala')" style="cursor: pointer">
+        <li class="nav-item" [class.active]="isActive('/prenota-sala')">
+          <a
+            class="nav-link"
+            [class.active]="isActive('/prenota-sala')"
+            (click)="navigazioneProtetta('/prenota-sala')"
+            style="cursor: pointer"
+          >
             <span>Prenota sala</span>
           </a>
         </li>
 
-        <li class="nav-item" routerLinkActive="active">
-          <a class="nav-link" (click)="navigazioneProtetta('/prenotazioni/calendar')" style="cursor: pointer">
+        <li class="nav-item" [class.active]="isActive('/prenotazioni/calendar')">
+          <a
+            class="nav-link"
+            [class.active]="isActive('/prenotazioni/calendar')"
+            (click)="navigazioneProtetta('/prenotazioni/calendar')"
+            style="cursor: pointer"
+          >
             <fa-icon icon="calendar-alt" class="me-1"></fa-icon>
             <span>Calendario</span>
           </a>

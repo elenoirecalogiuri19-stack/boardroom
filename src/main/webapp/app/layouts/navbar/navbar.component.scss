@@ -52,19 +52,18 @@ $nav-height: 100px;
     border-radius: 6px;
     display: flex;
     align-items: center;
-    transition:
-      color 0.2s ease,
-      background 0.2s ease;
+    transition: color 0.2s ease;
 
     &:hover {
-      color: $br-dark !important;
-      background: rgba(0, 0, 0, 0.04);
+      color: $br-green !important;
+      background: transparent;
     }
 
     &.active-link,
     &.active {
       color: $br-green !important;
       font-weight: 600 !important;
+      background: transparent;
     }
   }
 }
@@ -72,6 +71,7 @@ $nav-height: 100px;
 .nav-item.active > .nav-link {
   color: $br-green !important;
   font-weight: 600 !important;
+  background: transparent;
 }
 
 .btn-login-green {
@@ -152,6 +152,11 @@ $nav-height: 100px;
   font-weight: 500 !important;
   text-transform: none !important;
   letter-spacing: 0 !important;
+
+  &:hover {
+    color: $br-green !important;
+    background: transparent;
+  }
 }
 
 .navbar-toggler {

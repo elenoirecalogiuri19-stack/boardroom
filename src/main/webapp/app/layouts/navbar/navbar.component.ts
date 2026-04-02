@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 import SharedModule from 'app/shared/shared.module';
 import { AccountService } from 'app/core/auth/account.service';
@@ -20,6 +21,7 @@ export default class NavbarComponent implements OnInit {
   isNavbarCollapsed = signal(true);
   openAPIEnabled?: boolean;
   version = '';
+  currentUrl = signal('');
 
   public accountService = inject(AccountService);
   account = this.accountService.trackCurrentAccount();
@@ -42,6 +44,12 @@ export default class NavbarComponent implements OnInit {
       this.inProduction = profileInfo.inProduction;
       this.openAPIEnabled = profileInfo.openAPIEnabled;
     });
+
+    this.currentUrl.set(this.router.url);
+
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe((event: NavigationEnd) => {
+      this.currentUrl.set(event.urlAfterRedirects);
+    });
   }
 
   hasAnyAuthority(authorities: string[] | string): boolean {
@@ -54,6 +62,10 @@ export default class NavbarComponent implements OnInit {
 
   toggleNavbar(): void {
     this.isNavbarCollapsed.update(isNavbarCollapsed => !isNavbarCollapsed);
+  }
+
+  isActive(path: string): boolean {
+    return this.currentUrl().startsWith(path);
   }
 
   navigazioneProtetta(destinazione: string): void {
