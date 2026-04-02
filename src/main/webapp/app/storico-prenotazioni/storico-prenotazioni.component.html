@@ -7,7 +7,6 @@
 
   <div class="storico-sep"></div>
 
-  <!-- Filtri -->
   <div class="filter-bar">
     <button class="filter-pill" [class.active]="filtroAttivo() === 'tutte'" (click)="applicaFiltro('tutte')">Tutte</button>
     <button class="filter-pill" [class.active]="filtroAttivo() === '30giorni'" (click)="applicaFiltro('30giorni')">Ultimi 30 giorni</button>
@@ -41,7 +40,6 @@
     </button>
   </div>
 
-  <!-- Input data singola -->
   @if (filtroAttivo() === 'singola') {
     <div class="date-input-row">
       <input type="date" class="date-input" [(ngModel)]="filtroDataSingola" />
@@ -50,7 +48,6 @@
     </div>
   }
 
-  <!-- Input range -->
   @if (filtroAttivo() === 'range') {
     <div class="date-input-row">
       <span class="date-input-label">Dal</span>
@@ -64,7 +61,6 @@
 
   <div class="storico-sep"></div>
 
-  <!-- Lista -->
   @if (isLoading()) {
     <p class="storico-empty">Caricamento...</p>
   } @else {

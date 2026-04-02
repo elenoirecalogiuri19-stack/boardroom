@@ -14,7 +14,6 @@ $bg: #efefef;
   margin: 0 auto;
 }
 
-// ─── Header ──────────────────────────────────────────────────
 .storico-tag {
   font-size: 0.62rem;
   font-weight: 700;
@@ -43,7 +42,6 @@ $bg: #efefef;
   margin: 22px 0;
 }
 
-// ─── Filter bar ──────────────────────────────────────────────
 .filter-bar {
   display: flex;
   align-items: center;
@@ -146,7 +144,6 @@ $bg: #efefef;
   }
 }
 
-// ─── Date inputs ─────────────────────────────────────────────
 .date-input-row {
   display: flex;
   align-items: center;
@@ -221,7 +218,6 @@ $bg: #efefef;
   }
 }
 
-// ─── Timeline ────────────────────────────────────────────────
 .timeline-wrap {
   display: flex;
   gap: 0;
@@ -340,7 +336,6 @@ $bg: #efefef;
   display: inline-block;
 }
 
-// ─── Badges ──────────────────────────────────────────────────
 .tl-badge {
   flex-shrink: 0;
   font-size: 0.7rem;
@@ -379,7 +374,6 @@ $bg: #efefef;
   border: 1px solid #fac775;
 }
 
-// ─── Empty ───────────────────────────────────────────────────
 .storico-empty {
   font-size: 0.875rem;
   color: $text-muted;
