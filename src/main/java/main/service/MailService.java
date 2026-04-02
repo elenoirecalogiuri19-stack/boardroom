@@ -255,4 +255,74 @@ public class MailService {
 
         LOG.debug("Promemoria accodato per '{}' — tipo: {}", email, etichettaTipo);
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Email waitlist
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Notifica all'utente che è stato inserito in lista di attesa.
+     */
+    public void sendWaitlistNotifica(
+        String email,
+        String nomeUtente,
+        String nomeSala,
+        String data,
+        String oraInizio,
+        String oraFine,
+        int posizione
+    ) {
+        Context ctx = new Context();
+        ctx.setVariable("nomeUtente", nomeUtente);
+        ctx.setVariable("nomeSala", nomeSala);
+        ctx.setVariable("dataPrenotazione", data);
+        ctx.setVariable("oraInizio", oraInizio);
+        ctx.setVariable("oraFine", oraFine);
+        ctx.setVariable("posizione", posizione);
+
+        String content = templateEngine.process("mail/waitlistNotificaEmail", ctx);
+
+        emailDispatcher.enqueue(
+            new EmailTask(email, "Lista di attesa — " + nomeSala, content, List.of(new InlineAttachment("logoimg", logoBytes, "image/png")))
+        );
+
+        LOG.debug("Email waitlist accodata per '{}' — posizione {}", email, posizione);
+    }
+
+    /**
+     * Notifica all'utente che è stato promosso dalla waitlist e ha 15 minuti per confermare.
+     */
+    public void sendWaitlistPromossa(
+        String email,
+        String nomeUtente,
+        String nomeSala,
+        String data,
+        String oraInizio,
+        String oraFine,
+        String prenotazioneId,
+        int minutiConferma
+    ) {
+        Context ctx = new Context();
+        ctx.setVariable("nomeUtente", nomeUtente);
+        ctx.setVariable("nomeSala", nomeSala);
+        ctx.setVariable("dataPrenotazione", data);
+        ctx.setVariable("oraInizio", oraInizio);
+        ctx.setVariable("oraFine", oraFine);
+        ctx.setVariable("prenotazioneId", prenotazioneId);
+        ctx.setVariable("minutiConferma", minutiConferma);
+        ctx.setVariable("baseUrl", jHipsterProperties.getMail().getBaseUrl());
+
+        String content = templateEngine.process("mail/waitlistPromossaEmail", ctx);
+
+        emailDispatcher.enqueue(
+            new EmailTask(
+                email,
+                "Posto disponibile! Conferma entro " + minutiConferma + " minuti — " + nomeSala,
+                content,
+                List.of(new InlineAttachment("logoimg", logoBytes, "image/png"))
+            )
+        );
+
+        LOG.debug("Email promozione waitlist accodata per '{}' — prenotazione {}", email, prenotazioneId);
+    }
 }

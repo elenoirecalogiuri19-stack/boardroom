@@ -46,5 +46,6 @@
   <include file="config/liquibase/changelog/20260401100001_add_perf_indexes.xml"      relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260402000002_alter_image_url_to_longtext.xml" relativeToChangelogFile="false"/>
   <include file="config/liquibase/changelog/20260402000003_add_locandina_to_eventi.xml" relativeToChangelogFile="false"/>
+  <include file="config/liquibase/changelog/20260402000004_add_waitlist.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

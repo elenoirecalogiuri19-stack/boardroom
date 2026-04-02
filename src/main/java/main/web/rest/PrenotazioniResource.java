@@ -48,10 +48,16 @@ public class PrenotazioniResource {
     private final PrenotazioniService prenotazioniService;
 
     private final PrenotazioniRepository prenotazioniRepository;
+    private final main.service.WaitlistService waitlistService;
 
-    public PrenotazioniResource(PrenotazioniService prenotazioniService, PrenotazioniRepository prenotazioniRepository) {
+    public PrenotazioniResource(
+        PrenotazioniService prenotazioniService,
+        PrenotazioniRepository prenotazioniRepository,
+        main.service.WaitlistService waitlistService
+    ) {
         this.prenotazioniService = prenotazioniService;
         this.prenotazioniRepository = prenotazioniRepository;
+        this.waitlistService = waitlistService;
     }
 
     /**
@@ -292,5 +298,23 @@ public class PrenotazioniResource {
     public ResponseEntity<PrenotazioniDTO> verificaQrCode(@PathVariable String codice) {
         LOG.debug("REST request to verify QR code : {}", codice);
         return prenotazioniService.findByCodiceQr(codice).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * POST /prenotazionis/{id}/conferma-promozione
+     * L'utente promosso dalla waitlist conferma di voler occupare lo slot.
+     * Deve essere chiamato entro 15 minuti dalla promozione.
+     */
+    @PostMapping("/{id}/conferma-promozione")
+    public ResponseEntity<PrenotazioniDTO> confermaPromozione(@PathVariable UUID id) {
+        LOG.debug("REST request to confirm waitlist promotion for prenotazione : {}", id);
+        try {
+            main.domain.Prenotazioni pren = waitlistService.confermaPromozione(id);
+            return ResponseEntity.ok(prenotazioniService.findOne(id).orElseThrow());
+        } catch (IllegalStateException e) {
+            throw new BadRequestAlertException(e.getMessage(), ENTITY_NAME, "waitlist.scaduta");
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

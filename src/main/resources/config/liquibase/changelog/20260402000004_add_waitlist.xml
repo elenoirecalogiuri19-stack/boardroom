@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Aggiunge la posizione in waitlist alla prenotazione -->
+    <changeSet id="20260402000004_add_waitlist_to_prenotazioni" author="boardroom">
+        <addColumn tableName="prenotazioni">
+            <column name="posizione_waitlist" type="INT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="promossa_at" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- Aggiunge i nuovi stati alla tabella stati_prenotazione -->
+    <changeSet id="20260402000005_add_waitlist_stati" author="boardroom">
+        <insert tableName="stati_prenotazione">
+            <column name="id" value="waitlisted-0000-0000-0000-000000000001"/>
+            <column name="codice" value="WAITLISTED"/>
+            <column name="descrizione" value="In lista di attesa"/>
+        </insert>
+        <insert tableName="stati_prenotazione">
+            <column name="id" value="promoted-00000-0000-0000-000000000002"/>
+            <column name="codice" value="PROMOTED"/>
+            <column name="descrizione" value="Promossa dalla waitlist, in attesa conferma"/>
+        </insert>
+        <insert tableName="stati_prenotazione">
+            <column name="id" value="expired-000000-0000-0000-000000000003"/>
+            <column name="codice" value="EXPIRED"/>
+            <column name="descrizione" value="Scaduta, utente non ha confermato"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

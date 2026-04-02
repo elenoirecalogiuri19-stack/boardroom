@@ -56,6 +56,7 @@ public class PrenotazioniService {
     private final QrCodeGenerator qrCodeGenerator;
 
     private final MailService mailService;
+    private final WaitlistService waitlistService;
 
     public PrenotazioniService(
         PrenotazioniRepository prenotazioniRepository,
@@ -64,7 +65,8 @@ public class PrenotazioniService {
         SaleRepository saleRepository,
         PrenotazioniMapper prenotazioniMapper,
         QrCodeGenerator qrCodeGenerator,
-        MailService mailService
+        MailService mailService,
+        WaitlistService waitlistService
     ) {
         this.prenotazioniRepository = prenotazioniRepository;
         this.statiPrenotazioneRepository = statiPrenotazioneRepository;
@@ -73,6 +75,7 @@ public class PrenotazioniService {
         this.prenotazioniMapper = prenotazioniMapper;
         this.qrCodeGenerator = qrCodeGenerator;
         this.mailService = mailService;
+        this.waitlistService = waitlistService;
     }
 
     /**
@@ -280,12 +283,19 @@ public class PrenotazioniService {
         Prenotazioni pren = prenotazioniRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Prenotazione non trovata"));
         verificaPermessiCancellazione(pren, username);
 
+        boolean wasConfirmed = pren.getStato() != null && pren.getStato().getCodice() == StatoCodice.CONFIRMED;
+
         StatiPrenotazione statoCancelled = statiPrenotazioneRepository
             .findByCodice(StatoCodice.CANCELLED)
             .orElseThrow(() -> new EntityNotFoundException("Stato CANCELLED non trovato"));
 
         pren.setStato(statoCancelled);
         prenotazioniRepository.save(pren);
+
+        // Se era CONFIRMED, libera lo slot e promuovi il primo in waitlist
+        if (wasConfirmed) {
+            waitlistService.promuoviDaWaitlist(pren);
+        }
 
         LOG.debug("Prenotazione {} annullata con successo dall'utente {}", id, username);
     }
@@ -519,10 +529,8 @@ public class PrenotazioniService {
         );
 
         if (sovrapposizione) {
-            StatiPrenotazione statoRejected = statiPrenotazioneRepository
-                .findByCodice(StatoCodice.REJECTED)
-                .orElseThrow(() -> new EntityNotFoundException("Stato REJECTED non trovato"));
-            pren.setStato(statoRejected);
+            // Slot occupato → entra in waitlist invece di essere rifiutato
+            waitlistService.aggiungiAWaitlist(pren);
         }
     }
 
