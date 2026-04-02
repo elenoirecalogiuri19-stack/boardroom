@@ -6,7 +6,6 @@ $br-text-muted: #6b7280;
 $br-border: #e5e7eb;
 $br-bg: #f4f6f5;
 
-// ─── Viewport ────────────────────────────────────────────────
 .br-viewport {
   background: $br-bg;
   min-height: 100vh;
@@ -16,7 +15,6 @@ $br-bg: #f4f6f5;
   align-items: flex-start;
 }
 
-// ─── Layout ──────────────────────────────────────────────────
 .br-page {
   width: 100%;
   max-width: 960px;
@@ -27,7 +25,6 @@ $br-bg: #f4f6f5;
   align-items: start;
 }
 
-// ─── Sinistra ────────────────────────────────────────────────
 .br-left {
   display: flex;
   flex-direction: column;
@@ -126,14 +123,12 @@ $br-bg: #f4f6f5;
   color: $br-text-muted;
 }
 
-// ─── Destra ──────────────────────────────────────────────────
 .br-right {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-// ─── Booking card ────────────────────────────────────────────
 .br-booking-card {
   background: white;
   border: 1px solid $br-border;
@@ -203,7 +198,6 @@ $br-bg: #f4f6f5;
   transition: width 0.4s ease;
 }
 
-// ─── Inline form ─────────────────────────────────────────────
 .br-inline-form {
   display: flex;
   flex-direction: column;
@@ -260,7 +254,6 @@ $br-bg: #f4f6f5;
   }
 }
 
-// ─── Bottoni ─────────────────────────────────────────────────
 .br-btn-prenota {
   width: 100%;
   height: 46px;
@@ -307,7 +300,6 @@ $br-bg: #f4f6f5;
   }
 }
 
-// ─── Details card ────────────────────────────────────────────
 .br-details-card {
   background: white;
   border: 1px solid $br-border;
@@ -362,7 +354,6 @@ $br-bg: #f4f6f5;
   margin: 0 20px;
 }
 
-// ─── Responsive ──────────────────────────────────────────────
 @media (max-width: 720px) {
   .br-page {
     grid-template-columns: 1fr;

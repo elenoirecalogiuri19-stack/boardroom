@@ -1,7 +1,6 @@
 <div class="br-viewport">
   @if (eventi(); as e) {
     <div class="br-page">
-      <!-- SINISTRA: foto + info evento -->
       <div class="br-left">
         <div class="br-photo">
           @if (e.locandinaUrl || e.salaImageUrl) {
@@ -31,9 +30,7 @@
         }
       </div>
 
-      <!-- DESTRA: booking card + details card -->
       <div class="br-right">
-        <!-- BOOKING CARD -->
         <div class="br-booking-card">
           @if (e.prezzo) {
             <div class="br-price-row">
@@ -54,7 +51,6 @@
           }
 
           @if (showForm) {
-            <!-- FORM INLINE -->
             <div class="br-inline-form">
               <div class="br-inline-form-label">I TUOI DATI</div>
               <div class="br-field-row">
@@ -81,7 +77,6 @@
           }
         </div>
 
-        <!-- DETAILS CARD -->
         <div class="br-details-card">
           @if (e.data && e.oraInizio && e.oraFine) {
             <div class="br-detail-row">
