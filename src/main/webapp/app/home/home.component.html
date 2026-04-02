@@ -1,9 +1,5 @@
 <div class="home-container">
   <div class="hero-section">
-    @if (isLoading()) {
-      <div class="hero-loading">Caricamento eventi...</div>
-    }
-
     @if (!isLoading() && eventi().length > 0) {
       <div
         class="hero-viewport"
