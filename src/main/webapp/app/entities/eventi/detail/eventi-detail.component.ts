@@ -15,7 +15,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class EventiDetailComponent implements OnInit {
   eventi = signal<IEventi | null>(null);
-  showModal = false;
+  showForm = false;
 
   prenotazione = {
     nome: '',
@@ -38,20 +38,19 @@ export class EventiDetailComponent implements OnInit {
     window.history.back();
   }
 
-  apriModal(): void {
-    this.showModal = true;
+  apriForm(): void {
+    this.showForm = true;
   }
 
-  chiudiModal(): void {
-    this.showModal = false;
+  chiudiForm(): void {
+    this.showForm = false;
+    this.prenotazione = { nome: '', cognome: '', email: '' };
   }
 
   confermaPrenotazione(): void {
     if (!this.eventi()) {
       return;
     }
-
-    this.showModal = false;
 
     this.http
       .post(`/api/eventis/${this.eventi()!.id}/prenotazione-email`, {
