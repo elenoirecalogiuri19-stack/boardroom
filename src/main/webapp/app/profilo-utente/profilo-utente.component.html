@@ -4,55 +4,84 @@
   </div>
 }
 
-<div class="profile-container" [class.blur-content]="isLoading">
-  <div class="profile-card">
-    <div class="profile-header">
-      <div class="avatar-column">
-        <div class="avatar-circle">
+<div class="pr-wrapper" [class.blur-content]="isLoading">
+  <div class="pr-inner">
+    <div class="pr-sidebar">
+      <div class="pr-avatar">
+        <fa-icon [icon]="faUser"></fa-icon>
+      </div>
+
+      <div class="pr-sidebar-name">{{ account()?.firstName }} {{ account()?.lastName }}</div>
+      <div class="pr-sidebar-since">UTENTE · DAL 2024</div>
+
+      <div class="pr-sidebar-sep"></div>
+
+      <nav class="pr-nav">
+        <a class="pr-nav-item pr-nav-active" routerLink="/profilo">
           <fa-icon [icon]="faUser"></fa-icon>
+          <span>Il mio profilo</span>
+        </a>
+        <a class="pr-nav-item" routerLink="/storico-prenotazioni">
+          <fa-icon [icon]="faHistory"></fa-icon>
+          <span>Storico prenotazioni</span>
+        </a>
+      </nav>
+
+      <div class="pr-sidebar-sep"></div>
+
+      <button class="pr-logout-btn" (click)="logout()">
+        <fa-icon [icon]="faSignOut"></fa-icon>
+        <span>Logout</span>
+      </button>
+    </div>
+
+    <div class="pr-content">
+      <div class="pr-content-header">
+        <div class="pr-content-tag">ACCOUNT</div>
+        <h1 class="pr-content-title">Il mio profilo</h1>
+        <p class="pr-content-sub">Gestisci le tue informazioni personali</p>
+      </div>
+
+      <div class="pr-section-sep"></div>
+
+      <div class="pr-section-label">INFORMAZIONI PERSONALI</div>
+
+      <div class="pr-field-row">
+        <div class="pr-field">
+          <label>NOME</label>
+          <input type="text" [placeholder]="account()?.firstName ?? 'Mario'" />
+        </div>
+        <div class="pr-field">
+          <label>COGNOME</label>
+          <input type="text" [placeholder]="account()?.lastName ?? 'Rossi'" />
         </div>
       </div>
-      <div class="title-column">
-        <p class="profile-tag">Il mio profilo</p>
-        <h1 class="user-full-name">{{ account()?.firstName }} {{ account()?.lastName }}</h1>
-        <p class="user-email-sub">{{ account()?.email }}</p>
-        <hr class="separator" />
-      </div>
-    </div>
 
-    <div class="data-table">
-      <div class="data-row">
-        <span class="data-label">Nome:</span>
-        <span class="data-value">{{ account()?.firstName }}</span>
+      <div class="pr-field">
+        <label>EMAIL</label>
+        <input type="email" [placeholder]="account()?.email ?? 'info@gmail.com'" />
       </div>
-      <div class="data-row">
-        <span class="data-label">Cognome:</span>
-        <span class="data-value">{{ account()?.lastName }}</span>
-      </div>
-      <div class="data-row">
-        <span class="data-label">Email:</span>
-        <span class="data-value">{{ account()?.email }}</span>
-      </div>
-      <div class="data-row">
-        <span class="data-label">Password:</span>
-        <span class="data-value">••••••••</span>
-      </div>
-    </div>
+      <div class="pr-section-sep"></div>
 
-    <div class="secondary-actions">
-      <button class="btn-light-green" routerLink="/storico-prenotazioni">
-        <fa-icon [icon]="faHistory" class="me-2"></fa-icon>
-        <span>Storico prenotazioni</span>
-      </button>
+      <div class="pr-section-label">SICUREZZA</div>
 
-      <button class="btn-light-green" routerLink="/account/settings">
-        <fa-icon [icon]="faCog" class="me-2"></fa-icon>
-        <span>Impostazioni account</span>
-      </button>
-    </div>
+      <div class="pr-field-row">
+        <div class="pr-field">
+          <label>PASSWORD ATTUALE</label>
+          <input type="password" placeholder="············" />
+        </div>
+        <div class="pr-field">
+          <label>NUOVA PASSWORD</label>
+          <input type="password" placeholder="Inserisci" />
+        </div>
+      </div>
 
-    <div class="logout-wrapper">
-      <span class="logout-text-link" (click)="logout()" style="cursor: pointer">Logout</span>
+      <div class="pr-section-sep"></div>
+
+      <div class="pr-actions">
+        <button class="pr-btn-save">Salva modifiche</button>
+        <button class="pr-btn-cancel">Annulla</button>
+      </div>
     </div>
   </div>
 </div>

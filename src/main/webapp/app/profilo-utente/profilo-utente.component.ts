@@ -4,7 +4,7 @@ import { AccountService } from 'app/core/auth/account.service';
 import { LoginService } from 'app/login/login.service';
 import SharedModule from 'app/shared/shared.module';
 import { CommonModule } from '@angular/common';
-import { faUser, faHistory, faCog } from '@fortawesome/free-solid-svg-icons'; // <-- Aggiunto
+import { faUser, faHistory, faCog, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   standalone: true,
@@ -19,6 +19,7 @@ export class ProfiloUtenteComponent {
   faUser = faUser;
   faHistory = faHistory;
   faCog = faCog;
+  faSignOut = faSignOutAlt;
 
   private accountService = inject(AccountService);
   private loginService = inject(LoginService);

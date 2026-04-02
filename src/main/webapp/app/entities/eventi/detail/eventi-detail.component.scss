@@ -7,7 +7,6 @@ $br-text-muted: #6b7280;
 $br-border: #e5e7eb;
 $br-bg: #f8faf9;
 
-// ─── Viewport ───────────────────────────────────────────────
 .br-viewport {
   background: $br-bg;
   min-height: 100vh;
@@ -17,7 +16,6 @@ $br-bg: #f8faf9;
   align-items: flex-start;
 }
 
-// ─── Page layout ────────────────────────────────────────────
 .br-page {
   width: 100%;
   max-width: 960px;
@@ -28,7 +26,6 @@ $br-bg: #f8faf9;
   align-items: start;
 }
 
-// ─── Left column ────────────────────────────────────────────
 .br-left {
   display: flex;
   flex-direction: column;
@@ -111,14 +108,12 @@ $br-bg: #f8faf9;
   color: $br-text-muted;
 }
 
-// ─── Right column ────────────────────────────────────────────
 .br-right {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-// ─── Booking card ────────────────────────────────────────────
 .br-booking-card {
   background: white;
   border: 1px solid $br-border;
@@ -188,7 +183,6 @@ $br-bg: #f8faf9;
   transition: width 0.4s ease;
 }
 
-// ─── Inline form ─────────────────────────────────────────────
 .br-inline-form {
   display: flex;
   flex-direction: column;
@@ -244,7 +238,6 @@ $br-bg: #f8faf9;
   }
 }
 
-// ─── Buttons ─────────────────────────────────────────────────
 .br-btn-prenota {
   width: 100%;
   height: 46px;
@@ -310,7 +303,6 @@ $br-bg: #f8faf9;
   }
 }
 
-// ─── Details card ────────────────────────────────────────────
 .br-details-card {
   background: white;
   border: 1px solid $br-border;
@@ -365,7 +357,6 @@ $br-bg: #f8faf9;
   margin: 0 18px;
 }
 
-// ─── Responsive ─────────────────────────────────────────────
 @media (max-width: 680px) {
   .br-page {
     grid-template-columns: 1fr;
