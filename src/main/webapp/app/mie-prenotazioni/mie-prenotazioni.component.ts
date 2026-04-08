@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import SharedModule from 'app/shared/shared.module';
@@ -7,6 +7,13 @@ import { NotificationService } from 'app/shared/notification/notification.servic
 import { RicorrenzaService } from '../entities/ricorrenti/ricorrenza.service';
 import { IRicorrenza } from '../entities/ricorrenti/ricorrenza.model';
 import { PromemoriaService, PromemoriaDTO, TipoPromemoria, TipoStatoDTO } from '../services/promemoria.service';
+
+type FiltroType = 'tutte' | 'settimana' | 'mese' | 'confermate' | 'attesa';
+
+interface GruppoPrenotazioni {
+  stato: string;
+  items: PrenotazioneDTO[];
+}
 
 @Component({
   standalone: true,
@@ -21,13 +28,11 @@ export class MiePrenotazioniComponent implements OnInit {
   showDeleteModal = signal(false);
   prenotazioneIdDaEliminare = signal<string | undefined>(undefined);
 
-  // ── Ricorrenze ────────────────────────────────────────
   ricorrenze = signal<IRicorrenza[]>([]);
   showCancellaSerieModal = signal(false);
   ricorrenzaIdDaCancellare = signal<string | undefined>(undefined);
   cancellaSoloFuture = signal(true);
 
-  // ── Promemoria ────────────────────────────────────────
   showPromemoriaModal = signal(false);
   proPrenotazioneId = signal<string | undefined>(undefined);
   proRiepilogo = signal<TipoStatoDTO[]>([]);
@@ -35,7 +40,8 @@ export class MiePrenotazioniComponent implements OnInit {
   proLoading = signal(false);
   proSaving = signal(false);
 
-  // Array tipizzato usato nel template @for — evita l'errore "string not assignable to TipoPromemoria"
+  filtroAttivo = signal<FiltroType>('tutte');
+
   readonly proOpzioni: { tipo: TipoPromemoria; label: string; desc: string }[] = [
     { tipo: 'WEEK_BEFORE', label: '1 settimana prima', desc: "7 giorni prima dell'evento" },
     { tipo: 'TWO_DAYS_BEFORE', label: '2 giorni prima', desc: "48 ore prima dell'evento" },
@@ -60,7 +66,67 @@ export class MiePrenotazioniComponent implements OnInit {
     });
   }
 
-  // ── Helpers display ───────────────────────────────────
+  setFiltro(filtro: FiltroType): void {
+    this.filtroAttivo.set(filtro);
+  }
+
+  gruppiPrenotazioni = computed<GruppoPrenotazioni[]>(() => {
+    const oggi = new Date();
+    oggi.setHours(0, 0, 0, 0);
+    const filtro = this.filtroAttivo();
+
+    const filtrate = this.prenotazioni().filter(pren => {
+      const dataPren = pren.data ? new Date(pren.data) : null;
+
+      switch (filtro) {
+        case 'settimana': {
+          if (!dataPren) return false;
+          const fine = new Date(oggi);
+          fine.setDate(fine.getDate() + 7);
+          return dataPren >= oggi && dataPren <= fine;
+        }
+        case 'mese': {
+          if (!dataPren) return false;
+          const fine = new Date(oggi);
+          fine.setMonth(fine.getMonth() + 1);
+          return dataPren >= oggi && dataPren <= fine;
+        }
+        case 'confermate':
+          return pren.stato?.codice === 'CONFIRMED' || pren.stato?.codice?.toLowerCase() === 'confermata';
+        case 'attesa':
+          return pren.stato?.codice === 'WAITING' || pren.stato?.codice?.toLowerCase().includes('attesa');
+        default:
+          return true;
+      }
+    });
+
+    const mappaGruppi = new Map<string, PrenotazioneDTO[]>();
+
+    for (const pren of filtrate) {
+      const statoLabel = this.getStatoLabel(pren);
+      if (!mappaGruppi.has(statoLabel)) {
+        mappaGruppi.set(statoLabel, []);
+      }
+      mappaGruppi.get(statoLabel)!.push(pren);
+    }
+
+    return Array.from(mappaGruppi.entries()).map(([stato, items]) => ({ stato, items }));
+  });
+
+  private getStatoLabel(pren: PrenotazioneDTO): string {
+    const codice = pren.stato?.codice?.toUpperCase() ?? '';
+    const mappa: Record<string, string> = {
+      CONFIRMED: 'Confermate',
+      CONFERMATA: 'Confermate',
+      CANCELLED: 'Cancellate',
+      CANCELLATA: 'Cancellate',
+      ANNULLATA: 'Cancellate',
+      REJECTED: 'Rifiutate',
+      RIFIUTATA: 'Rifiutate',
+      WAITING: 'In attesa',
+    };
+    return mappa[codice] ?? pren.stato?.descrizione ?? 'Altre';
+  }
 
   getTitolo(pren: PrenotazioneDTO): string {
     if (pren.evento?.titolo) return pren.evento.titolo;
@@ -103,8 +169,6 @@ export class MiePrenotazioniComponent implements OnInit {
     return giorni.map(g => nomi[g] ?? g).join(' · ');
   }
 
-  // ── Promemoria ────────────────────────────────────────
-
   apriPromemoria(prenotazioneId: string | undefined): void {
     if (!prenotazioneId) return;
     this.proPrenotazioneId.set(prenotazioneId);
@@ -119,7 +183,6 @@ export class MiePrenotazioniComponent implements OnInit {
       },
       error: () => {
         this.proLoading.set(false);
-        // Se non esistono ancora, inizializza vuoto
         this.proRiepilogo.set([]);
         this.proSelezionati.set(new Set());
       },
@@ -145,7 +208,6 @@ export class MiePrenotazioniComponent implements OnInit {
     return this.proSelezionati().has(tipo);
   }
 
-  /** Helper senza arrow function: usato nel template al posto di proRiepilogo().find(...) */
   isTipoInviato(tipo: TipoPromemoria): boolean {
     return this.proRiepilogo().some(r => r.tipo === tipo && r.inviato);
   }
@@ -166,7 +228,7 @@ export class MiePrenotazioniComponent implements OnInit {
           this.chiudiPromemoria();
           const count = this.proSelezionati().size;
           this.notificationService.show(
-            count > 0 ? `✅ Promemoria salvati: riceverai ${count} notifica${count > 1 ? 'he' : ''}` : 'Promemoria disattivati',
+            count > 0 ? `Promemoria salvati: riceverai ${count} notifica${count > 1 ? 'he' : ''}` : 'Promemoria disattivati',
             'success',
           );
         },
@@ -177,12 +239,9 @@ export class MiePrenotazioniComponent implements OnInit {
       });
   }
 
-  /** Controlla se una prenotazione ha almeno un promemoria attivo */
   hasPromemoriaAttivo(prenotazioneId: string | undefined): boolean {
-    return false; // ottimizzazione: implementare con cache locale se necessario
+    return false;
   }
-
-  // ── Ricorrenze ────────────────────────────────────────
 
   caricaRicorrenze(): void {
     this.ricorrenzaService.getMie().subscribe({
@@ -191,24 +250,13 @@ export class MiePrenotazioniComponent implements OnInit {
     });
   }
 
-  /**
-   * Restituisce le serie ricorrenti da mostrare nella card section.
-   * Nasconde le serie in cui TUTTE le prenotazioni collegate sono CANCELLED.
-   * Usa le prenotazioni già caricate in memoria — nessuna chiamata extra al backend.
-   */
   get ricorrenzeAttive(): IRicorrenza[] {
     return this.ricorrenze().filter(r => !this.isSerieInteramenteCancellata(r.id));
   }
 
-  /**
-   * True se tutte le prenotazioni della serie hanno stato CANCELLED.
-   * Una serie è considerata "attiva" se ha almeno una prenotazione non cancellata.
-   */
   isSerieInteramenteCancellata(ricorrenzaId: string | undefined): boolean {
     if (!ricorrenzaId) return false;
     const prenotazioniSerie = this.prenotazioni().filter(p => p.ricorrenzaId === ricorrenzaId);
-    // Se non ci sono prenotazioni caricate per questa serie (es. tutte passate)
-    // non nascondiamo la card — manteniamo comportamento conservativo
     if (prenotazioniSerie.length === 0) return false;
     return prenotazioniSerie.every(p => p.stato?.codice === 'CANCELLED');
   }
@@ -242,8 +290,6 @@ export class MiePrenotazioniComponent implements OnInit {
     });
     this.ricorrenzaIdDaCancellare.set(undefined);
   }
-
-  // ── Prenotazione singola ──────────────────────────────
 
   toggleDetails(id: string | undefined): void {
     if (!id) return;

@@ -26,7 +26,7 @@ $status-wait-text: #475569;
 
 .header-section {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 32px;
   h1 {
     font-size: 2.2rem;
     font-weight: 800;
@@ -39,16 +39,65 @@ $status-wait-text: #475569;
   }
 }
 
+.filtri-bar {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.filtro-btn {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  color: #475569;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: $br-success;
+    color: $br-success;
+  }
+
+  &.active {
+    background: $br-success;
+    border-color: $br-success;
+    color: #fff;
+  }
+}
+
+.gruppo-stato {
+  margin-bottom: 8px;
+}
+
+.gruppo-header {
+  padding: 10px 4px 6px;
+}
+
+.gruppo-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .event-card-wrapper {
   background: white;
-  border-radius: 20px;
-  margin-bottom: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.4s ease;
+  border-radius: 16px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  transition: all 0.3s ease;
   overflow: hidden;
+
   &:hover {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
   }
+
   &.is-expanded {
     border-color: $br-success;
   }
@@ -56,38 +105,72 @@ $status-wait-text: #475569;
 
 .event-card-row {
   display: grid;
-  grid-template-columns: 160px 1fr 80px;
+  grid-template-columns: 64px 1fr auto auto;
   align-items: center;
-  padding: 25px;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.date-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+
+  &__day {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: $br-dark;
+    line-height: 1;
+  }
+
+  &__month {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: $text-muted;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
 }
 
 .info-grid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1.2fr 0.8fr 1fr;
-  gap: 25px;
-  padding: 0 30px;
-  border-left: 1px solid #f1f5f9;
+  grid-template-columns: 1.6fr 1fr 1.2fr 0.7fr 1fr;
+  gap: 16px;
+  align-items: center;
 }
 
 .info-group {
   display: flex;
   flex-direction: column;
+  gap: 3px;
+
   .label {
     font-size: 0.65rem;
-    font-weight: 700;
+    font-weight: 600;
     color: $text-muted;
     text-transform: uppercase;
-    margin-bottom: 5px;
+    letter-spacing: 0.04em;
   }
+
   .value {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: $br-dark;
   }
+
   .title-highlight {
-    color: $br-success;
+    color: $br-dark;
     font-weight: 700;
+    font-size: 0.9rem;
   }
+
   .time-sub {
     font-size: 0.8rem;
     color: $text-muted;
@@ -95,13 +178,27 @@ $status-wait-text: #475569;
   }
 }
 
+.location-dot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: $br-success;
+    flex-shrink: 0;
+  }
+}
+
 .status-pill {
   padding: 5px 12px;
-  border-radius: 6px;
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  display: flex;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: fit-content;
@@ -110,50 +207,75 @@ $status-wait-text: #475569;
   &[data-status='confirmed'] {
     background: $status-confirm-bg !important;
     color: $status-confirm-text !important;
+    border: 1px solid darken($status-confirm-bg, 8%);
   }
   &[data-status='cancellata'],
   &[data-status='cancelled'],
   &[data-status='annullata'] {
     background: $status-cancel-bg !important;
     color: $status-cancel-text !important;
+    border: 1px solid darken($status-cancel-bg, 6%);
   }
   &[data-status='rifiutata'],
   &[data-status='rejected'] {
     background: $status-reject-bg !important;
     color: $status-reject-text !important;
+    border: 1px solid darken($status-reject-bg, 8%);
   }
   &[data-status='validazione prenotazione in corso'],
-  &[data-status='waiting'] {
-    background: $status-wait-bg !important;
-    color: $status-wait-text !important;
+  &[data-status='waiting'],
+  &[data-status='in_attesa'] {
+    background: #fff7e6 !important;
+    color: #b45309 !important;
+    border: 1px solid #fde68a;
   }
 }
 
 .action-column {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  align-items: stretch;
+  min-width: 100px;
+
   .btn-action {
-    padding: 7px 12px;
-    border-radius: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
     background: transparent;
-    transition: 0.2s;
-    min-width: 100px;
+    transition: 0.15s;
+    text-align: center;
+    white-space: nowrap;
+
     &.btn-edit {
-      color: $br-success;
-      border: 1px solid rgba($br-success, 0.2);
+      color: $br-dark;
+      border: 1.5px solid #cbd5e1;
       &:hover {
-        background: rgba($br-success, 0.06);
+        border-color: $br-dark;
+        background: #f8fafc;
       }
     }
+
     &.btn-delete {
       color: #e74c3c;
-      border: 1px solid rgba(#e74c3c, 0.2);
+      border: 1.5px solid rgba(#e74c3c, 0.25);
       &:hover {
         background: rgba(#e74c3c, 0.06);
+      }
+    }
+
+    &.btn-promemoria {
+      color: $br-dark;
+      border: 1.5px solid #cbd5e1;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      &:hover {
+        border-color: $br-dark;
+        background: #f8fafc;
       }
     }
   }
@@ -163,9 +285,10 @@ $status-wait-text: #475569;
   display: flex;
   justify-content: center;
   cursor: pointer;
+
   .arrow-circle {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -173,6 +296,7 @@ $status-wait-text: #475569;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
+
     &.rotated {
       background: $br-success;
       color: white;
@@ -184,9 +308,10 @@ $status-wait-text: #475569;
 .details-drawer {
   background: #fafbfc;
   border-top: 1px solid #f1f5f9;
-  padding: 25px 30px;
+  padding: 20px 24px;
+
   .description-text {
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     color: $text-muted;
     line-height: 1.6;
   }
@@ -195,7 +320,8 @@ $status-wait-text: #475569;
 .meta-footer {
   display: flex;
   gap: 20px;
-  margin-top: 20px;
+  margin-top: 16px;
+
   .badge-type {
     background: #e2e8f0;
     padding: 4px 10px;
@@ -203,6 +329,7 @@ $status-wait-text: #475569;
     font-size: 0.7rem;
     font-weight: 700;
   }
+
   .price-tag {
     color: $br-success;
     font-weight: 700;
@@ -291,30 +418,6 @@ $status-wait-text: #475569;
   }
 }
 
-// ── Bottone promemoria nella action-column ────────────────────
-.btn-promemoria {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 10px;
-  background: #eff6ff;
-  color: #3b82f6;
-  border: 1px solid #bfdbfe;
-  border-radius: 7px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-
-  &:hover {
-    background: #3b82f6;
-    color: white;
-    border-color: #3b82f6;
-  }
-}
-
-// ── Stili extra card lista ────────────────────────────────────
 .event-card-wrapper.is-cancelled {
   opacity: 0.65;
   border-left: 3px solid #ced4da !important;
@@ -331,6 +434,7 @@ $status-wait-text: #475569;
   justify-content: center;
   width: 100%;
   min-height: 40px;
+
   .cancelled-icon {
     font-size: 1.2rem;
     opacity: 0.5;
@@ -349,28 +453,6 @@ $status-wait-text: #475569;
   margin-left: 6px;
   vertical-align: middle;
 }
-
-.status-pill {
-  &[data-status='confirmed'] {
-    background: #d4edda;
-    color: #155724;
-  }
-  &[data-status='cancelled'] {
-    background: #f0f0f0;
-    color: #6c757d;
-    text-decoration: line-through;
-  }
-  &[data-status='waiting'] {
-    background: #fff3cd;
-    color: #856404;
-  }
-  &[data-status='rejected'] {
-    background: #f8d7da;
-    color: #721c24;
-  }
-}
-
-// ── Modal promemoria ──────────────────────────────────────────
 
 .modal-overlay {
   position: fixed;
@@ -442,6 +524,7 @@ $status-wait-text: #475569;
   color: #64748b;
   font-size: 0.85rem;
   flex-shrink: 0;
+
   &:hover {
     background: #e2e8f0;
     color: #1e293b;
@@ -483,7 +566,6 @@ $status-wait-text: #475569;
   }
 }
 
-// Opzione tipo promemoria
 .pro-tipi {
   display: flex;
   flex-direction: column;
@@ -598,6 +680,7 @@ $status-wait-text: #475569;
   &:hover:not(:disabled) {
     filter: brightness(1.08);
   }
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -614,9 +697,11 @@ $status-wait-text: #475569;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
+
   &:hover {
     background: #f1f5f9;
   }
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -633,7 +718,6 @@ $status-wait-text: #475569;
   display: inline-block;
 }
 
-// ── Ricorrenze card ───────────────────────────────────────────
 .ricorrenze-section {
   margin-bottom: 28px;
 }
@@ -665,6 +749,7 @@ $status-wait-text: #475569;
   flex-direction: column;
   gap: 6px;
   transition: box-shadow 0.15s;
+
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }

@@ -1,10 +1,17 @@
 <div class="mie-prenotazioni-container" [class.blur-content]="showDeleteModal() || showCancellaSerieModal() || showPromemoriaModal()">
   <div class="header-section">
-    <h1>Le tue Prenotazioni</h1>
+    <h1>Le tue prenotazioni</h1>
     <p>Visualizza e gestisci le tue prenotazioni future.</p>
   </div>
 
-  <!-- ── Serie ricorrenti ────────────────────────────── -->
+  <div class="filtri-bar">
+    <button class="filtro-btn" [class.active]="filtroAttivo() === 'tutte'" (click)="setFiltro('tutte')">Tutte</button>
+    <button class="filtro-btn" [class.active]="filtroAttivo() === 'settimana'" (click)="setFiltro('settimana')">Questa settimana</button>
+    <button class="filtro-btn" [class.active]="filtroAttivo() === 'mese'" (click)="setFiltro('mese')">Questo mese</button>
+    <button class="filtro-btn" [class.active]="filtroAttivo() === 'confermate'" (click)="setFiltro('confermate')">Confermate</button>
+    <button class="filtro-btn" [class.active]="filtroAttivo() === 'attesa'" (click)="setFiltro('attesa')">In attesa</button>
+  </div>
+
   @if (ricorrenzeAttive.length > 0) {
     <div class="ricorrenze-section">
       <h2 class="ricorrenze-title">
@@ -45,129 +52,139 @@
     </div>
   }
 
-  <!-- ── Lista prenotazioni ─────────────────────────── -->
   <div class="list-container">
-    @for (pren of prenotazioni(); track pren.id) {
-      <div class="event-card-wrapper" [class.is-expanded]="isExpanded(pren.id)" [class.is-cancelled]="isCancellata(pren)">
-        <div class="event-card-row">
-          <div class="action-column">
-            @if (!isCancellata(pren)) {
-              @if (pren.eventoId) {
-                <button class="btn-action btn-edit" [routerLink]="['/eventi', pren.eventoId, 'edit']">
-                  <span>📝 Modifica</span>
-                </button>
-              }
-              <button class="btn-action btn-delete" (click)="chiediConfermaEliminazione(pren.id)">
-                <span>🗑️ Elimina</span>
-              </button>
-              <!-- ── Bottone promemoria ── -->
-              <button class="btn-action btn-promemoria" (click)="apriPromemoria(pren.id)" title="Imposta promemoria email">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                </svg>
-                <span>Promemoria</span>
-              </button>
-            } @else {
-              <div class="cancelled-placeholder">
-                <span class="cancelled-icon">🚫</span>
-              </div>
-            }
-          </div>
-
-          <div class="info-grid">
-            <div class="info-group">
-              <span class="label">
-                @if (isRicorrente(pren) && !pren.eventoId) {
-                  Prenotazione ricorrente
-                } @else {
-                  Evento
-                }
-              </span>
-              <div class="value title-highlight">
-                {{ getTitolo(pren) }}
-                @if (isRicorrente(pren)) {
-                  <span class="badge-ricorrente" title="Parte di una serie ricorrente">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                      <polyline points="1 4 1 10 7 10"></polyline>
-                      <path d="M3.51 15a9 9 0 1 0 .49-4.5"></path>
-                    </svg>
-                  </span>
-                }
-              </div>
-            </div>
-
-            <div class="info-group">
-              <span class="label">Location</span>
-              <span class="value">📍 {{ pren.sala?.nome || 'N/A' }}</span>
-            </div>
-
-            <div class="info-group">
-              <span class="label">Data e Ora</span>
-              <div class="value">
-                <span class="d-block">{{ pren.data | date: 'dd MMM yyyy' }}</span>
-                <span class="time-sub">{{ pren.oraInizio }} - {{ pren.oraFine }}</span>
-              </div>
-            </div>
-
-            <div class="info-group">
-              <span class="label">Partecipanti</span>
-              <span class="value">👥 {{ pren.numPersone ?? '—' }}</span>
-            </div>
-
-            <div class="info-group">
-              <span class="label">Stato</span>
-              <span class="status-pill" [attr.data-status]="getStatusAttr(pren)">
-                {{ pren.stato?.descrizione || 'N/D' }}
-              </span>
-            </div>
-          </div>
-
-          <div class="arrow-column" (click)="toggleDetails(pren.id)">
-            <div class="arrow-circle" [class.rotated]="isExpanded(pren.id)">
-              <span class="arrow-icon">▼</span>
-            </div>
-          </div>
+    @for (gruppo of gruppiPrenotazioni(); track gruppo.stato) {
+      <div class="gruppo-stato">
+        <div class="gruppo-header">
+          <span class="gruppo-label">{{ gruppo.stato.toUpperCase() }}•{{ gruppo.items.length }}</span>
         </div>
+        @for (pren of gruppo.items; track pren.id) {
+          <div class="event-card-wrapper" [class.is-expanded]="isExpanded(pren.id)" [class.is-cancelled]="isCancellata(pren)">
+            <div class="event-card-row">
+              <div class="date-block">
+                <span class="date-block__day">{{ pren.data | date: 'dd' }}</span>
+                <span class="date-block__month">{{ pren.data | date: 'MMM' | uppercase }}</span>
+              </div>
 
-        @if (isExpanded(pren.id)) {
-          <div class="details-drawer">
-            <div class="drawer-inner">
-              @if (pren.evento) {
-                <div class="detail-block">
-                  <span class="label">Descrizione Evento</span>
-                  <p class="description-text">{{ pren.evento.descrizione || 'Nessuna descrizione.' }}</p>
+              <div class="info-grid">
+                <div class="info-group">
+                  <span class="value title-highlight">
+                    {{ getTitolo(pren) }}
+                    @if (isRicorrente(pren)) {
+                      <span class="badge-ricorrente" title="Parte di una serie ricorrente">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <polyline points="1 4 1 10 7 10"></polyline>
+                          <path d="M3.51 15a9 9 0 1 0 .49-4.5"></path>
+                        </svg>
+                      </span>
+                    }
+                  </span>
+                  <span class="label">{{ pren.evento?.tipo ?? (isRicorrente(pren) ? 'Ricorrente' : 'Prenotazione') }}</span>
                 </div>
-                <div class="meta-footer">
-                  <div class="meta-item">
-                    <span class="label">Tipologia</span>
-                    <span class="badge-type">{{ pren.evento.tipo || 'PRIVATO' }}</span>
+
+                <div class="info-group">
+                  <div class="value location-dot">
+                    <span class="dot"></span>
+                    {{ pren.sala?.nome || 'N/A' }}
                   </div>
-                  @if (pren.evento.tipo === 'PUBBLICO' || (pren.evento.prezzo != null && pren.evento.prezzo > 0)) {
-                    <div class="meta-item">
-                      <span class="label">Prezzo</span>
-                      <span class="price-tag">€ {{ pren.evento.prezzo | number: '1.2-2' }}</span>
+                </div>
+
+                <div class="info-group">
+                  <span class="value">{{ pren.data | date: 'dd MMMM yyyy' }}</span>
+                </div>
+
+                <div class="info-group">
+                  <span class="value">
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      style="vertical-align: middle; margin-right: 3px"
+                    >
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                    </svg>
+                    {{ pren.numPersone ?? '—' }}
+                  </span>
+                </div>
+
+                <div class="info-group">
+                  <span class="status-pill" [attr.data-status]="getStatusAttr(pren)">
+                    {{ pren.stato?.descrizione || 'N/D' }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="action-column">
+                @if (!isCancellata(pren)) {
+                  <button class="btn-action btn-delete" (click)="chiediConfermaEliminazione(pren.id)">
+                    <span>Elimina</span>
+                  </button>
+                  <button class="btn-action btn-promemoria" (click)="apriPromemoria(pren.id)" title="Imposta promemoria email">
+                    <span>Promemoria</span>
+                  </button>
+                  @if (pren.eventoId) {
+                    <button class="btn-action btn-edit" [routerLink]="['/eventi', pren.eventoId, 'edit']">
+                      <span>Modifica</span>
+                    </button>
+                  }
+                } @else {
+                  <div class="cancelled-placeholder">
+                    <span class="cancelled-icon">🚫</span>
+                  </div>
+                }
+              </div>
+
+              <div class="arrow-column" (click)="toggleDetails(pren.id)">
+                <div class="arrow-circle" [class.rotated]="isExpanded(pren.id)">
+                  <span class="arrow-icon">▼</span>
+                </div>
+              </div>
+            </div>
+
+            @if (isExpanded(pren.id)) {
+              <div class="details-drawer">
+                <div class="drawer-inner">
+                  @if (pren.evento) {
+                    <div class="detail-block">
+                      <span class="label">Descrizione Evento</span>
+                      <p class="description-text">{{ pren.evento.descrizione || 'Nessuna descrizione.' }}</p>
+                    </div>
+                    <div class="meta-footer">
+                      <div class="meta-item">
+                        <span class="label">Tipologia</span>
+                        <span class="badge-type">{{ pren.evento.tipo || 'PRIVATO' }}</span>
+                      </div>
+                      @if (pren.evento.tipo === 'PUBBLICO' || (pren.evento.prezzo != null && pren.evento.prezzo > 0)) {
+                        <div class="meta-item">
+                          <span class="label">Prezzo</span>
+                          <span class="price-tag">€ {{ pren.evento.prezzo | number: '1.2-2' }}</span>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="detail-block">
+                      <span class="label">Dettagli prenotazione</span>
+                      <p class="description-text">
+                        Prenotazione ricorrente · {{ pren.sala?.nome ?? 'Sala' }}
+                        @if (isCancellata(pren)) {
+                          · <strong>Cancellata</strong>
+                        }
+                      </p>
+                    </div>
+                    <div class="meta-footer">
+                      <div class="meta-item">
+                        <span class="label">Tipologia</span>
+                        <span class="badge-type">RICORRENTE</span>
+                      </div>
                     </div>
                   }
                 </div>
-              } @else {
-                <div class="detail-block">
-                  <span class="label">Dettagli prenotazione</span>
-                  <p class="description-text">
-                    Prenotazione ricorrente · {{ pren.sala?.nome ?? 'Sala' }}
-                    @if (isCancellata(pren)) {
-                      · <strong>Cancellata</strong>
-                    }
-                  </p>
-                </div>
-                <div class="meta-footer">
-                  <div class="meta-item">
-                    <span class="label">Tipologia</span>
-                    <span class="badge-type">RICORRENTE</span>
-                  </div>
-                </div>
-              }
-            </div>
+              </div>
+            }
           </div>
         }
       </div>
@@ -177,7 +194,6 @@
   </div>
 </div>
 
-<!-- ══ MODAL: Promemoria ════════════════════════════════ -->
 @if (showPromemoriaModal()) {
   <div class="modal-overlay" (click)="chiudiPromemoria()"></div>
   <div class="modal-box promemoria-modal" role="dialog" aria-modal="true">
@@ -218,7 +234,7 @@
                 <span class="pro-tipo__label">{{ opt.label }}</span>
                 <span class="pro-tipo__desc">{{ opt.desc }}</span>
               </div>
-              <!-- Badge "già inviato" — metodo helper nel TS, no arrow function nel template -->
+
               @if (isTipoInviato(opt.tipo)) {
                 <span class="pro-tipo__sent">✓ Inviato</span>
               }
@@ -244,7 +260,6 @@
   </div>
 }
 
-<!-- ══ MODAL: Elimina singola ═══════════════════════════ -->
 @if (showDeleteModal()) {
   <div class="delete-overlay">
     <div class="delete-modal">
@@ -258,7 +273,6 @@
   </div>
 }
 
-<!-- ══ MODAL: Cancella serie ════════════════════════════ -->
 @if (showCancellaSerieModal()) {
   <div class="delete-overlay">
     <div class="delete-modal">
