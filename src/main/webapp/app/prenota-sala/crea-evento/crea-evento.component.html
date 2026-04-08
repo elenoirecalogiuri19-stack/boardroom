@@ -1,384 +1,256 @@
-<div class="crea-evento-container">
-  <div class="minimal-card shadow-sm" [class.card-wide]="fase === 'riepilogo'">
-    <!-- ══════════════════════════════════════════════════
-         FASE: FORM
-    ══════════════════════════════════════════════════ -->
-    @if (fase === 'form') {
-      <header class="header-section">
-        <h1>Dettagli evento</h1>
-        <p>
-          Stai prenotando la <span>{{ evento.nomeSala }}</span>
-        </p>
-      </header>
+<div class="ce-page">
+  <div class="ce-header">
+    <div class="ce-header-left">
+      <h1 class="ce-title">Dettagli evento</h1>
+      <p class="ce-subtitle">
+        Stai prenotando la <span class="sala-pill">{{ evento.nomeSala }}</span>
+      </p>
+    </div>
+    <span class="evento-tipo-badge" [class.pubblico]="isPubblico" [class.privato]="!isPubblico">
+      {{ isPubblico ? 'Evento pubblico' : 'Evento privato' }}
+    </span>
+  </div>
 
-      <div class="form-content">
-        <div class="input-field">
-          <label for="titolo">Nome dell'evento</label>
-          <input type="text" id="titolo" [(ngModel)]="evento.titolo" placeholder="Esempio: Riunione settimanale" name="titolo" required />
+  <div class="ce-form">
+    <div class="ce-field">
+      <label class="ce-label" for="titolo">NOME DELL'EVENTO</label>
+      <input
+        id="titolo"
+        type="text"
+        class="ce-input"
+        [(ngModel)]="evento.titolo"
+        placeholder="Esempio: Riunione settimanale"
+        name="titolo"
+      />
+    </div>
+
+    <div class="ce-field">
+      <label class="ce-label" for="descrizione">DESCRIZIONE</label>
+      <textarea
+        id="descrizione"
+        class="ce-input ce-textarea"
+        [(ngModel)]="evento.descrizione"
+        rows="4"
+        placeholder="Aggiungi qualche dettaglio..."
+        name="descrizione"
+      ></textarea>
+    </div>
+
+    @if (isPubblico) {
+      <div class="ce-section-title">BIGLIETTERIA</div>
+
+      <div class="ce-field">
+        <label class="ce-label" for="prezzo">PREZZO BIGLIETTO</label>
+        <div class="ce-price-input-wrap">
+          <span class="ce-currency">€</span>
+          <input
+            id="prezzo"
+            type="number"
+            class="ce-input ce-price-input"
+            [(ngModel)]="evento.prezzo"
+            placeholder="0,00"
+            name="prezzo"
+            min="0"
+            step="0.5"
+          />
         </div>
-
-        <div class="input-field">
-          <label for="descrizione">Descrizione</label>
-          <textarea
-            id="descrizione"
-            [(ngModel)]="evento.descrizione"
-            rows="3"
-            placeholder="Aggiungi qualche dettaglio..."
-            name="descrizione"
-          ></textarea>
+        <small class="ce-hint">Lascia 0.00 per evento gratuito</small>
+        <div class="ce-quick-chips">
+          <button type="button" class="ce-chip" [class.active]="evento.prezzo === 0" (click)="evento.prezzo = 0">Gratuito</button>
+          <button type="button" class="ce-chip" [class.active]="evento.prezzo === 5" (click)="evento.prezzo = 5">€ 5</button>
+          <button type="button" class="ce-chip" [class.active]="evento.prezzo === 10" (click)="evento.prezzo = 10">€ 10</button>
+          <button type="button" class="ce-chip" [class.active]="evento.prezzo === 15" (click)="evento.prezzo = 15">€ 15</button>
+          <button type="button" class="ce-chip" [class.active]="evento.prezzo === 20" (click)="evento.prezzo = 20">€ 20</button>
         </div>
+      </div>
 
-        @if (isPubblico) {
-          <div class="input-field price-animation">
-            <label for="prezzo">Prezzo biglietto (€)</label>
-            <input type="number" id="prezzo" [(ngModel)]="evento.prezzo" placeholder="0.00" name="prezzo" />
-            <small class="hint-text">Evento pubblico: inserisci il costo del ticket.</small>
-          </div>
-
-          <div class="input-field locandina-field">
-            <label>Locandina evento <span class="optional-badge">opzionale</span></label>
-            <div
-              class="locandina-upload-area"
-              [class.has-image]="locandinaPreview"
-              (click)="triggerLocandinaInput()"
-              (dragover)="$event.preventDefault()"
-              (drop)="onLocandrinaDrop($event)"
-            >
-              @if (locandinaPreview) {
-                <img [src]="locandinaPreview" class="locandina-preview" alt="Anteprima locandina" />
-                <button type="button" class="locandina-remove" (click)="rimuoviLocandina($event)">✕</button>
-              } @else {
-                <div class="locandina-placeholder">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#97c459" stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="3" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <polyline points="21 15 16 10 5 21" />
-                  </svg>
-                  <p>Clicca o trascina un'immagine</p>
-                  <small>JPG, PNG, WEBP · compressa automaticamente</small>
-                </div>
-              }
-            </div>
-            <input
-              #locandinaInput
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              style="display: none"
-              (change)="onLocandinaChange($event)"
-            />
-          </div>
-        }
-
-        <!-- Sezione ricorrenza (solo PRIVATO) -->
-        @if (!isPubblico) {
-          <div class="ric-section">
-            <button type="button" class="ric-toggle-btn" [class.active]="mostraRicorrenza" (click)="mostraRicorrenza = !mostraRicorrenza">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="1 4 1 10 7 10"></polyline>
-                <path d="M3.51 15a9 9 0 1 0 .49-4.5"></path>
+      <div class="ce-field">
+        <label class="ce-label"> LOCANDINA EVENTO <span class="ce-optional">(opzionale)</span> </label>
+        <div
+          class="ce-upload-area"
+          [class.has-image]="locandinaPreview"
+          (click)="triggerLocandinaInput()"
+          (dragover)="$event.preventDefault()"
+          (drop)="onLocandrinaDrop($event)"
+        >
+          @if (locandinaPreview) {
+            <img [src]="locandinaPreview" class="ce-upload-preview" alt="Anteprima locandina" />
+            <button type="button" class="ce-upload-remove" (click)="rimuoviLocandina($event)">✕</button>
+          } @else {
+            <div class="ce-upload-placeholder">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="3" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
               </svg>
-              {{ mostraRicorrenza ? 'Rimuovi ricorrenza' : 'Aggiungi ricorrenza' }}
-              <span class="ric-toggle-badge" [class.on]="mostraRicorrenza">{{ mostraRicorrenza ? 'Attiva' : 'Off' }}</span>
-            </button>
-
-            @if (mostraRicorrenza) {
-              <div class="ric-form">
-                <div class="ric-precompilata">
-                  <div class="ric-pre-item">
-                    <span class="ric-pre-label">Sala</span><span class="ric-pre-val">{{ evento.nomeSala }}</span>
-                  </div>
-                  <div class="ric-pre-item">
-                    <span class="ric-pre-label">Inizio</span><span class="ric-pre-val">{{ formatData(evento.data) }}</span>
-                  </div>
-                  <div class="ric-pre-item">
-                    <span class="ric-pre-label">Orario</span><span class="ric-pre-val">{{ evento.oraInizio }}–{{ evento.oraFine }}</span>
-                  </div>
-                </div>
-
-                <div class="ric-field">
-                  <label class="ric-label">Frequenza</label>
-                  <div class="ric-freq-grid">
-                    @for (opt of frequenzaOptions; track opt.value) {
-                      <button
-                        type="button"
-                        class="ric-freq-btn"
-                        [class.active]="ricorrenza.frequenza === opt.value"
-                        (click)="ricorrenza.frequenza = opt.value; onFrequenzaChange()"
-                      >
-                        <span class="ric-freq-label">{{ opt.label }}</span>
-                        <span class="ric-freq-desc">{{ opt.desc }}</span>
-                      </button>
-                    }
-                  </div>
-                </div>
-
-                @if (mostraGiorni) {
-                  <div class="ric-field">
-                    <label class="ric-label"
-                      >Giorni settimana
-                      <small class="ric-label-hint">{{ formatData(evento.data) }} già selezionato</small>
-                    </label>
-                    <div class="ric-giorni">
-                      @for (g of giorniOptions; track g.value) {
-                        <button
-                          type="button"
-                          class="ric-giorno"
-                          [class.active]="isGiornoSelezionato(g.value)"
-                          (click)="toggleGiorno(g.value)"
-                        >
-                          {{ g.label.substring(0, 3) }}
-                        </button>
-                      }
-                    </div>
-                  </div>
-                }
-
-                <div class="ric-field">
-                  <label class="ric-label">Fine serie</label>
-                  <div class="ric-fine-toggle">
-                    <button
-                      type="button"
-                      class="ric-fine-btn"
-                      [class.active]="ricorrenza.usaDataFine"
-                      (click)="ricorrenza.usaDataFine = true"
-                    >
-                      Per data
-                    </button>
-                    <button
-                      type="button"
-                      class="ric-fine-btn"
-                      [class.active]="!ricorrenza.usaDataFine"
-                      (click)="ricorrenza.usaDataFine = false"
-                    >
-                      Per numero
-                    </button>
-                  </div>
-                  @if (ricorrenza.usaDataFine) {
-                    <input class="ric-input" type="date" [(ngModel)]="ricorrenza.dataFine" name="dataFine" [min]="evento.data" />
-                  } @else {
-                    <div class="ric-occ-row">
-                      <input
-                        class="ric-input ric-input--sm"
-                        type="number"
-                        [(ngModel)]="ricorrenza.numOccorrenze"
-                        name="numOccorrenze"
-                        min="1"
-                        max="365"
-                        placeholder="es: 12"
-                      />
-                      <span class="ric-occ-label">ripetizioni</span>
-                    </div>
-                  }
-                </div>
-
-                @if (stimaOccorrenze) {
-                  <div class="ric-stima">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="8" x2="12" y2="12"></line>
-                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                    Stima: {{ stimaOccorrenze }} · disponibilità verificata alla conferma
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        }
-
-        <div class="actions-group">
-          <button type="button" class="btn-cancel" (click)="annulla()" [disabled]="isLoading">Annulla</button>
-          <button
-            type="button"
-            class="btn-confirm"
-            (click)="conferma()"
-            [disabled]="isLoading || !evento.titolo"
-            [class.btn-loading]="isLoading"
-          >
-            @if (isLoading) {
-              <span class="minimal-loader"></span>
-            }
-            <span>{{ isLoading ? '' : mostraRicorrenza ? 'Verifica disponibilità →' : 'Finalizza' }}</span>
-          </button>
-        </div>
-      </div>
-    }
-
-    <!-- ══════════════════════════════════════════════════
-         FASE: VERIFICA
-    ══════════════════════════════════════════════════ -->
-    @if (fase === 'verifica') {
-      <div class="verifica-loading">
-        <div class="verifica-spinner"></div>
-        <p>Verifica disponibilità in corso…</p>
-        <small>Controllo ogni data della serie</small>
-      </div>
-    }
-
-    <!-- ══════════════════════════════════════════════════
-         FASE: RIEPILOGO CONFLITTI
-    ══════════════════════════════════════════════════ -->
-    @if (fase === 'riepilogo') {
-      <header class="header-section">
-        <h1>Gestisci i conflitti</h1>
-        <p>
-          <strong>{{ dateLibere.length }}</strong> date libere &nbsp;·&nbsp; <strong class="text-warn">{{ conflitti().length }}</strong> in
-          conflitto
-        </p>
-      </header>
-
-      <div class="conflitti-list">
-        @for (c of conflitti(); track c.data) {
-          <div class="conflitto-card" [class.risolto]="isConflittoRisolto(c)" [class.saltato]="isConflittoSaltato(c) && !c.tipoRisoluzione">
-            <!-- Header conflitto -->
-            <div class="conflitto-header">
-              <div class="conflitto-data-label">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                  <line x1="16" y1="2" x2="16" y2="6"></line>
-                  <line x1="8" y1="2" x2="8" y2="6"></line>
-                  <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-                <strong>{{ formatData(c.data) }}</strong>
-                <span class="conflitto-data-slot">{{ evento.oraInizio }}–{{ evento.oraFine }} · {{ evento.nomeSala }}</span>
-              </div>
-              <span class="conflitto-status" [class.ok]="isConflittoRisolto(c)" [class.skip]="!c.tipoRisoluzione">
-                @if (isConflittoRisolto(c)) {
-                  ✓ Risolto
-                } @else {
-                  Salta
-                }
-              </span>
+              <p>Clicca o trascina un'immagine</p>
+              <small>JPG, PNG, WEBP · compressa automaticamente</small>
             </div>
-
-            <!-- Riepilogo scelta corrente -->
-            @if (isConflittoRisolto(c)) {
-              <div class="scelta-attiva">
-                <span class="tipo-pill tipo-pill--{{ c.tipoRisoluzione }}">
-                  @if (c.tipoRisoluzione === 'cambio_giorno') {
-                    📅 Giorno
-                  }
-                  @if (c.tipoRisoluzione === 'cambio_orario') {
-                    🕐 Orario
-                  }
-                  @if (c.tipoRisoluzione === 'cambio_sala') {
-                    🚪 Sala
-                  }
-                </span>
-                <span class="scelta-desc">{{ getRiepilogoConflitto(c) }}</span>
-                <button type="button" class="btn-cambia" (click)="saltaConflitto(c)">Cambia</button>
-              </div>
-            } @else {
-              <!-- Selettori tipo risoluzione -->
-              <div class="tipo-tabs">
-                @if (c.opzioniGiorno.length > 0) {
-                  <button
-                    type="button"
-                    class="tipo-tab"
-                    [class.active]="c.tipoRisoluzione === 'cambio_giorno'"
-                    (click)="selezionaTipo(c, 'cambio_giorno')"
-                  >
-                    📅 Cambia giorno
-                  </button>
-                }
-                @if (c.opzioniOrario.length > 0) {
-                  <button
-                    type="button"
-                    class="tipo-tab"
-                    [class.active]="c.tipoRisoluzione === 'cambio_orario'"
-                    (click)="selezionaTipo(c, 'cambio_orario')"
-                  >
-                    🕐 Cambia orario
-                  </button>
-                }
-                @if (c.opzioniSala.length > 0) {
-                  <button
-                    type="button"
-                    class="tipo-tab"
-                    [class.active]="c.tipoRisoluzione === 'cambio_sala'"
-                    (click)="selezionaTipo(c, 'cambio_sala')"
-                  >
-                    🚪 Cambia sala
-                  </button>
-                }
-                @if (c.opzioniGiorno.length === 0 && c.opzioniOrario.length === 0 && c.opzioniSala.length === 0) {
-                  <p class="no-opzioni">Nessuna alternativa disponibile — questa data verrà saltata.</p>
-                }
-              </div>
-
-              <!-- Opzioni CAMBIO GIORNO -->
-              @if (c.tipoRisoluzione === 'cambio_giorno') {
-                <div class="opzioni-grid opzioni-grid--giorni">
-                  @for (data of c.opzioniGiorno; track data) {
-                    <button
-                      type="button"
-                      class="opzione-chip"
-                      [class.selected]="c.giornoScelto === data"
-                      (click)="selezionaGiorno(c, data)"
-                    >
-                      <span class="chip-main">{{ formatData(data) }}</span>
-                      <span class="chip-sub">{{ evento.oraInizio }}–{{ evento.oraFine }}</span>
-                    </button>
-                  }
-                </div>
-              }
-
-              <!-- Opzioni CAMBIO ORARIO -->
-              @if (c.tipoRisoluzione === 'cambio_orario') {
-                <div class="opzioni-grid opzioni-grid--orari">
-                  @for (slot of c.opzioniOrario; track slot.oraInizio) {
-                    <button
-                      type="button"
-                      class="opzione-chip"
-                      [class.selected]="c.oraScelta?.oraInizio === slot.oraInizio"
-                      (click)="selezionaOrario(c, slot)"
-                    >
-                      <span class="chip-main">{{ slot.oraInizio }} – {{ slot.oraFine }}</span>
-                      <span class="chip-sub">{{ formatData(c.data) }}</span>
-                    </button>
-                  }
-                </div>
-              }
-
-              <!-- Opzioni CAMBIO SALA -->
-              @if (c.tipoRisoluzione === 'cambio_sala') {
-                <div class="opzioni-grid opzioni-grid--sale">
-                  @for (sala of c.opzioniSala; track sala.id) {
-                    <button
-                      type="button"
-                      class="opzione-chip opzione-chip--sala"
-                      [class.selected]="c.salaScelta?.id === sala.id"
-                      (click)="selezionaSala(c, sala)"
-                    >
-                      <span class="chip-main">{{ sala.nome }}</span>
-                      <span class="chip-sub">{{ sala.capienza }} posti · {{ evento.oraInizio }}–{{ evento.oraFine }}</span>
-                    </button>
-                  }
-                </div>
-              }
-            }
-          </div>
-        }
-      </div>
-
-      <!-- Riepilogo finale -->
-      <div class="riepilogo-footer">
-        <div class="riepilogo-stats">
-          <span class="stat stat--green">✓ {{ conflittiRisoltiCount }} risolti</span>
-          <span class="stat stat--gray">↷ {{ conflittiSaltatiCount }} saltati</span>
-          <span class="stat stat--blue">📅 {{ dateLibere.length }} libere</span>
-        </div>
-      </div>
-
-      <div class="actions-group">
-        <button type="button" class="btn-cancel" (click)="tornaAlForm()">← Torna al form</button>
-        <button type="button" class="btn-confirm" (click)="creaRicorrenzaFinale()" [disabled]="isLoading">
-          @if (isLoading) {
-            <span class="minimal-loader"></span>
           }
-          <span>{{ isLoading ? '' : 'Crea serie' }}</span>
-        </button>
+        </div>
+        <input
+          #locandinaInput
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          style="display: none"
+          (change)="onLocandinaChange($event)"
+        />
       </div>
     }
+
+    @if (!isPubblico) {
+      <button type="button" class="ce-ricorrenza-btn" (click)="apriRicorrenzaModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        <span>Aggiungi ricorrenza</span>
+
+        <span class="ce-ric-toggle" [class.on]="mostraRicorrenza">
+          <span class="ce-ric-toggle-knob"></span>
+        </span>
+      </button>
+
+      @if (mostraRicorrenza && ricorrenzaSummary) {
+        <div class="ce-ric-summary">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 .49-4.5"></path>
+          </svg>
+          {{ ricorrenzaSummary }}
+          <button type="button" class="ce-ric-edit" (click)="apriRicorrenzaModal()">Modifica</button>
+        </div>
+      }
+    }
+
+    <div class="ce-actions">
+      <button type="button" class="ce-btn-annulla" (click)="annulla()" [disabled]="isLoading">Annulla</button>
+      <button
+        type="button"
+        class="ce-btn-finalizza"
+        (click)="conferma()"
+        [disabled]="isLoading || !evento.titolo"
+        [class.loading]="isLoading"
+      >
+        @if (isLoading) {
+          <span class="ce-loader"></span>
+        } @else {
+          {{ mostraRicorrenza ? 'Verifica disponibilità →' : 'Finalizza' }}
+        }
+      </button>
+    </div>
   </div>
 </div>
+
+@if (showRicorrenzaModal) {
+  <div class="ric-overlay" (click)="chiudiRicorrenzaModal($event)">
+    <div class="ric-modal">
+      <div class="ric-modal-header">
+        <h2 class="ric-modal-title">Aggiungi ricorrenza</h2>
+        <p class="ric-modal-subtitle">Scegli quando si ripete questo evento</p>
+      </div>
+
+      <div class="ric-field">
+        <label class="ric-label">SI RIPETE</label>
+        <div class="ric-select-wrap">
+          <select class="ric-select" [(ngModel)]="ricorrenza.frequenza" (ngModelChange)="onFrequenzaChange()" name="frequenza">
+            @for (opt of frequenzaOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+          <svg class="ric-select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      @if (mostraGiorni) {
+        <div class="ric-field">
+          <label class="ric-label">GIORNO</label>
+          <div class="ric-giorni">
+            @for (g of giorniOptions; track g.value) {
+              <button type="button" class="ric-giorno-pill" [class.active]="isGiornoSelezionato(g.value)" (click)="toggleGiorno(g.value)">
+                {{ g.label.substring(0, 3) }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="ric-field">
+        <label class="ric-label">ORARIO</label>
+        <div class="ric-orario-row">
+          <input type="time" class="ric-time-input" [(ngModel)]="ricorrenza.oraInizio" name="oraInizio" />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+          <input type="time" class="ric-time-input" [(ngModel)]="ricorrenza.oraFine" name="oraFine" />
+        </div>
+      </div>
+
+      <div class="ric-field">
+        <label class="ric-label">FINE RICORRENZA</label>
+        <div class="ric-fine-tabs">
+          <button type="button" class="ric-fine-tab" [class.active]="ricorrenza.tipoFine === 'mai'" (click)="ricorrenza.tipoFine = 'mai'">
+            Mai
+          </button>
+          <button type="button" class="ric-fine-tab" [class.active]="ricorrenza.tipoFine === 'data'" (click)="ricorrenza.tipoFine = 'data'">
+            Data
+          </button>
+          <button
+            type="button"
+            class="ric-fine-tab"
+            [class.active]="ricorrenza.tipoFine === 'occorrenze'"
+            (click)="ricorrenza.tipoFine = 'occorrenze'"
+          >
+            Dopo N volte
+          </button>
+        </div>
+
+        @if (ricorrenza.tipoFine === 'data') {
+          <input type="date" class="ric-input-text" [(ngModel)]="ricorrenza.dataFine" name="dataFine" [min]="evento.data" />
+        }
+        @if (ricorrenza.tipoFine === 'occorrenze') {
+          <div class="ric-occ-row">
+            <input
+              type="number"
+              class="ric-input-text ric-input--sm"
+              [(ngModel)]="ricorrenza.numOccorrenze"
+              name="numOccorrenze"
+              min="1"
+              max="365"
+              placeholder="es: 12"
+            />
+            <span class="ric-occ-label">ripetizioni</span>
+          </div>
+        }
+      </div>
+
+      @if (ricorrenzaModalSummary) {
+        <div class="ric-preview-box">
+          {{ ricorrenzaModalSummary }}
+        </div>
+      }
+
+      <div class="ric-modal-actions">
+        <button type="button" class="ric-btn-annulla" (click)="showRicorrenzaModal = false">Annulla</button>
+        <button type="button" class="ric-btn-conferma" (click)="confermaRicorrenza()">Conferma</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (fase === 'verifica') {
+  <div class="ric-overlay">
+    <div class="ric-modal ric-modal--loading">
+      <div class="verifica-spinner"></div>
+      <p>Verifica disponibilità in corso…</p>
+      <small>Controllo ogni data della serie</small>
+    </div>
+  </div>
+}
