@@ -14,13 +14,13 @@ import { NotificationService } from 'app/shared/notification/notification.servic
 })
 export default class PrenotaSalaComponent implements OnInit {
   orari: string[] = [];
-  capienza = 50;
+  capienza = 0;
   dataSelezionata = '';
   oraSelezionata = '';
   caricamento = false;
 
   constructor(
-    private router: Router,
+    public router: Router,
     private ricercaService: RicercaService,
     private notificationService: NotificationService,
   ) {}

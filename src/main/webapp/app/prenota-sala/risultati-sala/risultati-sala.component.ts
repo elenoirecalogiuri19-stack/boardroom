@@ -2,8 +2,6 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faArrowLeft, faDoorOpen, faChevronRight, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { SaleApiService, ISalaDTO } from 'app/services/sale-api.service';
 import { PrenotazioniApiService } from 'app/services/prenotazioni-api.service';
 import { NotificationService } from 'app/shared/notification/notification.service';
@@ -12,30 +10,19 @@ export interface Sala {
   id: string;
   nome: string;
   capienza: number;
+  descrizione?: string;
   imageUrl?: string | null;
+  features?: string[];
 }
 
 @Component({
   selector: 'jhi-risultati-sala',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, FontAwesomeModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './risultati-sala.component.html',
   styleUrl: './risultati-sala.component.scss',
 })
 export class RisultatiSalaComponent implements OnInit {
-  faArrowLeft = faArrowLeft;
-  faDoorOpen = faDoorOpen;
-  faChevronRight = faChevronRight;
-  faUsers = faUsers;
-
-  /** Fallback se l'immagine non si carica: nasconde il tag img e mostra il placeholder */
-  onImgError(event: Event): void {
-    const img = event.target as HTMLImageElement;
-    img.style.display = 'none';
-    const placeholder = img.closest('.room-img-col')?.querySelector('.room-img-placeholder') as HTMLElement;
-    if (placeholder) placeholder.style.display = 'flex';
-  }
-
   dataRicerca = '';
   oraRicerca = '';
   capienzaRicerca = 0;
@@ -71,8 +58,14 @@ export class RisultatiSalaComponent implements OnInit {
     this.showPrivacyModal = true;
   }
 
+  chiudiModal(event: MouseEvent): void {
+    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
+      this.showPrivacyModal = false;
+    }
+  }
+
   confermaEProcedi(isPubblico: boolean): void {
-    if (!this.salaSelezionata) return;
+    if (!this.salaSelezionata || this.isLoading) return;
 
     this.isLoading = true;
     const [oraInizio, oraFine] = this.oraRicerca.split('-').map(o => o.trim());
@@ -109,6 +102,13 @@ export class RisultatiSalaComponent implements OnInit {
       });
   }
 
+  onImgError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
+    const placeholder = img.closest('.room-img-col')?.querySelector('.room-img-placeholder') as HTMLElement | null;
+    if (placeholder) placeholder.style.display = 'flex';
+  }
+
   private caricaSaleDisponibili(): void {
     if (!this.dataRicerca || !this.oraRicerca) return;
 
@@ -130,11 +130,17 @@ export class RisultatiSalaComponent implements OnInit {
             id: s.id!.toString(),
             nome: s.nome || 'Sala Executive',
             capienza: s.capienza || 0,
+            descrizione: s.descrizione ?? undefined,
             imageUrl: s.imageUrl ?? null,
+
+            features: (s as any).features ?? (s as any).dotazioni ?? [],
           }));
         this.isLoading = false;
       },
-      error: () => (this.isLoading = false),
+      error: () => {
+        this.isLoading = false;
+        this.notificationService.show('Impossibile caricare le sale. Riprova.', 'error');
+      },
     });
   }
 
