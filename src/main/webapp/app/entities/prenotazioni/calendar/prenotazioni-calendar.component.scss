@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// Boardroom – Calendar Component Styles
-// ─────────────────────────────────────────────────────────────
-
 :host {
   display: block;
   font-family:
@@ -11,7 +7,6 @@
     sans-serif;
 }
 
-// ── Variables ────────────────────────────────────────────────
 $border: #e5e7eb;
 $surface: #ffffff;
 $surface-muted: #f9fafb;
@@ -31,7 +26,6 @@ $shadow-lg:
   0 10px 15px -3px rgba(0, 0, 0, 0.1),
   0 4px 6px -4px rgba(0, 0, 0, 0.05);
 
-// ── Wrapper ──────────────────────────────────────────────────
 .cal-wrapper {
   background: $surface;
   border: 1px solid $border;
@@ -41,7 +35,6 @@ $shadow-lg:
   max-width: 100%;
 }
 
-// ── Header ───────────────────────────────────────────────────
 .cal-header {
   display: flex;
   align-items: center;
@@ -151,7 +144,6 @@ $shadow-lg:
   flex-wrap: wrap;
 }
 
-// Toggle sala/stato
 .cal-toggle {
   display: flex;
   background: $surface-muted;
@@ -207,7 +199,6 @@ $shadow-lg:
   }
 }
 
-// ── Filters ──────────────────────────────────────────────────
 .cal-filters {
   display: flex;
   align-items: center;
@@ -262,7 +253,6 @@ $shadow-lg:
     font-weight: 600;
   }
 
-  // Colori specifici per stato
   &--stato {
     &[data-stato='CONFIRMED'].active {
       background: #10b981;
@@ -303,7 +293,6 @@ $shadow-lg:
   }
 }
 
-// ── Loading ──────────────────────────────────────────────────
 .cal-loading {
   display: flex;
   align-items: center;
@@ -340,7 +329,6 @@ $shadow-lg:
   }
 }
 
-// ── Weekday headers ──────────────────────────────────────────
 .cal-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -363,7 +351,6 @@ $shadow-lg:
   }
 }
 
-// ── Grid ─────────────────────────────────────────────────────
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -446,7 +433,6 @@ $shadow-lg:
   padding: 1px 6px;
 }
 
-// ── Events ───────────────────────────────────────────────────
 .cal-events {
   display: flex;
   flex-direction: column;
@@ -521,7 +507,6 @@ $shadow-lg:
   }
 }
 
-// ── Legend ───────────────────────────────────────────────────
 .cal-legend {
   display: flex;
   align-items: center;
@@ -555,7 +540,6 @@ $shadow-lg:
   flex-shrink: 0;
 }
 
-// ── Responsive ───────────────────────────────────────────────
 @media (max-width: 640px) {
   .cal-header {
     padding: 14px 16px;
@@ -582,7 +566,7 @@ $shadow-lg:
 
   .cal-event {
     .cal-event__text em {
-      display: none; // Nasconde orari su mobile
+      display: none;
     }
   }
 }

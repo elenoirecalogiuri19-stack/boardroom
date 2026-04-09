@@ -18,7 +18,7 @@ import { StatoCodice } from 'app/entities/enumerations/stato-codice.model';
 import { PrenotazioniCalendarDetailComponent } from './prenotazioni-calendar-detail.component';
 
 dayjs.extend(isoWeek);
-dayjs.locale('it'); // Mesi e giorni in italiano
+dayjs.locale('it');
 
 export interface CalendarDay {
   date: dayjs.Dayjs;
@@ -27,7 +27,6 @@ export interface CalendarDay {
   prenotazioni: IPrenotazioni[];
 }
 
-// Color palette per sala (max 8 sale con colori distinti)
 const SALA_COLORS = [
   { bg: '#3B82F6', light: '#EFF6FF', text: '#1D4ED8' },
   { bg: '#8B5CF6', light: '#F5F3FF', text: '#6D28D9' },
@@ -60,22 +59,18 @@ export class PrenotazioniCalendarComponent implements OnInit, OnDestroy {
   private accountService = inject(AccountService);
   private modalService = inject(NgbModal);
 
-  // URL del nuovo endpoint dedicato al calendario
   private readonly calendarioUrl = this.appConfig.getEndpointFor('api/prenotazionis/calendario');
 
-  // ── Stato ──────────────────────────────────────────────
   currentMonth = signal<dayjs.Dayjs>(dayjs().startOf('month'));
   prenotazioni = signal<IPrenotazioni[]>([]);
   sale = signal<ISale[]>([]);
   isLoading = signal(false);
   isAdmin = signal(false);
 
-  // Filtri
   selectedSalaId = signal<string | null>(null);
   selectedStato = signal<string | null>(null);
   colorMode = signal<'sala' | 'stato'>('sala');
 
-  // Mappa salaId → indice colore
   private salaColorMap = new Map<string, number>();
 
   private subscription: Subscription | null = null;
@@ -83,16 +78,13 @@ export class PrenotazioniCalendarComponent implements OnInit, OnDestroy {
   readonly weekDays = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
   readonly statiOptions = Object.values(StatoCodice);
 
-  // ── Computed ───────────────────────────────────────────
   readonly calendarDays = computed<CalendarDay[]>(() => {
     const month = this.currentMonth();
     const startOfMonth = month.startOf('month');
     const endOfMonth = month.endOf('month');
 
-    // Prima cella = lunedì della settimana di inizio mese
     const startCell = startOfMonth.isoWeekday() === 1 ? startOfMonth : startOfMonth.subtract(startOfMonth.isoWeekday() - 1, 'day');
 
-    // Ultima cella = domenica della settimana di fine mese
     const endCell = endOfMonth.isoWeekday() === 7 ? endOfMonth : endOfMonth.add(7 - endOfMonth.isoWeekday(), 'day');
 
     const days: CalendarDay[] = [];
@@ -124,14 +116,13 @@ export class PrenotazioniCalendarComponent implements OnInit, OnDestroy {
     let list = this.prenotazioni();
     const sala = this.selectedSalaId();
     const stato = this.selectedStato();
-    // Le prenotazioni cancellate non devono apparire nel calendario
+
     list = list.filter(p => p.stato?.codice !== 'CANCELLED');
     if (sala) list = list.filter(p => p.sala?.id === sala);
     if (stato) list = list.filter(p => p.stato?.codice === stato);
     return list;
   });
 
-  // ── Lifecycle ──────────────────────────────────────────
   ngOnInit(): void {
     this.accountService.identity().subscribe(account => {
       this.isAdmin.set(account?.authorities?.includes('ROLE_ADMIN') ?? false);
@@ -144,7 +135,6 @@ export class PrenotazioniCalendarComponent implements OnInit, OnDestroy {
     this.subscription?.unsubscribe();
   }
 
-  // ── Navigation ────────────────────────────────────────
   prevMonth(): void {
     this.currentMonth.update(m => m.subtract(1, 'month'));
     this.loadPrenotazioni();
@@ -160,7 +150,6 @@ export class PrenotazioniCalendarComponent implements OnInit, OnDestroy {
     this.loadPrenotazioni();
   }
 
-  // ── Data loading ──────────────────────────────────────
   loadSale(): void {
     this.saleService.query({ size: 100 }).subscribe(res => {
       const saleList = res.body ?? [];
@@ -177,14 +166,12 @@ export class PrenotazioniCalendarComponent implements OnInit, OnDestroy {
     const dataInizio = month.startOf('month').format('YYYY-MM-DD');
     const dataFine = month.endOf('month').format('YYYY-MM-DD');
 
-    // Usa il nuovo endpoint dedicato /calendario invece del generico paginato
     this.http
       .get<IPrenotazioni[]>(this.calendarioUrl, {
         params: { dataInizio, dataFine },
       })
       .subscribe({
         next: data => {
-          // Converte le date stringa in oggetti dayjs (compatibile con il model)
           const converted = data.map(p => ({
             ...p,
             data: p.data ? dayjs(p.data as any) : null,
@@ -196,7 +183,6 @@ export class PrenotazioniCalendarComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ── Helpers ───────────────────────────────────────────
   getPrenotazioniForDay(day: dayjs.Dayjs): IPrenotazioni[] {
     return this.filteredPrenotazioni().filter(p => p.data && dayjs(p.data).isSame(day, 'day'));
   }
@@ -243,7 +229,6 @@ export class PrenotazioniCalendarComponent implements OnInit, OnDestroy {
     this.selectedStato.set(null);
   }
 
-  // Helpers per la legenda — evitano cast "as any" non supportati nei template Angular
   getLegendColorBySala(salaId: string | null | undefined): { bg: string; light: string; text: string } {
     if (salaId && this.salaColorMap.has(salaId)) {
       return SALA_COLORS[this.salaColorMap.get(salaId)!];

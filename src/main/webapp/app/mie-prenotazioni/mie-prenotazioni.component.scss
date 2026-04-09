@@ -339,50 +339,69 @@ $status-wait-text: #475569;
 .delete-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000;
-  animation: fadeIn 0.25s ease-out;
+  animation: fadeIn 0.22s ease-out;
 }
 
 .delete-modal {
   width: 100%;
   max-width: 400px;
-  padding: 45px 40px;
+  padding: 36px 32px 30px;
   background: #ffffff;
-  border-radius: 28px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.07);
+  animation: fadeIn 0.22s ease-out;
+  text-align: center;
+
+  &__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: #fef2f2;
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+
+    &--warn {
+      background: #fffbeb;
+      color: #f59e0b;
+    }
+  }
 
   .modal-title {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: $br-dark;
-    text-align: center;
-    margin-bottom: 12px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #334155;
+    margin: 0 0 10px;
+    letter-spacing: -0.3px;
   }
 
   .modal-subtitle {
-    font-size: 0.9rem;
-    color: $text-muted;
-    text-align: center;
+    font-size: 0.875rem;
+    color: #64748b;
     line-height: 1.6;
-    margin-bottom: 35px;
+    margin: 0 0 28px;
   }
 
   .modal-actions {
     display: flex;
-    gap: 12px;
+    gap: 10px;
 
     button {
       flex: 1;
-      padding: 14px;
-      border-radius: 14px;
-      font-weight: 700;
-      font-size: 0.9rem;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.88rem;
       cursor: pointer;
       border: none;
       transition: all 0.2s ease;
@@ -393,15 +412,17 @@ $status-wait-text: #475569;
       color: #64748b;
       &:hover {
         background: #e2e8f0;
+        color: #334155;
       }
     }
 
     .btn-modal-confirm {
-      background: #e74c3c;
+      background: #ef4444;
       color: white;
       &:hover {
-        background: #c0392b;
+        background: #dc2626;
         transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
       }
     }
   }

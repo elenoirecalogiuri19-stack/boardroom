@@ -1,5 +1,4 @@
 <div class="cal-wrapper">
-  <!-- ── HEADER ─────────────────────────────────────────── -->
   <div class="cal-header">
     <div class="cal-header__left">
       <h2 class="cal-title">Calendario Prenotazioni</h2>
@@ -24,7 +23,6 @@
     </div>
 
     <div class="cal-header__right">
-      <!-- Color mode toggle -->
       <div class="cal-toggle">
         <button class="cal-toggle__btn" [class.active]="colorMode() === 'sala'" (click)="colorMode.set('sala')">Per sala</button>
         <button class="cal-toggle__btn" [class.active]="colorMode() === 'stato'" (click)="colorMode.set('stato')">Per stato</button>
@@ -32,7 +30,6 @@
     </div>
   </div>
 
-  <!-- ── FILTERS ───────────────────────────────────────── -->
   <div class="cal-filters">
     <div class="cal-filters__group">
       <span class="cal-filters__label">Sale</span>
@@ -72,7 +69,6 @@
     }
   </div>
 
-  <!-- ── LOADING ───────────────────────────────────────── -->
   @if (isLoading()) {
     <div class="cal-loading">
       <div class="cal-spinner"></div>
@@ -80,16 +76,13 @@
     </div>
   }
 
-  <!-- ── GRID ──────────────────────────────────────────── -->
   <div class="cal-grid-wrapper" [class.cal-grid--loading]="isLoading()">
-    <!-- Intestazioni giorni della settimana -->
     <div class="cal-weekdays">
       @for (day of weekDays; track day) {
         <div class="cal-weekday">{{ day }}</div>
       }
     </div>
 
-    <!-- Griglia giorni -->
     <div class="cal-grid">
       @for (day of calendarDays(); track trackDay($index, day)) {
         <div
@@ -98,7 +91,6 @@
           [class.cal-cell--today]="day.isToday"
           [class.cal-cell--has-events]="day.prenotazioni.length > 0"
         >
-          <!-- Numero del giorno -->
           <div class="cal-cell__header">
             <span class="cal-cell__day" [class.cal-cell__day--today]="day.isToday">
               {{ day.date.date() }}
@@ -108,7 +100,6 @@
             }
           </div>
 
-          <!-- Events -->
           <div class="cal-events">
             @for (p of day.prenotazioni.slice(0, 3); track trackPrenotazione($index, p)) {
               <button
@@ -138,7 +129,6 @@
     </div>
   </div>
 
-  <!-- ── LEGEND ────────────────────────────────────────── -->
   @if (colorMode() === 'sala') {
     <div class="cal-legend">
       <span class="cal-legend__title">Sale:</span>

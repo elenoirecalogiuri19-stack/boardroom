@@ -14,18 +14,17 @@ import { EventiFormGroup, EventiFormService } from './eventi-form.service';
 @Component({
   selector: 'jhi-eventi-update',
   templateUrl: './eventi-update.component.html',
+  styleUrl: './eventi-update.component.scss',
   imports: [SharedModule, FormsModule, ReactiveFormsModule],
 })
 export class EventiUpdateComponent implements OnInit {
   isSaving = false;
   eventi: IEventi | null = null;
 
-  // 👉 PRIMA dichiariamo i servizi (ESLint è felice)
   protected eventiService = inject(EventiService);
   protected eventiFormService = inject(EventiFormService);
   protected activatedRoute = inject(ActivatedRoute);
 
-  // 👉 POI il form (TS è felice perché eventiFormService è già inizializzato)
   editForm: EventiFormGroup = this.eventiFormService.createEventiFormGroup();
 
   ngOnInit(): void {
@@ -43,10 +42,7 @@ export class EventiUpdateComponent implements OnInit {
 
   save(): void {
     this.isSaving = true;
-
-    // Forziamo il tipo a IEventi (in update l'id esiste sempre)
     const eventi = this.eventiFormService.getEventi(this.editForm) as IEventi;
-
     this.subscribeToSaveResponse(this.eventiService.update(eventi));
   }
 
@@ -60,11 +56,7 @@ export class EventiUpdateComponent implements OnInit {
   protected onSaveSuccess(): void {
     this.previousState();
   }
-
-  protected onSaveError(): void {
-    // opzionale
-  }
-
+  protected onSaveError(): void {}
   protected onSaveFinalize(): void {
     this.isSaving = false;
   }
