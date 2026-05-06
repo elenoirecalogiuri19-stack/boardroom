@@ -11,6 +11,8 @@ import java.util.UUID;
 import main.repository.EventiRepository;
 import main.repository.PrenotazioneEventoPubblicoRepository;
 import main.security.AuthoritiesConstants;
+// MODIFICA: aggiunta import per sicurezza owner-check
+import main.security.SecurityUtils;
 import main.service.EventiService;
 import main.service.dto.EventiDTO;
 import main.service.dto.PrenotazioniEmailDTO;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -81,14 +84,35 @@ public class EventiResource {
         }
     }
 
+    /**
+     * MODIFICA PRINCIPALE:
+     * PUT /api/eventis/{id}
+     *
+     * Prima era solo @PreAuthorize("hasAuthority(ADMIN)").
+     * Ora è accessibile:
+     *   - a qualsiasi utente autenticato (ROLE_USER incluso)
+     *   - ma un utente non-admin può modificare SOLO i propri eventi
+     *     (eventi la cui prenotazione appartiene a lui)
+     *   - l'admin può modificare qualsiasi evento (comportamento invariato)
+     */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<EventiDTO> updateEventi(
         @PathVariable(value = "id", required = false) UUID id,
         @Valid @RequestBody EventiDTO eventiDTO
     ) throws URISyntaxException {
         LOG.debug("REST request to update Eventi : {}, {}", id, eventiDTO);
         validaIdPerUpdate(id, eventiDTO);
+
+        // Se l'utente NON è admin, verifica che sia il proprietario dell'evento
+        boolean isAdmin = SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN);
+        if (!isAdmin) {
+            boolean isOwner = eventiService.isCurrentUserOwner(id);
+            if (!isOwner) {
+                LOG.warn("Utente non autorizzato a modificare l'evento {}", id);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        }
 
         EventiDTO result = eventiService.update(eventiDTO);
 
@@ -109,13 +133,25 @@ public class EventiResource {
         }
     }
 
+    /**
+     * MODIFICA: PATCH anch'esso aperto all'owner (stessa logica di PUT)
+     */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<EventiDTO> partialUpdateEventi(
         @PathVariable(value = "id", required = false) UUID id,
         @NotNull @RequestBody EventiDTO eventiDTO
     ) throws URISyntaxException {
         validaIdPerUpdate(id, eventiDTO);
+
+        boolean isAdmin = SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.ADMIN);
+        if (!isAdmin) {
+            boolean isOwner = eventiService.isCurrentUserOwner(id);
+            if (!isOwner) {
+                LOG.warn("Utente non autorizzato a modificare parzialmente l'evento {}", id);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        }
 
         Optional<EventiDTO> result = eventiService.partialUpdate(eventiDTO);
 

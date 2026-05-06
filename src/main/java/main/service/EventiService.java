@@ -10,12 +10,15 @@ import java.util.stream.Collectors;
 import main.domain.Eventi;
 import main.domain.PrenotazioneEventoPubblico;
 import main.domain.Prenotazioni;
+import main.domain.Utenti;
 import main.domain.enumeration.StatoCodice;
 import main.domain.enumeration.TipoEvento;
 import main.repository.EventiRepository;
 import main.repository.PrenotazioneEventoPubblicoRepository;
 import main.repository.PrenotazioniRepository;
 import main.repository.StatiPrenotazioneRepository;
+import main.repository.UtentiRepository;
+import main.security.SecurityUtils;
 import main.service.dto.EventiDTO;
 import main.service.dto.PrenotazioniEmailDTO;
 import main.service.mapper.EventiMapper;
@@ -41,6 +44,8 @@ public class EventiService {
     private final MailService mailService;
     private final QrCodeGenerator qrCodeGenerator;
     private final PrenotazioneEventoPubblicoRepository prenotazioneEventoPubblicoRepository;
+    // MODIFICA: aggiunto UtentiRepository per verificare la proprietà dell'evento
+    private final UtentiRepository utentiRepository;
 
     public EventiService(
         EventiRepository eventiRepository,
@@ -49,7 +54,8 @@ public class EventiService {
         StatiPrenotazioneRepository statiPrenotazioneRepository,
         MailService mailService,
         QrCodeGenerator qrCodeGenerator,
-        PrenotazioneEventoPubblicoRepository prenotazioneEventoPubblicoRepository
+        PrenotazioneEventoPubblicoRepository prenotazioneEventoPubblicoRepository,
+        UtentiRepository utentiRepository
     ) {
         this.eventiRepository = eventiRepository;
         this.eventiMapper = eventiMapper;
@@ -58,6 +64,42 @@ public class EventiService {
         this.mailService = mailService;
         this.qrCodeGenerator = qrCodeGenerator;
         this.prenotazioneEventoPubblicoRepository = prenotazioneEventoPubblicoRepository;
+        this.utentiRepository = utentiRepository;
+    }
+
+    /**
+     * MODIFICA: verifica che l'utente corrente sia il proprietario dell'evento.
+     *
+     * Un utente è proprietario se la prenotazione collegata all'evento
+     * appartiene a lui (prenotazione.utente.user.login == currentUserLogin).
+     *
+     * @param eventoId UUID dell'evento da verificare
+     * @return true se l'utente loggato è il creatore/proprietario dell'evento
+     */
+    @Transactional(readOnly = true)
+    public boolean isCurrentUserOwner(UUID eventoId) {
+        Optional<String> currentLogin = SecurityUtils.getCurrentUserLogin();
+        if (currentLogin.isEmpty()) {
+            return false;
+        }
+        String login = currentLogin.get();
+
+        // Carica l'evento con la prenotazione e l'utente associato
+        return eventiRepository
+            .findByIdWithPrenotazioneAndSala(eventoId)
+            .map(evento -> {
+                Prenotazioni prenotazione = evento.getPrenotazione();
+                if (prenotazione == null) {
+                    // Evento senza prenotazione: nessun "owner" utente registrato
+                    return false;
+                }
+                Utenti utente = prenotazione.getUtente();
+                if (utente == null || utente.getUser() == null) {
+                    return false;
+                }
+                return login.equals(utente.getUser().getLogin());
+            })
+            .orElse(false);
     }
 
     @Transactional(readOnly = true)
@@ -118,8 +160,6 @@ public class EventiService {
 
     @Transactional(readOnly = true)
     public Optional<EventiDTO> findOne(UUID id) {
-        // Usa la query con JOIN FETCH per caricare prenotazione e sala in eager.
-        // findById standard lascerebbe prenotazione in lazy → numPersone = null nel DTO.
         return eventiRepository.findByIdWithPrenotazioneAndSala(id).map(eventiMapper::toDto);
     }
 
@@ -183,14 +223,8 @@ public class EventiService {
         prenotazioniRepository.save(prenotazione);
     }
 
-    /**
-     * Invia l'email di conferma prenotazione all'utente dopo che lo stato
-     * è passato a CONFIRMED tramite la creazione dell'evento.
-     * Non blocca mai il flusso principale: gli errori vengono solo loggati.
-     */
     private void inviaEmailConfermaPrenotazione(Prenotazioni pren, Eventi evento) {
         try {
-            // Genera il codice QR dal codice prenotazione
             if (pren.getCodiceQr() == null || pren.getCodiceQr().isBlank()) {
                 String codice = "SALA-" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
                 pren.setCodiceQr(codice);
@@ -213,7 +247,6 @@ public class EventiService {
                 return;
             }
 
-            // Collega l'evento alla prenotazione per il template
             pren.setEvento(evento);
 
             mailService.sendConfermaPrenotazione(pren, emailDto, pren.getCodiceQr(), qrBase64);
@@ -225,19 +258,12 @@ public class EventiService {
 
     @Transactional
     public void inviaEmailPrenotazione(UUID id, PrenotazioniEmailDTO dto) {
-        // Acquisisce subito il lock pessimistico sull'evento per serializzare
-        // le richieste concorrenti: il secondo thread attende finché il primo
-        // non ha completato il salvataggio e fatto commit.
         eventiRepository.findByIdWithLock(id).orElseThrow(() -> new EntityNotFoundException("Evento non trovato"));
 
-        // Carica l'evento con le relazioni necessarie (prenotazione + sala)
-        // all'interno della stessa transazione che detiene il lock.
         Eventi evento = eventiRepository
             .findByIdWithPrenotazioneAndSala(id)
             .orElseThrow(() -> new EntityNotFoundException("Evento non trovato"));
 
-        // Controlla capienza: a questo punto siamo gli unici nel lock,
-        // il conteggio riflette la situazione reale senza interferenze.
         Integer limitePartecipanti = evento.getPrenotazione() != null ? evento.getPrenotazione().getNumPersone() : null;
         if (limitePartecipanti != null) {
             long postiOccupati = prenotazioneEventoPubblicoRepository.countByEventoId(evento.getId());
@@ -262,8 +288,6 @@ public class EventiService {
         prenPub.setEmail(dto.getEmail());
         prenPub.setCodicePrenotazione(codicePrenotazione);
         prenotazioneEventoPubblicoRepository.save(prenPub);
-        // Il lock viene rilasciato al commit di questa transazione,
-        // garantendo che nessun altro thread abbia inserito nel frattempo.
 
         String qrCod = qrCodeGenerator.generateQRCodeBase64(codicePrenotazione);
         mailService.sendPrenotazioneEventoPublico(evento, dto, codicePrenotazione, qrCod);
