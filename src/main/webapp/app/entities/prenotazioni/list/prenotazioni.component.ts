@@ -19,6 +19,7 @@ import { PrenotazioniDeleteDialogComponent } from '../delete/prenotazioni-delete
 @Component({
   selector: 'jhi-prenotazioni',
   templateUrl: './prenotazioni.component.html',
+  styleUrl: './prenotazioni.component.scss',
   imports: [RouterModule, FormsModule, SharedModule, SortDirective, SortByDirective, FormatMediumDatePipe, ItemCountComponent],
 })
 export class PrenotazioniComponent implements OnInit {

@@ -18,6 +18,7 @@ import { SaleDeleteDialogComponent } from '../delete/sale-delete-dialog.componen
 @Component({
   selector: 'jhi-sale',
   templateUrl: './sale.component.html',
+  styleUrl: './sale.component.scss',
   imports: [RouterModule, FormsModule, SharedModule, SortDirective, SortByDirective, ItemCountComponent],
 })
 export class SaleComponent implements OnInit {

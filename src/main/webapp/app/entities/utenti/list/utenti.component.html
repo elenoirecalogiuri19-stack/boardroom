@@ -1,100 +1,75 @@
-<div>
-  <h2 id="page-heading" data-cy="UtentiHeading">
-    <span>Utentis</span>
-
-    <div class="d-flex justify-content-end">
-      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+<div class="utenti-list-page">
+  <div class="utenti-list-header">
+    <div>
+      <h1 class="utenti-list-title">Utenti</h1>
+      <p class="utenti-list-sub">Gestione e visualizzazione di tutti gli utenti</p>
+    </div>
+    <div class="utenti-list-actions">
+      <button class="btn-refresh" (click)="load()" [disabled]="isLoading">
         <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
-        <span>Refresh list</span>
+        Aggiorna
       </button>
-
-      <button
-        id="jh-create-entity"
-        data-cy="entityCreateButton"
-        class="btn btn-primary jh-create-entity create-utenti"
-        [routerLink]="['/utenti/new']"
-      >
+      <button class="btn-new" [routerLink]="['/utenti/new']">
         <fa-icon icon="plus"></fa-icon>
-        <span>Genera un nuovo Utenti</span>
+        Nuovo utente
       </button>
     </div>
-  </h2>
+  </div>
 
   <jhi-alert-error />
-
   <jhi-alert />
 
-  @if (utentis().length === 0) {
-    <div class="alert alert-warning" id="no-result">
-      <span>No Utentis found</span>
+  @if (utentis().length === 0 && !isLoading) {
+    <div class="utenti-list-empty">
+      <span class="utenti-list-empty__icon">👤</span>
+      <p>Nessun utente trovato.</p>
     </div>
   } @else {
-    <div class="table-responsive table-entities" id="entities">
-      <table class="table table-striped" aria-describedby="page-heading">
+    <div class="utenti-table-wrap">
+      <table class="utenti-table" aria-describedby="page-heading">
         <thead>
           <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
-            <th scope="col" jhiSortBy="id">
-              <div class="d-flex">
-                <span>Id</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="id">
+              <div class="th-inner">Id <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="nome">
-              <div class="d-flex">
-                <span>Nome</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="nome">
+              <div class="th-inner">Nome <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="nomeAzienda">
-              <div class="d-flex">
-                <span>Nome Azienda</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="nomeAzienda">
+              <div class="th-inner">Azienda <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="numeroDiTelefono">
-              <div class="d-flex">
-                <span>Numero Di Telefono</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="numeroDiTelefono">
+              <div class="th-inner">Telefono <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="user.id">
-              <div class="d-flex">
-                <span>User</span>
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="user.id">
+              <div class="th-inner">User <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col"></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           @for (utenti of utentis(); track trackId(utenti)) {
-            <tr data-cy="entityTable">
-              <td>
+            <tr>
+              <td class="td-id">
                 <a [routerLink]="['/utenti', utenti.id, 'view']">{{ utenti.id }}</a>
               </td>
-              <td>{{ utenti.nome }}</td>
-              <td>{{ utenti.nomeAzienda }}</td>
-              <td>{{ utenti.numeroDiTelefono }}</td>
+              <td class="td-nome">{{ utenti.nome }}</td>
+              <td class="td-secondary">{{ utenti.nomeAzienda || '–' }}</td>
+              <td class="td-secondary">{{ utenti.numeroDiTelefono || '–' }}</td>
               <td>
-                {{ utenti.user?.id }}
+                <span class="user-badge">{{ utenti.user?.id || '–' }}</span>
               </td>
-              <td class="text-end">
-                <div class="btn-group">
-                  <a [routerLink]="['/utenti', utenti.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+              <td class="td-actions">
+                <div class="action-group">
+                  <a [routerLink]="['/utenti', utenti.id, 'view']" class="action-btn action-btn--view" title="Visualizza">
                     <fa-icon icon="eye"></fa-icon>
                     <span class="d-none d-md-inline">Visualizza</span>
                   </a>
-
-                  <a [routerLink]="['/utenti', utenti.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                  <a [routerLink]="['/utenti', utenti.id, 'edit']" class="action-btn action-btn--edit" title="Modifica">
                     <fa-icon icon="pencil-alt"></fa-icon>
                     <span class="d-none d-md-inline">Modifica</span>
                   </a>
-
-                  <button type="submit" (click)="delete(utenti)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                  <button (click)="delete(utenti)" class="action-btn action-btn--delete" title="Elimina">
                     <fa-icon icon="times"></fa-icon>
                     <span class="d-none d-md-inline">Elimina</span>
                   </button>

@@ -1,91 +1,71 @@
-<div>
-  <h2 id="page-heading" data-cy="SaleHeading">
-    <span>Sales</span>
-
-    <div class="d-flex justify-content-end">
-      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+<div class="sale-list-page">
+  <div class="sale-list-header">
+    <div>
+      <h1 class="sale-list-title">Sale</h1>
+      <p class="sale-list-sub">Gestione e visualizzazione di tutte le sale</p>
+    </div>
+    <div class="sale-list-actions">
+      <button class="btn-refresh" (click)="load()" [disabled]="isLoading">
         <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
-        <span>Refresh list</span>
+        Aggiorna
       </button>
-
-      <button
-        id="jh-create-entity"
-        data-cy="entityCreateButton"
-        class="btn btn-primary jh-create-entity create-sale"
-        [routerLink]="['/sale/new']"
-      >
+      <button class="btn-new" [routerLink]="['/sale/new']">
         <fa-icon icon="plus"></fa-icon>
-        <span>Genera un nuovo Sale</span>
+        Nuova sala
       </button>
     </div>
-  </h2>
+  </div>
 
   <jhi-alert-error />
-
   <jhi-alert />
 
-  @if (sales().length === 0) {
-    <div class="alert alert-warning" id="no-result">
-      <span>No Sales found</span>
+  @if (sales().length === 0 && !isLoading) {
+    <div class="sale-list-empty">
+      <span class="sale-list-empty__icon">🏛️</span>
+      <p>Nessuna sala trovata.</p>
     </div>
   } @else {
-    <div class="table-responsive table-entities" id="entities">
-      <table class="table table-striped" aria-describedby="page-heading">
+    <div class="sale-table-wrap">
+      <table class="sale-table" aria-describedby="page-heading">
         <thead>
           <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
-            <th scope="col" jhiSortBy="id">
-              <div class="d-flex">
-                <span>Id</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="id">
+              <div class="th-inner">Id <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="nome">
-              <div class="d-flex">
-                <span>Nome</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="nome">
+              <div class="th-inner">Nome <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="capienza">
-              <div class="d-flex">
-                <span>Capienza</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="capienza">
+              <div class="th-inner">Capienza <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="descrizione">
-              <div class="d-flex">
-                <span>Descrizione</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="descrizione">
+              <div class="th-inner">Descrizione <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col"></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           @for (sale of sales(); track trackId(sale)) {
-            <tr data-cy="entityTable">
-              <td>
+            <tr>
+              <td class="td-id">
                 <a [routerLink]="['/sale', sale.id, 'view']">{{ sale.id }}</a>
               </td>
-              <td>{{ sale.nome }}</td>
-              <td>{{ sale.capienza }}</td>
-              <td>{{ sale.descrizione }}</td>
-              <td class="text-end">
-                <div class="btn-group">
-                  <a [routerLink]="['/sale', sale.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+              <td class="td-nome">{{ sale.nome }}</td>
+              <td>
+                <span class="capienza-badge">👥 {{ sale.capienza }}</span>
+              </td>
+              <td class="td-desc">{{ sale.descrizione || '–' }}</td>
+              <td class="td-actions">
+                <div class="action-group">
+                  <a [routerLink]="['/sale', sale.id, 'view']" class="action-btn action-btn--view" title="Visualizza">
                     <fa-icon icon="eye"></fa-icon>
                     <span class="d-none d-md-inline">Visualizza</span>
                   </a>
-
-                  <a [routerLink]="['/sale', sale.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                  <a [routerLink]="['/sale', sale.id, 'edit']" class="action-btn action-btn--edit" title="Modifica">
                     <fa-icon icon="pencil-alt"></fa-icon>
                     <span class="d-none d-md-inline">Modifica</span>
                   </a>
-
-                  <button type="submit" (click)="delete(sale)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                  <button (click)="delete(sale)" class="action-btn action-btn--delete" title="Elimina">
                     <fa-icon icon="times"></fa-icon>
                     <span class="d-none d-md-inline">Elimina</span>
                   </button>
@@ -97,23 +77,19 @@
       </table>
     </div>
   }
-  @if (sales().length > 0) {
-    <div>
-      <div class="d-flex justify-content-center">
-        <jhi-item-count [params]="{ page, totalItems, itemsPerPage }" />
-      </div>
 
-      <div class="d-flex justify-content-center">
-        <ngb-pagination
-          [collectionSize]="totalItems"
-          [page]="page"
-          [pageSize]="itemsPerPage"
-          [maxSize]="5"
-          [rotate]="true"
-          [boundaryLinks]="true"
-          (pageChange)="navigateToPage($event)"
-        ></ngb-pagination>
-      </div>
+  @if (sales().length > 0) {
+    <div class="sale-pagination">
+      <jhi-item-count [params]="{ page, totalItems, itemsPerPage }" />
+      <ngb-pagination
+        [collectionSize]="totalItems"
+        [page]="page"
+        [pageSize]="itemsPerPage"
+        [maxSize]="5"
+        [rotate]="true"
+        [boundaryLinks]="true"
+        (pageChange)="navigateToPage($event)"
+      />
     </div>
   }
 </div>
