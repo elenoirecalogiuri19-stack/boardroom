@@ -2,6 +2,7 @@ package main.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -105,7 +106,7 @@ public class EventiService {
     @Transactional(readOnly = true)
     public List<EventiDTO> findPublicEventi() {
         LOG.debug("Request to get all public Eventi");
-        List<Eventi> eventi = eventiRepository.findPublicConfirmed(TipoEvento.PUBBLICO, StatoCodice.CONFIRMED);
+        List<Eventi> eventi = eventiRepository.findPublicConfirmed(TipoEvento.PUBBLICO, StatoCodice.CONFIRMED, LocalDate.now());
 
         if (eventi.isEmpty()) {
             return List.of();

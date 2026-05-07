@@ -1,5 +1,6 @@
 package main.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,10 +20,10 @@ public interface EventiRepository extends JpaRepository<Eventi, UUID> {
         LEFT JOIN FETCH p.sala
         LEFT JOIN FETCH p.stato s
         WHERE e.tipo = :tipo
-          AND (p IS NULL OR s.codice = :stato)
+          AND (p IS NULL OR (s.codice = :stato AND p.data >= :oggi))
         """
     )
-    List<Eventi> findPublicConfirmed(@Param("tipo") TipoEvento tipo, @Param("stato") StatoCodice stato);
+    List<Eventi> findPublicConfirmed(@Param("tipo") TipoEvento tipo, @Param("stato") StatoCodice stato, @Param("oggi") LocalDate oggi);
 
     @Query(
         """
