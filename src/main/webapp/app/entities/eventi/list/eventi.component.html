@@ -1,104 +1,93 @@
-<div>
-  <h2 id="page-heading" data-cy="EventiHeading">
-    <span>Eventis</span>
-
-    <div class="d-flex justify-content-end">
-      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+<div class="eventi-list-page">
+  <div class="eventi-list-header">
+    <div>
+      <h1 class="eventi-list-title">Eventi</h1>
+      <p class="eventi-list-sub">Gestione e visualizzazione di tutti gli eventi</p>
+    </div>
+    <div class="eventi-list-actions">
+      <button class="btn-refresh" (click)="load()" [disabled]="isLoading">
         <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
-        <span>Refresh list</span>
+        Aggiorna
       </button>
-
-      <button
-        id="jh-create-entity"
-        data-cy="entityCreateButton"
-        class="btn btn-primary jh-create-entity create-eventi"
-        [routerLink]="['/eventi/new']"
-      >
+      <button class="btn-new" [routerLink]="['/eventi/new']">
         <fa-icon icon="plus"></fa-icon>
-        <span>Genera un nuovo Eventi</span>
+        Nuovo evento
       </button>
     </div>
-  </h2>
+  </div>
 
   <jhi-alert-error />
-
   <jhi-alert />
 
-  @if (eventis().length === 0) {
-    <div class="alert alert-warning" id="no-result">
-      <span>No Eventis found</span>
+  @if (eventis().length === 0 && !isLoading) {
+    <div class="eventi-list-empty">
+      <span class="eventi-list-empty__icon">🎪</span>
+      <p>Nessun evento trovato.</p>
     </div>
   } @else {
-    <div class="table-responsive table-entities" id="entities">
-      <table class="table table-striped" aria-describedby="page-heading">
+    <div class="eventi-table-wrap">
+      <table class="eventi-table" aria-describedby="page-heading">
         <thead>
           <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
-            <th scope="col" jhiSortBy="id">
-              <div class="d-flex">
-                <span>Id</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="id">
+              <div class="th-inner">Id <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="titolo">
-              <div class="d-flex">
-                <span>Titolo</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="titolo">
+              <div class="th-inner">Titolo <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="tipo">
-              <div class="d-flex">
-                <span>Tipo</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="tipo">
+              <div class="th-inner">Tipo <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="prezzo">
-              <div class="d-flex">
-                <span>Prezzo</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="prezzo">
+              <div class="th-inner">Prezzo <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="prenotazione.id">
-              <div class="d-flex">
-                <span>Prenotazione</span>
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="prenotazione.id">
+              <div class="th-inner">Prenotazione <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col"></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           @for (eventi of eventis(); track trackId(eventi)) {
-            <tr data-cy="entityTable">
-              <td>
+            <tr>
+              <td class="td-id">
                 <a [routerLink]="['/eventi', eventi.id, 'view']">{{ eventi.id }}</a>
               </td>
-              <td>{{ eventi.titolo }}</td>
-              <td>{{ { null: '', PRIVATO: 'PRIVATO', PUBBLICO: 'PUBBLICO' }[eventi.tipo ?? 'null'] }}</td>
-              <td>{{ eventi.prezzo }}</td>
+              <td class="td-titolo">{{ eventi.titolo }}</td>
               <td>
-                @if (eventi.prenotazione) {
-                  <div>
-                    <a [routerLink]="['/prenotazioni', eventi.prenotazione.id, 'view']">{{ eventi.prenotazione.id }}</a>
-                  </div>
+                @if (eventi.tipo) {
+                  <span class="tipo-badge tipo-badge--{{ eventi.tipo.toLowerCase() }}">
+                    {{ eventi.tipo }}
+                  </span>
+                } @else {
+                  <span class="td-secondary">–</span>
                 }
               </td>
-              <td class="text-end">
-                <div class="btn-group">
-                  <a [routerLink]="['/eventi', eventi.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+              <td class="td-prezzo">
+                @if (eventi.prezzo != null) {
+                  <span class="prezzo-badge">€ {{ eventi.prezzo }}</span>
+                } @else {
+                  <span class="td-secondary">–</span>
+                }
+              </td>
+              <td>
+                @if (eventi.prenotazione) {
+                  <a [routerLink]="['/prenotazioni', eventi.prenotazione.id, 'view']" class="td-link"> #{{ eventi.prenotazione.id }} </a>
+                } @else {
+                  <span class="td-secondary">–</span>
+                }
+              </td>
+              <td class="td-actions">
+                <div class="action-group">
+                  <a [routerLink]="['/eventi', eventi.id, 'view']" class="action-btn action-btn--view" title="Visualizza">
                     <fa-icon icon="eye"></fa-icon>
                     <span class="d-none d-md-inline">Visualizza</span>
                   </a>
-
-                  <a [routerLink]="['/eventi', eventi.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                  <a [routerLink]="['/eventi', eventi.id, 'edit']" class="action-btn action-btn--edit" title="Modifica">
                     <fa-icon icon="pencil-alt"></fa-icon>
                     <span class="d-none d-md-inline">Modifica</span>
                   </a>
-
-                  <button type="submit" (click)="delete(eventi)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                  <button (click)="delete(eventi)" class="action-btn action-btn--delete" title="Elimina">
                     <fa-icon icon="times"></fa-icon>
                     <span class="d-none d-md-inline">Elimina</span>
                   </button>
@@ -110,23 +99,19 @@
       </table>
     </div>
   }
-  @if (eventis().length > 0) {
-    <div>
-      <div class="d-flex justify-content-center">
-        <jhi-item-count [params]="{ page, totalItems, itemsPerPage }" />
-      </div>
 
-      <div class="d-flex justify-content-center">
-        <ngb-pagination
-          [collectionSize]="totalItems"
-          [page]="page"
-          [pageSize]="itemsPerPage"
-          [maxSize]="5"
-          [rotate]="true"
-          [boundaryLinks]="true"
-          (pageChange)="navigateToPage($event)"
-        ></ngb-pagination>
-      </div>
+  @if (eventis().length > 0) {
+    <div class="eventi-pagination">
+      <jhi-item-count [params]="{ page, totalItems, itemsPerPage }" />
+      <ngb-pagination
+        [collectionSize]="totalItems"
+        [page]="page"
+        [pageSize]="itemsPerPage"
+        [maxSize]="5"
+        [rotate]="true"
+        [boundaryLinks]="true"
+        (pageChange)="navigateToPage($event)"
+      />
     </div>
   }
 </div>

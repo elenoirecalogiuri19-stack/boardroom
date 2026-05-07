@@ -14,6 +14,7 @@ import { StatiPrenotazioneDeleteDialogComponent } from '../delete/stati-prenotaz
 @Component({
   selector: 'jhi-stati-prenotazione',
   templateUrl: './stati-prenotazione.component.html',
+  styleUrl: './stati-prenotazione.component.scss',
   imports: [RouterModule, FormsModule, SharedModule, SortDirective, SortByDirective],
 })
 export class StatiPrenotazioneComponent implements OnInit {

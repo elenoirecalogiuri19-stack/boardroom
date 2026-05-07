@@ -20,9 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
 
-/**
- * REST controller for managing {@link main.domain.StatiPrenotazione}.
- */
 @RestController
 @RequestMapping("/api/stati-prenotaziones")
 public class StatiPrenotazioneResource {
@@ -46,13 +43,6 @@ public class StatiPrenotazioneResource {
         this.statiPrenotazioneRepository = statiPrenotazioneRepository;
     }
 
-    /**
-     * {@code POST  /stati-prenotaziones} : Create a new statiPrenotazione.
-     *
-     * @param dto the statiPrenotazioneDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new statiPrenotazioneDTO, or with status {@code 400 (Bad Request)} if the statiPrenotazione has already an ID.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
     @PostMapping
     public ResponseEntity<StatiPrenotazioneDTO> createStatiPrenotazione(@Valid @RequestBody StatiPrenotazioneDTO dto)
         throws URISyntaxException {
@@ -73,16 +63,6 @@ public class StatiPrenotazioneResource {
         }
     }
 
-    /**
-     * {@code PUT  /stati-prenotaziones/:id} : Updates an existing statiPrenotazione.
-     *
-     * @param id the id of the statiPrenotazioneDTO to save.
-     * @param dto the statiPrenotazioneDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated statiPrenotazioneDTO,
-     * or with status {@code 400 (Bad Request)} if the statiPrenotazioneDTO is not valid,
-     * or with status {@code 500 (Internal Server Error)} if the statiPrenotazioneDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
     @PutMapping("/{id}")
     public ResponseEntity<StatiPrenotazioneDTO> updateStatiPrenotazione(
         @PathVariable(value = "id", required = false) final UUID id,
@@ -110,17 +90,6 @@ public class StatiPrenotazioneResource {
         }
     }
 
-    /**
-     * {@code PATCH  /stati-prenotaziones/:id} : Partial updates given fields of an existing statiPrenotazione, field will ignore if it is null
-     *
-     * @param id the id of the statiPrenotazioneDTO to save.
-     * @param dto the statiPrenotazioneDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated statiPrenotazioneDTO,
-     * or with status {@code 400 (Bad Request)} if the statiPrenotazioneDTO is not valid,
-     * or with status {@code 404 (Not Found)} if the statiPrenotazioneDTO is not found,
-     * or with status {@code 500 (Internal Server Error)} if the statiPrenotazioneDTO couldn't be updated.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
     public ResponseEntity<StatiPrenotazioneDTO> partialUpdateStatiPrenotazione(
         @PathVariable(value = "id", required = false) final UUID id,
@@ -138,23 +107,12 @@ public class StatiPrenotazioneResource {
         );
     }
 
-    /**
-     * {@code GET  /stati-prenotaziones} : get all the statiPrenotaziones.
-     *
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of statiPrenotaziones in body.
-     */
     @GetMapping
     public List<StatiPrenotazioneDTO> getAllStatiPrenotaziones() {
         LOG.debug("REST request to get all StatiPrenotaziones");
         return statiPrenotazioneService.findAll();
     }
 
-    /**
-     * {@code GET  /stati-prenotaziones/:id} : get the "id" statiPrenotazione.
-     *
-     * @param id the id of the statiPrenotazioneDTO to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the statiPrenotazioneDTO, or with status {@code 404 (Not Found)}.
-     */
     @GetMapping("/{id}")
     public ResponseEntity<StatiPrenotazioneDTO> getStatiPrenotazione(@PathVariable("id") UUID id) {
         LOG.debug("REST request to get StatiPrenotazione : {}", id);
@@ -162,12 +120,6 @@ public class StatiPrenotazioneResource {
         return ResponseUtil.wrapOrNotFound(statiPrenotazioneDTO);
     }
 
-    /**
-     * {@code DELETE  /stati-prenotaziones/:id} : delete the "id" statiPrenotazione.
-     *
-     * @param id the id of the statiPrenotazioneDTO to delete.
-     * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStatiPrenotazione(@PathVariable("id") UUID id) {
         LOG.debug("REST request to delete StatiPrenotazione : {}", id);

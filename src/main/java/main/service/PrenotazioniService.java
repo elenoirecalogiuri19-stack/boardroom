@@ -34,9 +34,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Service Implementation for managing {@link main.domain.Prenotazioni}.
- */
 @Service
 @Transactional
 public class PrenotazioniService {
@@ -78,14 +75,6 @@ public class PrenotazioniService {
         this.waitlistService = waitlistService;
     }
 
-    /**
-     * Save a prenotazioni (admin).
-     * Imposta lo stato a CONFIRMED solo se non esistono conflitti con prenotazioni già confermate.
-     * In caso di sovrapposizione lancia IllegalStateException per evitare doppioni silenziosi.
-     *
-     * @param dto the entity to save.
-     * @return the persisted entity.
-     */
     public PrenotazioniDTO save(PrenotazioniDTO dto) {
         LOG.debug("Request to save Prenotazioni (admin) : {}", dto);
 
@@ -104,7 +93,6 @@ public class PrenotazioniService {
 
         applyDefaultConfirmedState(entity);
 
-        // Verifica conflitti prima di salvare come CONFIRMED
         if (entity.getSala() != null && entity.getData() != null && entity.getOraInizio() != null && entity.getOraFine() != null) {
             boolean conflitto = prenotazioniRepository.existsOverlappingConfirmedPrenotazione(
                 entity.getSala(),
@@ -121,7 +109,6 @@ public class PrenotazioniService {
             }
         }
 
-        // Genera il codice QR univoco per la prenotazione admin (stato CONFIRMED diretto)
         if (entity.getCodiceQr() == null || entity.getCodiceQr().isBlank()) {
             String codice = "SALA-" + UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
             entity.setCodiceQr(codice);
@@ -132,25 +119,15 @@ public class PrenotazioniService {
         return prenotazioniMapper.toDto(entity);
     }
 
-    /**
-     * Update a prenotazioni.
-     * Valida i dati, verifica che la prenotazione esista e controlla i conflitti
-     * con altre prenotazioni CONFIRMED della stessa sala, escludendo se stessa.
-     *
-     * @param dto the entity to save.
-     * @return the persisted entity.
-     */
     public PrenotazioniDTO update(PrenotazioniDTO dto) {
         LOG.debug("Request to update Prenotazioni : {}", dto);
 
-        // Verifica che la prenotazione esista
         prenotazioniRepository
             .findById(dto.getId())
             .orElseThrow(() -> new EntityNotFoundException("Prenotazione non trovata: " + dto.getId()));
 
         Prenotazioni entity = prenotazioniMapper.toEntity(dto);
 
-        // Carica la sala con lock per evitare race condition
         if (entity.getSala() != null && entity.getSala().getId() != null) {
             UUID salaId = entity.getSala().getId();
             Sale sala = saleRepository
@@ -159,10 +136,8 @@ public class PrenotazioniService {
             entity.setSala(sala);
         }
 
-        // Valida i dati (stessi controlli della creazione)
         validaPrenotazione(entity);
 
-        // Controlla conflitti escludendo la prenotazione stessa (evita falso positivo su se stessa)
         if (entity.getSala() != null && entity.getData() != null && entity.getOraInizio() != null && entity.getOraFine() != null) {
             boolean conflitto = prenotazioniRepository.existsOverlappingConfirmedExcluding(
                 entity.getSala(),
@@ -184,12 +159,6 @@ public class PrenotazioniService {
         return prenotazioniMapper.toDto(entity);
     }
 
-    /**
-     * Partially update a prenotazioni.
-     *
-     * @param dto the entity to update partially.
-     * @return the persisted entity.
-     */
     public Optional<PrenotazioniDTO> partialUpdate(PrenotazioniDTO dto) {
         LOG.debug("Request to partially update Prenotazioni : {}", dto);
 
@@ -203,33 +172,16 @@ public class PrenotazioniService {
             .map(prenotazioniMapper::toDto);
     }
 
-    /**
-     * Get all the prenotazionis.
-     *
-     * @param pageable the pagination information.
-     * @return the list of entities.
-     */
     @Transactional(readOnly = true)
     public Page<PrenotazioniDTO> findAll(Pageable pageable) {
         LOG.debug("Request to get all Prenotazionis");
         return prenotazioniRepository.findAll(pageable).map(prenotazioniMapper::toDto);
     }
 
-    /**
-     * Get all the prenotazionis with eager load of many-to-many relationships.
-     *
-     * @return the list of entities.
-     */
     public Page<PrenotazioniDTO> findAllWithEagerRelationships(Pageable pageable) {
         return prenotazioniRepository.findAllWithEagerRelationships(pageable).map(prenotazioniMapper::toDto);
     }
 
-    /**
-     * Get one prenotazioni by id.
-     *
-     * @param id the id of the entity.
-     * @return the entity.
-     */
     @Transactional(readOnly = true)
     public Optional<PrenotazioniDTO> findOne(UUID id) {
         LOG.debug("Request to get Prenotazioni : {}", id);
@@ -253,12 +205,6 @@ public class PrenotazioniService {
         return prenotazioniRepository.findByCodiceQr(codice).map(prenotazioniMapper::toDto);
     }
 
-    /**
-     * Cancellazione fisica riservata agli amministratori.
-     * Rimuove il record dal DB senza passare per il cambio di stato.
-     *
-     * @param id the id of the entity.
-     */
     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public void deleteAsAdmin(UUID id) {
         LOG.debug("Request to hard-delete Prenotazioni (admin) : {}", id);
@@ -269,12 +215,6 @@ public class PrenotazioniService {
         LOG.debug("Prenotazione {} eliminata definitivamente dall'amministratore", id);
     }
 
-    /**
-     * Cancellazione logica per l'utente proprietario della prenotazione.
-     * Imposta lo stato a CANCELLED senza rimuovere il record dal DB.
-     *
-     * @param id the id of the entity.
-     */
     public void deletePrenotazione(UUID id) {
         LOG.debug("Request to cancel Prenotazioni : {}", id);
 
@@ -292,19 +232,12 @@ public class PrenotazioniService {
         pren.setStato(statoCancelled);
         prenotazioniRepository.save(pren);
 
-        // Se era CONFIRMED, libera lo slot e promuovi il primo in waitlist
         if (wasConfirmed) {
             waitlistService.promuoviDaWaitlist(pren);
         }
 
         LOG.debug("Prenotazione {} annullata con successo dall'utente {}", id, username);
     }
-
-    /**
-     *
-     * Metodo per confermare la prenotazione
-     *
-     */
 
     public PrenotazioniDTO confermaPrenotazione(UUID prenotazioneId) {
         LOG.debug("Request to create Prenotazioni : {}", prenotazioneId);
@@ -313,7 +246,6 @@ public class PrenotazioniService {
             .findById(prenotazioneId)
             .orElseThrow(() -> new EntityNotFoundException("Prenotazione non trovato"));
 
-        // Verifica che solo il proprietario o un admin possa confermare la prenotazione
         String username = getAuthenticatedUsername();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth != null && auth.getAuthorities().stream().anyMatch(a -> AuthoritiesConstants.ADMIN.equals(a.getAuthority()));
@@ -334,7 +266,6 @@ public class PrenotazioniService {
             .orElseThrow(() -> new EntityNotFoundException("Stato CONFIRMED non trovato"));
         pren.setStato(statoConfirmed);
 
-        // Genera il codice QR univoco se non è già presente
         if (pren.getCodiceQr() == null || pren.getCodiceQr().isBlank()) {
             String codice = "SALA-" + UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
             pren.setCodiceQr(codice);
@@ -343,7 +274,6 @@ public class PrenotazioniService {
 
         pren = prenotazioniRepository.save(pren);
 
-        // ── Invio email di conferma ───────────────────────────────────────
         try {
             String qrBase64 = qrCodeGenerator.generateQRCodeBase64(pren.getCodiceQr());
 
@@ -359,10 +289,8 @@ public class PrenotazioniService {
             mailService.sendConfermaPrenotazione(pren, emailDto, pren.getCodiceQr(), qrBase64);
             LOG.debug("Email conferma accodata per prenotazione {}", pren.getId());
         } catch (Exception e) {
-            // L'email non deve mai bloccare la conferma della prenotazione
             LOG.warn("Errore invio email conferma per prenotazione {}: {}", pren.getId(), e.getMessage());
         }
-        // ─────────────────────────────────────────────────────────────────
 
         return prenotazioniMapper.toDto(pren);
     }
@@ -375,11 +303,9 @@ public class PrenotazioniService {
         boolean isAdmin = auth != null && auth.getAuthorities().stream().anyMatch(a -> AuthoritiesConstants.ADMIN.equals(a.getAuthority()));
 
         if (isAdmin) {
-            // L'amministratore vede lo storico completo di tutti gli utenti
             return prenotazioniRepository.findStorico(oggi).stream().map(prenotazioniMapper::toDto).toList();
         }
 
-        // L'utente normale vede solo il proprio storico
         String username = getAuthenticatedUsername();
         return prenotazioniRepository.findStoricoByLogin(username, oggi).stream().map(prenotazioniMapper::toDto).toList();
     }
@@ -395,15 +321,6 @@ public class PrenotazioniService {
             .toList();
     }
 
-    // ── CALENDARIO ────────────────────────────────────────────────────────────
-    /**
-     * Recupera tutte le prenotazioni in un intervallo di date per la vista calendario.
-     * Admin: vede tutte le prenotazioni. Utente: vede solo le proprie.
-     *
-     * @param dataInizio primo giorno dell'intervallo (incluso)
-     * @param dataFine   ultimo giorno dell'intervallo (incluso)
-     * @return lista di DTO ordinata per data e ora di inizio
-     */
     @Transactional(readOnly = true)
     public List<PrenotazioniDTO> findByDataBetween(LocalDate dataInizio, LocalDate dataFine) {
         LOG.debug("Request to get prenotazioni calendario da {} a {}", dataInizio, dataFine);
@@ -413,7 +330,6 @@ public class PrenotazioniService {
         List<Prenotazioni> risultati = prenotazioniRepository.findByDataBetween(dataInizio, dataFine);
 
         if (!isAdmin) {
-            // Utente normale: filtra solo le proprie prenotazioni
             String username = getAuthenticatedUsername();
             risultati = risultati
                 .stream()
@@ -425,8 +341,6 @@ public class PrenotazioniService {
 
         return risultati.stream().map(prenotazioniMapper::toDto).toList();
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
 
     public PrenotazioniDTO nuovoPrenotazioni(PrenotazioniDTO dto) {
         LOG.debug("Request to nuovo Prenotazioni : {}", dto);
@@ -459,11 +373,6 @@ public class PrenotazioniService {
 
         return prenotazioniMapper.toDto(salvata);
     }
-
-    /**
-     * Metodo per la validazione dei dati
-     *
-     */
 
     private void validaPrenotazione(Prenotazioni prenotazioni) {
         if (!prenotazioni.getOraInizio().isBefore(prenotazioni.getOraFine())) {

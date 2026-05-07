@@ -18,6 +18,7 @@ import { EventiDeleteDialogComponent } from '../delete/eventi-delete-dialog.comp
 @Component({
   selector: 'jhi-eventi',
   templateUrl: './eventi.component.html',
+  styleUrl: './eventi.component.scss',
   imports: [RouterModule, FormsModule, SharedModule, SortDirective, SortByDirective, ItemCountComponent],
 })
 export class EventiComponent implements OnInit {

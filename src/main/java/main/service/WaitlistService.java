@@ -18,24 +18,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Gestione completa della lista di attesa (waitlist) per le prenotazioni sala.
- *
- * Flusso:
- * 1. Utente prova a prenotare → slot occupato → entra in WAITLISTED con posizione FIFO
- * 2. Prenotazione confermata viene cancellata → promuoviPrimoInWaitlist()
- * 3. Utente promosso ha 15 minuti per confermare → stato PROMOTED
- * 4. Se non conferma → EXPIRED, si passa al prossimo in lista
- *
- * Anti race-condition: lock pessimistico sulla sala + transazione serializzata.
- */
 @Service
 @Transactional
 public class WaitlistService {
 
     private static final Logger LOG = LoggerFactory.getLogger(WaitlistService.class);
 
-    /** Minuti entro cui l'utente promosso deve confermare prima di perdere il posto. */
     private static final int MINUTI_CONFERMA = 15;
 
     private final PrenotazioniRepository prenotazioniRepository;
@@ -58,20 +46,10 @@ public class WaitlistService {
         this.qrCodeGenerator = qrCodeGenerator;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // INSERIMENTO IN WAITLIST
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Aggiunge una prenotazione alla waitlist per lo slot richiesto.
-     * Calcola automaticamente la posizione FIFO.
-     * Chiamato da PrenotazioniService quando lo slot è occupato.
-     */
     public Prenotazioni aggiungiAWaitlist(Prenotazioni prenotazione) {
         Sale sala = prenotazione.getSala();
         if (sala == null) throw new IllegalArgumentException("Sala obbligatoria");
 
-        // Controlla che l'utente non sia già in waitlist per lo stesso slot
         boolean giaInCoda = prenotazioniRepository.existsWaitlistPerStessoSlot(
             sala,
             prenotazione.getData(),
@@ -83,7 +61,6 @@ public class WaitlistService {
             throw new IllegalStateException("Sei già in lista di attesa per questo slot.");
         }
 
-        // Calcola la prossima posizione disponibile (FIFO)
         int prossimaPos =
             prenotazioniRepository
                 .maxPosizioneWaitlist(sala, prenotazione.getData(), prenotazione.getOraInizio(), prenotazione.getOraFine())
@@ -96,7 +73,6 @@ public class WaitlistService {
 
         Prenotazioni salvata = prenotazioniRepository.save(prenotazione);
 
-        // Notifica l'utente che è in lista di attesa
         inviaEmailWaitlist(salvata, prossimaPos);
 
         LOG.info(
@@ -111,26 +87,11 @@ public class WaitlistService {
         return salvata;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // PROMOZIONE DALLA WAITLIST (chiamato alla cancellazione)
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Quando una prenotazione CONFIRMED viene cancellata, promuove automaticamente
-     * il primo utente in waitlist per quello slot.
-     *
-     * Usa lock pessimistico sulla sala per evitare race condition
-     * (es: due cancellazioni simultanee che promuovono lo stesso utente).
-     *
-     * @param prenotazioneCancellata la prenotazione appena cancellata
-     */
     public void promuoviDaWaitlist(Prenotazioni prenotazioneCancellata) {
         Sale sala = prenotazioneCancellata.getSala();
 
-        // Lock pessimistico sulla sala — serializza le promozioni concorrenti
         saleRepository.findByIdWithLock(sala.getId()).orElseThrow(() -> new EntityNotFoundException("Sala non trovata"));
 
-        // Carica la waitlist ordinata per posizione (FIFO)
         List<Prenotazioni> waitlist = prenotazioniRepository.findWaitlistOrdinata(
             sala,
             prenotazioneCancellata.getData(),
@@ -146,7 +107,6 @@ public class WaitlistService {
         Prenotazioni candidato = waitlist.get(0);
         promuoviCandidato(candidato);
 
-        // Riscala le posizioni degli altri in coda (1, 2, 3, ...)
         for (int i = 1; i < waitlist.size(); i++) {
             Prenotazioni p = waitlist.get(i);
             p.setPosizioneWaitlist(i);
@@ -154,12 +114,7 @@ public class WaitlistService {
         }
     }
 
-    /**
-     * Porta la prenotazione dallo stato WAITLISTED a PROMOTED.
-     * Imposta il timer di 15 minuti per la conferma.
-     */
     private void promuoviCandidato(Prenotazioni candidato) {
-        // Genera codice QR se non presente
         if (candidato.getCodiceQr() == null || candidato.getCodiceQr().isBlank()) {
             String codice = "SALA-" + UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
             candidato.setCodiceQr(codice);
@@ -172,7 +127,6 @@ public class WaitlistService {
 
         prenotazioniRepository.save(candidato);
 
-        // Notifica l'utente — ha 15 minuti per confermare
         inviaEmailPromozione(candidato);
 
         LOG.info(
@@ -182,14 +136,6 @@ public class WaitlistService {
         );
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // CONFERMA DA PARTE DELL'UTENTE PROMOSSO
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * L'utente promosso clicca "Conferma" — passa a CONFIRMED.
-     * Verifica che la finestra di 15 minuti non sia scaduta.
-     */
     public Prenotazioni confermaPromozione(UUID prenotazioneId) {
         Prenotazioni pren = prenotazioniRepository
             .findById(prenotazioneId)
@@ -199,18 +145,14 @@ public class WaitlistService {
             throw new IllegalStateException("La prenotazione non è in stato PROMOTED.");
         }
 
-        // Verifica scadenza 15 minuti
         LocalDateTime scadenza = pren.getPromossaAt().plusMinutes(MINUTI_CONFERMA);
         if (LocalDateTime.now().isAfter(scadenza)) {
-            // Scaduta — segna come EXPIRED e passa al prossimo
             scadiEPromuoviSuccessivo(pren);
             throw new IllegalStateException("Il tempo per confermare è scaduto. Il posto è stato assegnato al prossimo in lista.");
         }
 
-        // Lock sulla sala per evitare conferme doppie
         saleRepository.findByIdWithLock(pren.getSala().getId()).orElseThrow(() -> new EntityNotFoundException("Sala non trovata"));
 
-        // Verifica che nel frattempo non ci siano conflitti (altra prenotazione confermata)
         boolean conflitto = prenotazioniRepository.existsOverlappingConfirmedPrenotazione(
             pren.getSala(),
             pren.getData(),
@@ -230,14 +172,6 @@ public class WaitlistService {
         return pren;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // SCHEDULED: scade le PROMOTED non confermate in tempo
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Ogni minuto controlla le prenotazioni PROMOTED scadute.
-     * Se l'utente non ha confermato entro 15 min → EXPIRED, si passa al prossimo.
-     */
     @Scheduled(fixedRate = 60_000)
     @Transactional
     public void scadiPromozioniScadute() {
@@ -255,21 +189,13 @@ public class WaitlistService {
         }
     }
 
-    /**
-     * Segna la prenotazione come EXPIRED e promuove il prossimo in lista.
-     */
     private void scadiEPromuoviSuccessivo(Prenotazioni pren) {
         pren.setStato(getStato(StatoCodice.EXPIRED));
         pren.setPromossaAt(null);
         prenotazioniRepository.save(pren);
 
-        // Promuovi il prossimo come se fosse una cancellazione
         promuoviDaWaitlist(pren);
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // NOTIFICHE EMAIL
-    // ─────────────────────────────────────────────────────────────────────────
 
     private void inviaEmailWaitlist(Prenotazioni pren, int posizione) {
         try {
@@ -311,10 +237,6 @@ public class WaitlistService {
             LOG.warn("Errore invio email promozione per prenotazione {}: {}", pren.getId(), e.getMessage());
         }
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // HELPER
-    // ─────────────────────────────────────────────────────────────────────────
 
     private StatiPrenotazione getStato(StatoCodice codice) {
         return statiPrenotazioneRepository

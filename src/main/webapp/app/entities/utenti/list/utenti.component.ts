@@ -14,6 +14,7 @@ import { UtentiDeleteDialogComponent } from '../delete/utenti-delete-dialog.comp
 @Component({
   selector: 'jhi-utenti',
   templateUrl: './utenti.component.html',
+  styleUrl: './utenti.component.scss',
   imports: [RouterModule, FormsModule, SharedModule, SortDirective, SortByDirective],
 })
 export class UtentiComponent implements OnInit {

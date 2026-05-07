@@ -23,7 +23,7 @@ $blue-border: #b5d4f4;
 
 .storico-page {
   font-family: inherit;
-  background: $bg;
+  background: $white;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -34,19 +34,17 @@ $blue-border: #b5d4f4;
   flex: 1;
   display: flex;
   justify-content: center;
-  padding: 36px 20px 60px;
+  padding: 0;
 }
 
 .storico-card {
   background: $white;
-  border-radius: 20px;
-  border: 1px solid $border;
+  border-radius: 0;
+  border: none;
   width: 100%;
-  max-width: 1040px;
+  max-width: none;
   padding: 40px 44px;
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    0 4px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: none;
 }
 
 .storico-tag {
@@ -452,16 +450,8 @@ $blue-border: #b5d4f4;
 }
 
 @media (max-width: 720px) {
-  .storico-body {
-    padding: 0 0 40px;
-  }
-
   .storico-card {
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
     padding: 24px 20px;
-    box-shadow: none;
   }
 
   .tl-card-meta {
