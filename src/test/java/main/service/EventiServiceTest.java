@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -343,19 +345,21 @@ class EventiServiceTest {
     void findPublicEventi_shouldReturnOnlyPublicConfirmedEvents() {
         evento.setTipo(TipoEvento.PUBBLICO);
 
-        when(eventiRepository.findPublicConfirmed(TipoEvento.PUBBLICO, StatoCodice.CONFIRMED)).thenReturn(List.of(evento));
+        when(eventiRepository.findPublicConfirmed(eq(TipoEvento.PUBBLICO), eq(StatoCodice.CONFIRMED), any(LocalDate.class))).thenReturn(
+            List.of(evento)
+        );
         // FIX: usa anyList() invece di passare un'istanza concreta al matcher
         when(eventiMapper.toDto(anyList())).thenReturn(List.of(new EventiDTO()));
 
         List<EventiDTO> result = eventiService.findPublicEventi();
 
         assertThat(result).hasSize(1);
-        verify(eventiRepository).findPublicConfirmed(TipoEvento.PUBBLICO, StatoCodice.CONFIRMED);
+        verify(eventiRepository).findPublicConfirmed(eq(TipoEvento.PUBBLICO), eq(StatoCodice.CONFIRMED), any(LocalDate.class));
     }
 
     @Test
     void findPublicEventi_shouldReturnEmptyList_whenNoneExist() {
-        when(eventiRepository.findPublicConfirmed(any(), any())).thenReturn(List.of());
+        when(eventiRepository.findPublicConfirmed(any(), any(), any(LocalDate.class))).thenReturn(List.of());
         // FIX: usa anyList() invece di passare un'istanza concreta al matcher
         when(eventiMapper.toDto(anyList())).thenReturn(List.of());
 
