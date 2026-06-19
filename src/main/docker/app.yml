@@ -9,6 +9,22 @@ services:
       - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=true
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/boardroom?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
       - SPRING_LIQUIBASE_URL=jdbc:mysql://mysql:3306/boardroom?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+      # ── Email Gmail con App Password ─────────────────────────────────────────
+      # Sostituisci TUAMAIL@gmail.com e TUAAPPPASSWORD con i tuoi valori reali.
+      # L'App Password si genera su: https://myaccount.google.com/apppasswords
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=TUAMAIL@gmail.com
+      - SPRING_MAIL_PASSWORD=TUAAPPPASSWORD
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED=true
+      - JHIPSTER_MAIL_FROM=TUAMAIL@gmail.com
+      - JHIPSTER_MAIL_BASE_URL=http://localhost:8080
+      - JHIPSTER_MAIL_ENABLED=true
+      # ─────────────────────────────────────────────────────────────────────────
+    volumes:
+      - boardroom_uploads:/app/uploads
     ports:
       - 127.0.0.1:8080:8080
     healthcheck:
@@ -27,3 +43,6 @@ services:
     extends:
       file: ./mysql.yml
       service: mysql
+
+volumes:
+  boardroom_uploads:
