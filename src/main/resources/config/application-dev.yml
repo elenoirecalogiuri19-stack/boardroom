@@ -54,7 +54,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: boardroom.progetto@gmail.com
-    password: oqxbcdyywjffvejt
+    password: qsckszjlqwcmttul
     properties:
       mail:
         smtp:
