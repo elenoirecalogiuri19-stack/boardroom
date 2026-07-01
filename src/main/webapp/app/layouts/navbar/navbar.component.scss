@@ -68,10 +68,14 @@ $nav-height: 100px;
   }
 }
 
-.nav-item.active > .nav-link {
-  color: $br-green !important;
-  font-weight: 600 !important;
-  background: transparent;
+.nav-item.active {
+  background: transparent !important;
+
+  > .nav-link {
+    color: $br-green !important;
+    font-weight: 600 !important;
+    background: transparent !important;
+  }
 }
 
 .btn-login-green {

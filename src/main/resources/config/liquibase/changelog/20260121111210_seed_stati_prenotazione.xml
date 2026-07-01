@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Dati base degli stati prenotazione (tutti gli ambienti, non solo faker) -->
+    <changeSet id="20260121111210_seed_stati_prenotazione" author="boardroom">
+        <insert tableName="stati_prenotazione">
+            <column name="id"           value="00000001-0000-0000-0000-000000000001"/>
+            <column name="codice"       value="WAITING"/>
+            <column name="descrizione"  value="In attesa di conferma"/>
+            <column name="ordine_azione" valueNumeric="1"/>
+        </insert>
+        <insert tableName="stati_prenotazione">
+            <column name="id"           value="00000002-0000-0000-0000-000000000002"/>
+            <column name="codice"       value="CONFIRMED"/>
+            <column name="descrizione"  value="Confermata"/>
+            <column name="ordine_azione" valueNumeric="2"/>
+        </insert>
+        <insert tableName="stati_prenotazione">
+            <column name="id"           value="00000003-0000-0000-0000-000000000003"/>
+            <column name="codice"       value="REJECTED"/>
+            <column name="descrizione"  value="Rifiutata"/>
+            <column name="ordine_azione" valueNumeric="3"/>
+        </insert>
+        <insert tableName="stati_prenotazione">
+            <column name="id"           value="00000004-0000-0000-0000-000000000004"/>
+            <column name="codice"       value="CANCELLED"/>
+            <column name="descrizione"  value="Annullata"/>
+            <column name="ordine_azione" valueNumeric="4"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

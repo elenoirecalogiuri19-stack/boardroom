@@ -1,0 +1,89 @@
+# ============================================================
+# Boardroom – Docker Compose (produzione con MySQL)
+#
+# Avvio rapido:
+#   docker compose up --build -d
+#
+# Accesso:
+#   Applicazione  → http://localhost:8080
+#   Login admin   → admin / admin
+#
+# Per personalizzare credenziali crea un file ".env" nella stessa
+# cartella di questo file con le variabili riportate sotto.
+# ============================================================
+
+services:
+  # ── MySQL 9 ───────────────────────────────────────────────
+  mysql:
+    image: mysql:9.2.0
+    container_name: boardroom-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-boardroom}
+      MYSQL_USER: ${MYSQL_USER:-boardroom}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-boardroom}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-boardroomroot}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - '127.0.0.1:3307:3306'
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p${MYSQL_ROOT_PASSWORD:-boardroomroot}']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  # ── Boardroom app ──────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: boardroom-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - '8080:8080'
+    environment:
+      # ── Profilo Spring ──────────────────────────────────────
+      - SPRING_PROFILES_ACTIVE=prod
+
+      # ── Database MySQL ──────────────────────────────────────
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-boardroom}?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-boardroom}
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD:-boardroom}
+      - SPRING_LIQUIBASE_URL=jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-boardroom}?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+
+      # ── Email Gmail SMTP ────────────────────────────────────
+      # SPRING_MAIL_PASSWORD deve essere una "App Password" Gmail (16 caratteri).
+      # Non usare la password del tuo account Google!
+      # Genera qui: https://myaccount.google.com/apppasswords
+      - SPRING_MAIL_HOST=${SPRING_MAIL_HOST:-smtp.gmail.com}
+      - SPRING_MAIL_PORT=${SPRING_MAIL_PORT:-587}
+      - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME:-boardroom.progetto@gmail.com}
+      - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD:-vquvpjfegiahrzbd}
+      - JHIPSTER_MAIL_FROM=${JHIPSTER_MAIL_FROM:-Boardroom <boardroom.progetto@gmail.com>}
+
+      # ── URL base per i link nelle email ────────────────────
+      # Se esposto pubblicamente cambiare con il dominio reale (es: https://mio-sito.it)
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:8080}
+
+      # ── Sicurezza JWT ───────────────────────────────────────
+      # CONSIGLIATO: sovrascrivere con un segreto generato fresh:
+      #   openssl rand -base64 64
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=${JWT_SECRET:-MjQyMzY3Mjk5Y2QzNzMwZDczNTE4OTQyMzE2ZTZhY2RlM2QxOGI1ZTBiN2YyMWFiYmY5ODM1NjIxOTcwMWMyZDQ0NjMzNDU2YWRiZTQ4NDBjZmVlODU2YzI4YmNjZmJmMmIwMzc3ZjAxMTU3YzQ5MTBmMjc0MWE0YTgxNzQ1NDA=}
+
+      # ── JVM ────────────────────────────────────────────────
+      - _JAVA_OPTIONS=-Xmx512m -Xms256m
+
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/management/health/readiness']
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+volumes:
+  mysql_data:
+    driver: local

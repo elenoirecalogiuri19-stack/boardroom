@@ -17,8 +17,8 @@
 
     <div class="navbar-collapse collapse" id="navbarResponsive" [ngbCollapse]="isNavbarCollapsed()">
       <ul class="navbar-nav ms-auto align-items-center">
-        <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <a class="nav-link" routerLink="/" (click)="collapseNavbar()">
+        <li class="nav-item" [class.active]="currentUrl() === '/'">
+          <a class="nav-link" [class.active]="currentUrl() === '/'" routerLink="/" (click)="collapseNavbar()">
             <span>Bacheca</span>
           </a>
         </li>
