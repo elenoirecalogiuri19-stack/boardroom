@@ -1,5 +1,22 @@
 # boardroom
 
+
+
+## Comando avio Doker 
+da terminale puntando la cartella del prgramma per la prima volta e se si fano modifice
+```bash
+docker compose up --build -d
+```
+
+
+
+per aviarlo semplicemente da terminale 
+```bash
+docker compose up 
+```
+
+
+
 This application was generated using JHipster 8.11.0, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v8.11.0](https://www.jhipster.tech/documentation-archive/v8.11.0).
 
 ## Project Structure
