@@ -1,3 +1,5 @@
+@use 'sass:color' as color;
+
 $green: #3b6d11;
 $green-mid: #639922;
 $green-light: #eaf3de;
@@ -165,7 +167,7 @@ $blue-border: #b5d4f4;
       color: $green;
     }
     .filter-date-pill-label {
-      color: darken($green, 5%);
+      color: color.adjust($green, $lightness: -5%);
     }
   }
 
@@ -177,7 +179,7 @@ $blue-border: #b5d4f4;
       color: $green;
     }
     .filter-date-pill-label {
-      color: darken($green, 5%);
+      color: color.adjust($green, $lightness: -5%);
     }
     .filter-date-pill-value {
       color: $green;
@@ -238,7 +240,7 @@ $blue-border: #b5d4f4;
   transition: background 0.2s;
 
   &:hover {
-    background: darken($green, 8%);
+    background: color.adjust($green, $lightness: -8%);
   }
 }
 
@@ -257,7 +259,7 @@ $blue-border: #b5d4f4;
 
   &:hover {
     color: $text;
-    border-color: darken($border, 10%);
+    border-color: color.adjust($border, $lightness: -10%);
     background: $bg;
   }
 }
@@ -317,9 +319,9 @@ $blue-border: #b5d4f4;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: darken($border, 8%);
+  background: color.adjust($border, $lightness: -8%);
   border: 2px solid $white;
-  box-shadow: 0 0 0 1px darken($border, 8%);
+  box-shadow: 0 0 0 1px color.adjust($border, $lightness: -8%);
 
   &.dot-green {
     background: $green-mid;
@@ -347,7 +349,7 @@ $blue-border: #b5d4f4;
   cursor: default;
 
   &:hover {
-    border-color: darken($border, 8%);
+    border-color: color.adjust($border, $lightness: -8%);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   }
 }

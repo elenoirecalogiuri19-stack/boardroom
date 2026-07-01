@@ -1,3 +1,5 @@
+@use 'sass:color' as color;
+
 $br-green: #4a8c40;
 $br-text-dark: #1e293b;
 $br-text-soft: #64748b;
@@ -96,7 +98,7 @@ $br-white: #ffffff;
   box-shadow: 0 4px 12px rgba($br-green, 0.2);
 
   &:hover:not(:disabled) {
-    background-color: darken($br-green, 8%);
+    background-color: color.adjust($br-green, $lightness: -8%);
     transform: translateY(-3px);
     box-shadow: 0 12px 24px rgba($br-green, 0.3);
   }

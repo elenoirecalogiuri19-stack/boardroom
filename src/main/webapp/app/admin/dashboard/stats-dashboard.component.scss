@@ -1,3 +1,5 @@
+@use 'sass:color' as color;
+
 $green: #3b6d11;
 $green-mid: #639922;
 $green-light: #eaf3de;
@@ -398,7 +400,7 @@ $shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.15s;
 
   &:hover {
-    background: darken($green, 6%);
+    background: color.adjust($green, $lightness: -6%);
     transform: translateY(-1px);
   }
 }
@@ -480,7 +482,7 @@ $shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
     border-color: $green-border;
     color: $green;
     &:hover {
-      background: darken($green-light, 4%);
+      background: color.adjust($green-light, $lightness: -4%);
     }
   }
 
@@ -655,7 +657,7 @@ $shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.15s;
 
   &:hover:not(:disabled) {
-    background: darken($green, 6%);
+    background: color.adjust($green, $lightness: -6%);
   }
   &:disabled {
     opacity: 0.55;
@@ -768,7 +770,7 @@ $shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   &:hover,
   &--dragover {
     border-color: $green;
-    background: darken($green-light, 3%);
+    background: color.adjust($green-light, $lightness: -3%);
   }
 
   &__icon {

@@ -1,3 +1,5 @@
+@use 'sass:color' as color;
+
 $boardroom-logo-green: #4a8c40;
 
 $primary: $boardroom-logo-green;
@@ -18,8 +20,8 @@ $link-color: $boardroom-logo-green;
   box-shadow: none !important;
 
   &:hover {
-    background-color: darken($boardroom-logo-green, 7%) !important;
-    border-color: darken($boardroom-logo-green, 7%) !important;
+    background-color: color.adjust($boardroom-logo-green, $lightness: -7%) !important;
+    border-color: color.adjust($boardroom-logo-green, $lightness: -7%) !important;
   }
 }
 
@@ -32,6 +34,6 @@ button.btn-link {
   text-decoration: none;
 
   &:hover {
-    color: darken($boardroom-logo-green, 10%) !important;
+    color: color.adjust($boardroom-logo-green, $lightness: -10%) !important;
   }
 }

@@ -1,3 +1,5 @@
+@use 'sass:color' as color;
+
 $boardroom-green: #4a8c40;
 $br-soft: #555555;
 $br-dark: #1a1a1a;
@@ -194,7 +196,7 @@ $label-color: #888888;
   box-shadow: 0 4px 14px rgba($boardroom-green, 0.25);
 
   &:hover:not(:disabled) {
-    background-color: darken($boardroom-green, 6%) !important;
+    background-color: color.adjust($boardroom-green, $lightness: -6%) !important;
     transform: translateY(-1px);
     box-shadow: 0 8px 20px rgba($boardroom-green, 0.2);
   }
@@ -241,7 +243,7 @@ $label-color: #888888;
 
   &.alert-success {
     background-color: rgba($boardroom-green, 0.1);
-    color: darken($boardroom-green, 10%);
+    color: color.adjust($boardroom-green, $lightness: -10%);
     border: 1px solid rgba($boardroom-green, 0.2);
   }
 

@@ -1,3 +1,5 @@
+@use 'sass:color' as color;
+
 $br-green: #4a8c40;
 $br-dark-slate: #334155;
 $br-text-main: #475569;
@@ -203,7 +205,7 @@ $bg-global: #ffffff;
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background-color: darken($br-green, 5%);
+    background-color: color.adjust($br-green, $lightness: -5%);
     box-shadow: 0 4px 12px rgba($br-green, 0.2);
   }
 

@@ -1,3 +1,5 @@
+@use 'sass:color' as color;
+
 $accent: #3b82f6;
 $accent-light: #eff6ff;
 $green: #10b981;
@@ -332,7 +334,7 @@ $shadow-lg:
     background: $green-light;
     border-radius: $radius-sm;
     font-size: 0.9rem;
-    color: darken($green, 10%);
+    color: color.adjust($green, $lightness: -10%);
   }
 
   &__warn {
@@ -343,7 +345,7 @@ $shadow-lg:
     background: $warn-light;
     border-radius: $radius-sm;
     font-size: 0.8125rem;
-    color: darken($warn, 15%);
+    color: color.adjust($warn, $lightness: -15%);
     flex-wrap: wrap;
   }
 

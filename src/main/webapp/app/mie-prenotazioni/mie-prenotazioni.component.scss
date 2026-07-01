@@ -1,3 +1,5 @@
+@use 'sass:color' as color;
+
 $br-success: #4a8c40;
 $br-dark: #1a252f;
 $text-muted: #8e9aaf;
@@ -207,20 +209,20 @@ $status-wait-text: #475569;
   &[data-status='confirmed'] {
     background: $status-confirm-bg !important;
     color: $status-confirm-text !important;
-    border: 1px solid darken($status-confirm-bg, 8%);
+    border: 1px solid color.adjust($status-confirm-bg, $lightness: -8%);
   }
   &[data-status='cancellata'],
   &[data-status='cancelled'],
   &[data-status='annullata'] {
     background: $status-cancel-bg !important;
     color: $status-cancel-text !important;
-    border: 1px solid darken($status-cancel-bg, 6%);
+    border: 1px solid color.adjust($status-cancel-bg, $lightness: -6%);
   }
   &[data-status='rifiutata'],
   &[data-status='rejected'] {
     background: $status-reject-bg !important;
     color: $status-reject-text !important;
-    border: 1px solid darken($status-reject-bg, 8%);
+    border: 1px solid color.adjust($status-reject-bg, $lightness: -8%);
   }
   &[data-status='validazione prenotazione in corso'],
   &[data-status='waiting'],

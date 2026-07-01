@@ -1,3 +1,5 @@
+@use 'sass:color' as color;
+
 $green: #3b6d11;
 $green-mid: #639922;
 $green-light: #eaf3de;
@@ -89,7 +91,7 @@ $shadow-sm:
 
   &:hover:not(:disabled) {
     color: $text;
-    border-color: darken($border, 8%);
+    border-color: color.adjust($border, $lightness: -8%);
     background: $bg;
   }
 
@@ -117,7 +119,7 @@ $shadow-sm:
   transition: all 0.15s;
 
   &:hover {
-    background: darken($green, 6%);
+    background: color.adjust($green, $lightness: -6%);
     color: $white;
     transform: translateY(-1px);
   }

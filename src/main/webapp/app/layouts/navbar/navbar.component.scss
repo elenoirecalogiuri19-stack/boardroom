@@ -1,3 +1,5 @@
+@use 'sass:color' as color;
+
 $br-green: #4a8c40;
 $br-dark: #1a1a1a;
 $br-soft: #555555;
@@ -92,7 +94,7 @@ $nav-height: 100px;
   margin-left: 8px;
 
   &:hover {
-    background-color: darken($br-green, 8%);
+    background-color: color.adjust($br-green, $lightness: -8%);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba($br-green, 0.35);
   }
