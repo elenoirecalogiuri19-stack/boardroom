@@ -302,9 +302,6 @@ public class RicorrenzaService {
         if (dto.getSalaId() == null) throw new IllegalArgumentException("Sala obbligatoria");
         if (dto.getFrequenza() == null) throw new IllegalArgumentException("Frequenza obbligatoria");
         if (dto.getDataInizio() == null) throw new IllegalArgumentException("Data inizio obbligatoria");
-        if (dto.getDataFine() == null && dto.getNumOccorrenze() == null) throw new IllegalArgumentException(
-            "Specificare dataFine oppure numOccorrenze"
-        );
         if (dto.getDataFine() != null && dto.getDataFine().isBefore(dto.getDataInizio())) throw new IllegalArgumentException(
             "dataFine deve essere successiva a dataInizio"
         );

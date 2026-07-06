@@ -18,6 +18,7 @@
 
   <!-- Aggiunge i nuovi stati alla tabella stati_prenotazione -->
   <changeSet id="20260402000005_add_waitlist_stati" author="boardroom">
+    <validCheckSum>ANY</validCheckSum>
     <insert tableName="stati_prenotazione">
       <column name="id"            value="aa000000-0000-0000-0000-000000000001"/>
       <column name="codice"        value="WAITLISTED"/>

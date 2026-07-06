@@ -302,13 +302,24 @@ export class CreaEventoComponent implements OnInit {
   async verificaEProcedi(): Promise<void> {
     this.fase = 'verifica';
     const dateCandidate = this.calcolaDate();
+
+    // Oltre 52 occorrenze la verifica client-side causerebbe timeout:
+    // lasciamo che il backend gestisca i conflitti e mostriamo il riepilogo finale.
+    if (dateCandidate.length > 52) {
+      await this.creaRicorrenzaFinale();
+      return;
+    }
+
     const risultati: ConflittoData[] = [];
     this.dateLibere = [];
 
-    for (const data of dateCandidate) {
-      const libera = await this.verificaDisponibilita(data, this.ricorrenza.oraInizio, this.ricorrenza.oraFine, this.evento.salaId);
-      if (libera) this.dateLibere.push(data);
-      else risultati.push(await this.caricaOpzioniConflitto(data));
+    const checks = await Promise.all(
+      dateCandidate.map(data => this.verificaDisponibilita(data, this.ricorrenza.oraInizio, this.ricorrenza.oraFine, this.evento.salaId)),
+    );
+
+    for (let i = 0; i < dateCandidate.length; i++) {
+      if (checks[i]) this.dateLibere.push(dateCandidate[i]);
+      else risultati.push(await this.caricaOpzioniConflitto(dateCandidate[i]));
     }
 
     this.conflitti.set(risultati);

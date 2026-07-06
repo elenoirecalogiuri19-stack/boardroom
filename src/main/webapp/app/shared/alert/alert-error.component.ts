@@ -84,20 +84,20 @@ export class AlertErrorComponent implements OnDestroy {
     }
     if (errorHeader) {
       this.addErrorAlert(errorHeader);
-    } else if (httpErrorResponse.error !== '' && httpErrorResponse.error.fieldErrors) {
+    } else if (httpErrorResponse.error != null && httpErrorResponse.error !== '' && httpErrorResponse.error.fieldErrors) {
       this.handleFieldsError(httpErrorResponse);
-    } else if (httpErrorResponse.error !== '' && httpErrorResponse.error.message) {
+    } else if (httpErrorResponse.error != null && httpErrorResponse.error !== '' && httpErrorResponse.error.message) {
       this.addErrorAlert(httpErrorResponse.error.detail ?? httpErrorResponse.error.message);
     } else {
-      this.addErrorAlert(httpErrorResponse.error);
+      this.addErrorAlert(httpErrorResponse.error ?? undefined);
     }
   }
 
   private handleDefaultError(httpErrorResponse: HttpErrorResponse): void {
-    if (httpErrorResponse.error !== '' && httpErrorResponse.error.message) {
+    if (httpErrorResponse.error != null && httpErrorResponse.error !== '' && httpErrorResponse.error.message) {
       this.addErrorAlert(httpErrorResponse.error.detail ?? httpErrorResponse.error.message);
     } else {
-      this.addErrorAlert(httpErrorResponse.error);
+      this.addErrorAlert(httpErrorResponse.error ?? undefined);
     }
   }
 
