@@ -30,7 +30,9 @@ public class Eventi implements Serializable {
     @Column(name = "titolo", nullable = false)
     private String titolo;
 
-    @NotNull
+    @Column(name = "descrizione", nullable = false)
+    private String descrizione;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false)
     private TipoEvento tipo;
@@ -38,11 +40,14 @@ public class Eventi implements Serializable {
     @Column(name = "prezzo", precision = 21, scale = 2)
     private BigDecimal prezzo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties(value = { "eventis", "stato", "utente", "sala" }, allowSetters = true)
-    private Prenotazioni prenotazione;
+    /** Locandina dell'evento caricata dall'utente (base64 data URL). Null = usa immagine sala. */
+    @Column(name = "locandina_url", columnDefinition = "LONGTEXT")
+    private String locandinaUrl;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "prenotazione_id")
+    @JsonIgnoreProperties(value = { "evento", "stato", "utente", "sala" }, allowSetters = true)
+    private Prenotazioni prenotazione;
 
     public UUID getId() {
         return this.id;
@@ -107,6 +112,22 @@ public class Eventi implements Serializable {
     public Eventi prenotazione(Prenotazioni prenotazioni) {
         this.setPrenotazione(prenotazioni);
         return this;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
+
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione;
+    }
+
+    public String getLocandinaUrl() {
+        return locandinaUrl;
+    }
+
+    public void setLocandinaUrl(String locandinaUrl) {
+        this.locandinaUrl = locandinaUrl;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here

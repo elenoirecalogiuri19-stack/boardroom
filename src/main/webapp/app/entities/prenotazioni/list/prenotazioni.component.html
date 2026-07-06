@@ -1,130 +1,110 @@
-<div>
-  <h2 id="page-heading" data-cy="PrenotazioniHeading">
-    <span>Prenotazionis</span>
-
-    <div class="d-flex justify-content-end">
-      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+<div class="pren-list-page">
+  <div class="pren-list-header">
+    <div>
+      <h1 class="pren-list-title">Prenotazioni</h1>
+      <p class="pren-list-sub">Gestione e visualizzazione di tutte le prenotazioni</p>
+    </div>
+    <div class="pren-list-actions">
+      <a routerLink="/prenotazioni/calendar" class="btn-calendar" title="Vista calendario">
+        <fa-icon icon="calendar-alt"></fa-icon>
+        <span class="d-none d-md-inline">Calendario</span>
+      </a>
+      <button class="btn-refresh" (click)="load()" [disabled]="isLoading">
         <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
-        <span>Refresh list</span>
+        Aggiorna
       </button>
-
-      <button
-        id="jh-create-entity"
-        data-cy="entityCreateButton"
-        class="btn btn-primary jh-create-entity create-prenotazioni"
-        [routerLink]="['/prenotazioni/new']"
-      >
+      <button class="btn-new" [routerLink]="['/prenotazioni/new']">
         <fa-icon icon="plus"></fa-icon>
-        <span>Genera un nuovo Prenotazioni</span>
+        Nuova prenotazione
       </button>
     </div>
-  </h2>
+  </div>
 
   <jhi-alert-error />
-
   <jhi-alert />
 
-  @if (prenotazionis().length === 0) {
-    <div class="alert alert-warning" id="no-result">
-      <span>No Prenotazionis found</span>
+  @if (prenotazionis().length === 0 && !isLoading) {
+    <div class="pren-list-empty">
+      <span class="pren-list-empty__icon">📅</span>
+      <p>Nessuna prenotazione trovata.</p>
     </div>
   } @else {
-    <div class="table-responsive table-entities" id="entities">
-      <table class="table table-striped" aria-describedby="page-heading">
+    <div class="pren-table-wrap">
+      <table class="pren-table" aria-describedby="page-heading">
         <thead>
           <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
-            <th scope="col" jhiSortBy="id">
-              <div class="d-flex">
-                <span>Id</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="id">
+              <div class="th-inner">Id <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="data">
-              <div class="d-flex">
-                <span>Data</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="data">
+              <div class="th-inner">Data <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="oraInizio">
-              <div class="d-flex">
-                <span>Ora Inizio</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="oraInizio">
+              <div class="th-inner">Orario <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="oraFine">
-              <div class="d-flex">
-                <span>Ora Fine</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="stato.codice">
+              <div class="th-inner">Stato <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="stato.codice">
-              <div class="d-flex">
-                <span>Stato</span>
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="utente.nome">
+              <div class="th-inner">Utente <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="utente.nome">
-              <div class="d-flex">
-                <span>Utente</span>
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="sala.nome">
+              <div class="th-inner">Sala <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="sala.nome">
-              <div class="d-flex">
-                <span>Sala</span>
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
-            </th>
-            <th scope="col"></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           @for (prenotazioni of prenotazionis(); track trackId(prenotazioni)) {
-            <tr data-cy="entityTable">
-              <td>
+            <tr>
+              <td class="td-id">
                 <a [routerLink]="['/prenotazioni', prenotazioni.id, 'view']">{{ prenotazioni.id }}</a>
               </td>
-              <td>{{ prenotazioni.data | formatMediumDate }}</td>
-              <td>{{ prenotazioni.oraInizio }}</td>
-              <td>{{ prenotazioni.oraFine }}</td>
+              <td class="td-data">{{ prenotazioni.data | formatMediumDate }}</td>
+              <td>
+                <span class="orario-badge"> {{ prenotazioni.oraInizio }} – {{ prenotazioni.oraFine }} </span>
+              </td>
               <td>
                 @if (prenotazioni.stato) {
-                  <div>
-                    <a [routerLink]="['/stati-prenotazione', prenotazioni.stato.id, 'view']">{{ prenotazioni.stato.codice }}</a>
-                  </div>
+                  <a
+                    [routerLink]="['/stati-prenotazione', prenotazioni.stato.id, 'view']"
+                    class="codice-badge codice-badge--{{ prenotazioni.stato.codice?.toLowerCase() }}"
+                  >
+                    {{ prenotazioni.stato.codice }}
+                  </a>
+                } @else {
+                  <span class="td-secondary">–</span>
                 }
               </td>
               <td>
                 @if (prenotazioni.utente) {
-                  <div>
-                    <a [routerLink]="['/utenti', prenotazioni.utente.id, 'view']">{{ prenotazioni.utente.nome }}</a>
-                  </div>
+                  <a [routerLink]="['/utenti', prenotazioni.utente.id, 'view']" class="td-link">
+                    {{ prenotazioni.utente.nome }}
+                  </a>
+                } @else {
+                  <span class="td-secondary">–</span>
                 }
               </td>
               <td>
                 @if (prenotazioni.sala) {
-                  <div>
-                    <a [routerLink]="['/sale', prenotazioni.sala.id, 'view']">{{ prenotazioni.sala.nome }}</a>
-                  </div>
+                  <a [routerLink]="['/sale', prenotazioni.sala.id, 'view']" class="sala-badge">
+                    {{ prenotazioni.sala.nome }}
+                  </a>
+                } @else {
+                  <span class="td-secondary">–</span>
                 }
               </td>
-              <td class="text-end">
-                <div class="btn-group">
-                  <a [routerLink]="['/prenotazioni', prenotazioni.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+              <td class="td-actions">
+                <div class="action-group">
+                  <a [routerLink]="['/prenotazioni', prenotazioni.id, 'view']" class="action-btn action-btn--view" title="Visualizza">
                     <fa-icon icon="eye"></fa-icon>
                     <span class="d-none d-md-inline">Visualizza</span>
                   </a>
-
-                  <a [routerLink]="['/prenotazioni', prenotazioni.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                  <a [routerLink]="['/prenotazioni', prenotazioni.id, 'edit']" class="action-btn action-btn--edit" title="Modifica">
                     <fa-icon icon="pencil-alt"></fa-icon>
                     <span class="d-none d-md-inline">Modifica</span>
                   </a>
-
-                  <button type="submit" (click)="delete(prenotazioni)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                  <button (click)="delete(prenotazioni)" class="action-btn action-btn--delete" title="Elimina">
                     <fa-icon icon="times"></fa-icon>
                     <span class="d-none d-md-inline">Elimina</span>
                   </button>
@@ -136,23 +116,19 @@
       </table>
     </div>
   }
-  @if (prenotazionis().length > 0) {
-    <div>
-      <div class="d-flex justify-content-center">
-        <jhi-item-count [params]="{ page, totalItems, itemsPerPage }" />
-      </div>
 
-      <div class="d-flex justify-content-center">
-        <ngb-pagination
-          [collectionSize]="totalItems"
-          [page]="page"
-          [pageSize]="itemsPerPage"
-          [maxSize]="5"
-          [rotate]="true"
-          [boundaryLinks]="true"
-          (pageChange)="navigateToPage($event)"
-        ></ngb-pagination>
-      </div>
+  @if (prenotazionis().length > 0) {
+    <div class="pren-pagination">
+      <jhi-item-count [params]="{ page, totalItems, itemsPerPage }" />
+      <ngb-pagination
+        [collectionSize]="totalItems"
+        [page]="page"
+        [pageSize]="itemsPerPage"
+        [maxSize]="5"
+        [rotate]="true"
+        [boundaryLinks]="true"
+        (pageChange)="navigateToPage($event)"
+      />
     </div>
   }
 </div>

@@ -6,7 +6,17 @@ export interface IEventi {
   titolo?: string | null;
   tipo?: keyof typeof TipoEvento | null;
   prezzo?: number | null;
+  descrizione?: string | null;
+  data?: string | null;
+  oraInizio?: string | null;
+  oraFine?: string | null;
+  salaNome?: string | null;
+  salaImageUrl?: string | null;
+  locandinaUrl?: string | null;
   prenotazione?: Pick<IPrenotazioni, 'id'> | null;
+  numPersone?: number | null;
+  postiOccupati?: number | null;
+  eventoPieno?: boolean | null;
 }
 
 export type NewEventi = Omit<IEventi, 'id'> & { id: null };

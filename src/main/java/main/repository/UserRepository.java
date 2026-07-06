@@ -4,11 +4,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import main.domain.User;
-import main.domain.Utenti;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -17,8 +18,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     String USERS_BY_LOGIN_CACHE = "usersByLogin";
-
     String USERS_BY_EMAIL_CACHE = "usersByEmail";
+
     Optional<User> findOneByActivationKey(String activationKey);
     List<User> findAllByActivatedIsFalseAndActivationKeyIsNotNullAndCreatedDateBefore(Instant dateTime);
     Optional<User> findOneByResetKey(String resetKey);
@@ -35,5 +36,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findAllByIdNotNullAndActivatedIsTrue(Pageable pageable);
 
-    Optional<Utenti> findByUserLogin(String login);
+    @Query("select u from User u where u.login = :login")
+    Optional<User> findByLogin(@Param("login") String login);
 }

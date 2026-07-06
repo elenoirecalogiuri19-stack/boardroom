@@ -19,6 +19,7 @@ import { PrenotazioniDeleteDialogComponent } from '../delete/prenotazioni-delete
 @Component({
   selector: 'jhi-prenotazioni',
   templateUrl: './prenotazioni.component.html',
+  styleUrl: './prenotazioni.component.scss',
   imports: [RouterModule, FormsModule, SharedModule, SortDirective, SortByDirective, FormatMediumDatePipe, ItemCountComponent],
 })
 export class PrenotazioniComponent implements OnInit {
@@ -53,7 +54,7 @@ export class PrenotazioniComponent implements OnInit {
   delete(prenotazioni: IPrenotazioni): void {
     const modalRef = this.modalService.open(PrenotazioniDeleteDialogComponent, { size: 'lg', backdrop: 'static' });
     modalRef.componentInstance.prenotazioni = prenotazioni;
-    // unsubscribe not needed because closed completes on modal close
+
     modalRef.closed
       .pipe(
         filter(reason => reason === ITEM_DELETED_EVENT),

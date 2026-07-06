@@ -1,10 +1,8 @@
 package main.service;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import main.domain.Utenti;
 import main.repository.UtentiRepository;
 import main.service.dto.UtentiDTO;
@@ -86,7 +84,7 @@ public class UtentiService {
     @Transactional(readOnly = true)
     public List<UtentiDTO> findAll() {
         LOG.debug("Request to get all Utentis");
-        return utentiRepository.findAll().stream().map(utentiMapper::toDto).collect(Collectors.toCollection(LinkedList::new));
+        return utentiRepository.findAll().stream().map(utentiMapper::toDto).toList();
     }
 
     /**

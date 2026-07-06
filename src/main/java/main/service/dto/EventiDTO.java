@@ -3,6 +3,8 @@ package main.service.dto;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Objects;
 import java.util.UUID;
 import main.domain.enumeration.TipoEvento;
@@ -18,12 +20,31 @@ public class EventiDTO implements Serializable {
     @NotNull
     private String titolo;
 
-    @NotNull
     private TipoEvento tipo;
 
     private BigDecimal prezzo;
+    private String descrizione;
+    private LocalDate data;
+    private LocalTime oraInizio;
+    private LocalTime oraFine;
+    private String salaNome;
+
+    /** URL immagine della sala (es: /uploads/sale/uuid.jpg). Null = nessuna foto. */
+    private String salaImageUrl;
+
+    /** Locandina dell'evento (base64 data URL). Se presente sostituisce l'immagine sala. */
+    private String locandinaUrl;
 
     private UUID prenotazioneId;
+
+    /** Numero massimo di partecipanti ammessi all'evento pubblico. */
+    private Integer numPersone;
+
+    /** Numero di posti già prenotati (calcolato a runtime, non nel DB). */
+    private long postiOccupati;
+
+    /** true se l'evento ha raggiunto la capienza massima. */
+    private boolean eventoPieno;
 
     public UUID getId() {
         return id;
@@ -63,6 +84,86 @@ public class EventiDTO implements Serializable {
 
     public void setPrenotazioneId(UUID prenotazioneId) {
         this.prenotazioneId = prenotazioneId;
+    }
+
+    public LocalDate getData() {
+        return data;
+    }
+
+    public void setData(LocalDate data) {
+        this.data = data;
+    }
+
+    public LocalTime getOraInizio() {
+        return oraInizio;
+    }
+
+    public void setOraInizio(LocalTime oraInizio) {
+        this.oraInizio = oraInizio;
+    }
+
+    public LocalTime getOraFine() {
+        return oraFine;
+    }
+
+    public void setOraFine(LocalTime oraFine) {
+        this.oraFine = oraFine;
+    }
+
+    public String getSalaNome() {
+        return salaNome;
+    }
+
+    public void setSalaNome(String salaNome) {
+        this.salaNome = salaNome;
+    }
+
+    public String getSalaImageUrl() {
+        return salaImageUrl;
+    }
+
+    public void setSalaImageUrl(String salaImageUrl) {
+        this.salaImageUrl = salaImageUrl;
+    }
+
+    public String getLocandinaUrl() {
+        return locandinaUrl;
+    }
+
+    public void setLocandinaUrl(String locandinaUrl) {
+        this.locandinaUrl = locandinaUrl;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
+
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione;
+    }
+
+    public Integer getNumPersone() {
+        return numPersone;
+    }
+
+    public void setNumPersone(Integer numPersone) {
+        this.numPersone = numPersone;
+    }
+
+    public long getPostiOccupati() {
+        return postiOccupati;
+    }
+
+    public void setPostiOccupati(long postiOccupati) {
+        this.postiOccupati = postiOccupati;
+    }
+
+    public boolean isEventoPieno() {
+        return eventoPieno;
+    }
+
+    public void setEventoPieno(boolean eventoPieno) {
+        this.eventoPieno = eventoPieno;
     }
 
     @Override

@@ -110,14 +110,21 @@ public class StatiPrenotazione implements Serializable {
         return getClass().hashCode();
     }
 
-    // prettier-ignore
     @Override
     public String toString() {
-        return "StatiPrenotazione{" +
-            "id=" + getId() +
-            ", descrizione='" + getDescrizione() + "'" +
-            ", codice='" + getCodice() + "'" +
-            ", ordineAzione=" + getOrdineAzione() +
-            "}";
+        return (
+            "StatiPrenotazione{" +
+            "id=" +
+            getId() +
+            ", descrizione='" +
+            getDescrizione() +
+            "'" +
+            ", codice='" +
+            getCodice() +
+            "'" +
+            ", ordineAzione=" +
+            getOrdineAzione() +
+            "}"
+        );
     }
 }

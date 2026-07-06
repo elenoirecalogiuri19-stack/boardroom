@@ -1,0 +1,9 @@
+.git
+.gitignore
+node_modules
+target
+.mvn/wrapper/maven-wrapper.jar
+*.md
+.env
+.env.local
+*.env

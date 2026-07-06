@@ -1,15 +1,16 @@
-import { Component, ElementRef, Renderer2, effect, inject, input } from '@angular/core';
+import { Component, ElementRef, Renderer2, effect, inject, Input } from '@angular/core';
 
 import SharedModule from 'app/shared/shared.module';
 
 @Component({
   selector: 'jhi-password-strength-bar',
+  standalone: true,
   imports: [SharedModule],
   templateUrl: './password-strength-bar.component.html',
   styleUrl: './password-strength-bar.component.scss',
 })
 export default class PasswordStrengthBarComponent {
-  passwordToCheck = input<string>('');
+  @Input() passwordToCheck = '';
 
   colors = ['#F00', '#F90', '#FF0', '#9F0', '#0F0'];
 
@@ -18,7 +19,7 @@ export default class PasswordStrengthBarComponent {
 
   constructor() {
     effect(() => {
-      const password = this.passwordToCheck();
+      const password = this.passwordToCheck;
       if (password) {
         const c = this.getColor(this.measureStrength(password));
         const element = this.elementRef.nativeElement;
@@ -51,10 +52,8 @@ export default class PasswordStrengthBarComponent {
     force += 2 * p.length + (p.length >= 10 ? 1 : 0);
     force += passedMatches * 10;
 
-    // penalty (short password)
     force = p.length <= 6 ? Math.min(force, 10) : force;
 
-    // penalty (poor variety of characters)
     force = passedMatches === 1 ? Math.min(force, 10) : force;
     force = passedMatches === 2 ? Math.min(force, 20) : force;
     force = passedMatches === 3 ? Math.min(force, 40) : force;

@@ -3,7 +3,9 @@ package main.web.rest;
 import jakarta.validation.Valid;
 import java.util.*;
 import main.domain.User;
+import main.domain.Utenti;
 import main.repository.UserRepository;
+import main.repository.UtentiRepository;
 import main.security.SecurityUtils;
 import main.service.MailService;
 import main.service.UserService;
@@ -40,10 +42,18 @@ public class AccountResource {
 
     private final MailService mailService;
 
-    public AccountResource(UserRepository userRepository, UserService userService, MailService mailService) {
+    private final UtentiRepository utentiRepository;
+
+    public AccountResource(
+        UserRepository userRepository,
+        UserService userService,
+        MailService mailService,
+        UtentiRepository utentiRepository
+    ) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.mailService = mailService;
+        this.utentiRepository = utentiRepository;
     }
 
     /**
@@ -61,6 +71,15 @@ public class AccountResource {
             throw new InvalidPasswordException();
         }
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
+
+        Utenti nuovoProfilo = new Utenti();
+
+        nuovoProfilo.setNome(user.getLogin());
+        nuovoProfilo.setNumeroDiTelefono(managedUserVM.getNumeroDiTelefono());
+        nuovoProfilo.setNomeAzienda(managedUserVM.getNomeAzienda());
+        nuovoProfilo.setUser(user);
+
+        utentiRepository.save(nuovoProfilo);
         mailService.sendActivationEmail(user);
     }
 

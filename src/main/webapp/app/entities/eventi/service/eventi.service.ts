@@ -52,6 +52,10 @@ export class EventiService {
     return o1 && o2 ? this.getEventiIdentifier(o1) === this.getEventiIdentifier(o2) : o1 === o2;
   }
 
+  getEventiPubblici(): Observable<IEventi[]> {
+    return this.http.get<IEventi[]>(`${this.resourceUrl}/pubblici`);
+  }
+
   addEventiToCollectionIfMissing<Type extends Pick<IEventi, 'id'>>(
     eventiCollection: Type[],
     ...eventisToCheck: (Type | null | undefined)[]

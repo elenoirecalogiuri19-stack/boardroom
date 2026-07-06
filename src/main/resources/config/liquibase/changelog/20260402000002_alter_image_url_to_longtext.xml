@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- MySQL / H2: usa LONGTEXT (testo illimitato) per le immagini base64 -->
+    <changeSet id="20260402000002_alter_image_url_to_longtext" author="boardroom" dbms="mysql,h2">
+        <validCheckSum>ANY</validCheckSum>
+        <modifyDataType
+            tableName="sale"
+            columnName="image_url"
+            newDataType="LONGTEXT"/>
+    </changeSet>
+
+    <!-- PostgreSQL: TEXT equivale a LONGTEXT (nessun limite pratico) -->
+    <changeSet id="20260402000002_alter_image_url_to_text_pg" author="boardroom" dbms="postgresql">
+        <modifyDataType
+            tableName="sale"
+            columnName="image_url"
+            newDataType="TEXT"/>
+    </changeSet>
+
+</databaseChangeLog>

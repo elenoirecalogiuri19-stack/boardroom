@@ -14,6 +14,7 @@ import { UtentiDeleteDialogComponent } from '../delete/utenti-delete-dialog.comp
 @Component({
   selector: 'jhi-utenti',
   templateUrl: './utenti.component.html',
+  styleUrl: './utenti.component.scss',
   imports: [RouterModule, FormsModule, SharedModule, SortDirective, SortByDirective],
 })
 export class UtentiComponent implements OnInit {
@@ -50,7 +51,7 @@ export class UtentiComponent implements OnInit {
   delete(utenti: IUtenti): void {
     const modalRef = this.modalService.open(UtentiDeleteDialogComponent, { size: 'lg', backdrop: 'static' });
     modalRef.componentInstance.utenti = utenti;
-    // unsubscribe not needed because closed completes on modal close
+
     modalRef.closed
       .pipe(
         filter(reason => reason === ITEM_DELETED_EVENT),

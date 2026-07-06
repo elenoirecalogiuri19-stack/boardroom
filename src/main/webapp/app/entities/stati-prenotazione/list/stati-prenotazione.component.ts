@@ -14,6 +14,7 @@ import { StatiPrenotazioneDeleteDialogComponent } from '../delete/stati-prenotaz
 @Component({
   selector: 'jhi-stati-prenotazione',
   templateUrl: './stati-prenotazione.component.html',
+  styleUrl: './stati-prenotazione.component.scss',
   imports: [RouterModule, FormsModule, SharedModule, SortDirective, SortByDirective],
 })
 export class StatiPrenotazioneComponent implements OnInit {
@@ -50,7 +51,7 @@ export class StatiPrenotazioneComponent implements OnInit {
   delete(statiPrenotazione: IStatiPrenotazione): void {
     const modalRef = this.modalService.open(StatiPrenotazioneDeleteDialogComponent, { size: 'lg', backdrop: 'static' });
     modalRef.componentInstance.statiPrenotazione = statiPrenotazione;
-    // unsubscribe not needed because closed completes on modal close
+
     modalRef.closed
       .pipe(
         filter(reason => reason === ITEM_DELETED_EVENT),

@@ -1,14 +1,39 @@
-/* after changing this file run 'npm run webapp:build' */
+@use 'sass:color' as color;
 
-/***************************
-put Sass variables here:
-eg $input-color: red;
-****************************/
+$boardroom-logo-green: #4a8c40;
+
+$primary: $boardroom-logo-green;
+$success: $boardroom-logo-green;
+$link-color: $boardroom-logo-green;
+
 @import 'bootswatch/dist/flatly/variables';
-// Override Bootstrap variables
-@import 'bootstrap-variables';
-// Import Bootstrap source files from node_modules
 @import 'bootstrap/scss/bootstrap';
 @import 'bootswatch/dist/flatly/bootswatch';
 
-/* jhipster-needle-scss-add-vendor JHipster will add new css style */
+.btn-primary,
+.btn-success,
+#login,
+.btn {
+  background-color: $boardroom-logo-green !important;
+  border-color: $boardroom-logo-green !important;
+  color: white !important;
+  box-shadow: none !important;
+
+  &:hover {
+    background-color: color.adjust($boardroom-logo-green, $lightness: -7%) !important;
+    border-color: color.adjust($boardroom-logo-green, $lightness: -7%) !important;
+  }
+}
+
+a,
+.nav-link,
+fa-icon,
+.text-primary,
+button.btn-link {
+  color: $boardroom-logo-green !important;
+  text-decoration: none;
+
+  &:hover {
+    color: color.adjust($boardroom-logo-green, $lightness: -10%) !important;
+  }
+}

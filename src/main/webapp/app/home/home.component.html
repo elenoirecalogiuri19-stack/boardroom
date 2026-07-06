@@ -1,59 +1,102 @@
-<div class="row">
-  <div class="col-md-3">
-    <span class="hipster img-fluid rounded"></span>
-  </div>
+<div class="home-container">
+  <div class="hero-section">
+    @if (isLoading()) {
+      <div class="hero-loading">Caricamento eventi...</div>
+    }
 
-  <div class="col-md-9">
-    <h1 class="display-4"><span>Benvenuto, Java Hipster!</span> (Boardroom)</h1>
+    @if (!isLoading() && eventi().length > 0) {
+      <div
+        class="hero-viewport"
+        #heroViewport
+        (mousedown)="onDragStart($event)"
+        (mousemove)="onDragMove($event)"
+        (mouseup)="onDragEnd($event)"
+        (mouseleave)="onDragEnd($event)"
+        (touchstart)="onTouchStart($event)"
+        (touchend)="onTouchEnd($event)"
+        [class.hero-dragging]="isDragging"
+      >
+        <div class="hero-track">
+          @for (evento of eventi(); track evento.id; let i = $index) {
+            <div class="hero-slide">
+              <div class="hero-img-col">
+                @if (evento.locandinaUrl || evento.salaImageUrl) {
+                  <img
+                    [class]="evento.locandinaUrl ? 'hero-img hero-img--locandina' : 'hero-img'"
+                    [src]="evento.locandinaUrl || evento.salaImageUrl"
+                    [alt]="evento.salaNome ?? 'Sala'"
+                    loading="lazy"
+                    (error)="onHeroImgError($event)"
+                  />
+                } @else {
+                  <div class="hero-img-placeholder">
+                    <span class="hero-img-sala">{{ evento.salaNome }}</span>
+                  </div>
+                }
+              </div>
 
-    <p class="lead">Questa è la tua home page</p>
-
-    <div>
-      @if (account() !== null) {
-        <div class="alert alert-success">
-          @if (account(); as accountRef) {
-            <span id="home-logged-message">Autenticato come &quot;{{ accountRef.login }}&quot;.</span>
+              <div class="hero-info-col">
+                <span class="hero-badge">Evento pubblico</span>
+                <h2 class="hero-title">{{ evento.titolo }}</h2>
+                <div class="hero-meta">
+                  <p class="hero-meta-row"><span class="hero-meta-label">Sala:</span> {{ evento.salaNome }}</p>
+                  <p class="hero-meta-row">
+                    <span class="hero-meta-label">Data/Ora:</span>
+                    {{ evento.data | date: 'dd MMMM' }} &ndash; {{ evento.oraInizio | slice: 0 : 5 }} / {{ evento.oraFine | slice: 0 : 5 }}
+                  </p>
+                  @if (evento.numPersone) {
+                    <p class="hero-meta-row">
+                      <span class="hero-meta-label">Posti:</span>
+                      <span [class.hero-esaurito]="evento.eventoPieno">
+                        {{ evento.postiOccupati ?? 0 }} / {{ evento.numPersone }}
+                        @if (evento.eventoPieno) {
+                          <em> — Esaurito</em>
+                        }
+                      </span>
+                    </p>
+                  }
+                </div>
+                <div class="hero-actions">
+                  <button class="hero-link" (click)="vaiADettagli(evento)">Vedi dettagli</button>
+                  <span class="hero-price">{{ evento.prezzo }}€</span>
+                </div>
+              </div>
+            </div>
           }
         </div>
-      } @else {
-        <div class="alert alert-warning">
-          <span>Se vuoi </span>
-          <a class="alert-link" (click)="login()">accedere</a
-          ><span
-            >, puoi provare gli account di default: <br />
-            - Amministratore (user = &quot;admin&quot; e la password = &quot;admin&quot;) <br />
-            - utente (user = &quot;user&quot; e la password = &quot;user&quot;)</span
-          >
-        </div>
+      </div>
 
-        <div class="alert alert-warning">
-          <span>Non hai ancora un account?</span>&nbsp;
-          <a class="alert-link" routerLink="/account/register">Crea un account</a>
-        </div>
-      }
-    </div>
+      <div class="hero-dots">
+        @for (evento of eventi(); track evento.id; let i = $index) {
+          <button class="dot" [class.dot--active]="i === activeSlide" (click)="goToSlide(i)"></button>
+        }
+      </div>
+    }
+  </div>
 
-    <p>In caso di domande su JHipster:</p>
-
-    <ul>
-      <li><a href="https://www.jhipster.tech/" target="_blank" rel="noopener noreferrer">Homepage JHipster</a></li>
-      <li>
-        <a href="https://stackoverflow.com/tags/jhipster/info" target="_blank" rel="noopener noreferrer">JHipster su Stack Overflow</a>
-      </li>
-      <li>
-        <a href="https://github.com/jhipster/generator-jhipster/issues?state=open" target="_blank" rel="noopener noreferrer"
-          >JHipster tracciamento errori</a
-        >
-      </li>
-      <li>
-        <a href="https://gitter.im/jhipster/generator-jhipster" target="_blank" rel="noopener noreferrer">Chat room pubblica di JHipster</a>
-      </li>
-      <li><a href="https://twitter.com/jhipster" target="_blank" rel="noopener noreferrer">segui &#64;jhipster su Twitter</a></li>
-    </ul>
-
-    <p>
-      <span>Se ti piace JHipster, non dimenticarti di darci una stella su</span>
-      <a href="https://github.com/jhipster/generator-jhipster" target="_blank" rel="noopener noreferrer">GitHub</a>!
+  <div class="welcome-section">
+    <h2 class="welcome-title">Benvenuti in <span class="welcome-brand">Board</span>Room</h2>
+    <p class="welcome-text">
+      Gestisci i tuoi spazi di lavoro con un clic. In questa sezione trovi i workshop in evidenza, gli eventi formativi e le disponibilità
+      delle nostre sale più prestigiose. Prenota la tua prossima riunione in ambienti moderni, tecnologici e pronti a ospitare le tue idee.
     </p>
+  </div>
+
+  <div class="feature-strip">
+    <div class="feature-item">
+      <i class="bi bi-calendar2-check feature-icon"></i>
+      <h4 class="feature-title">Disponibilità live</h4>
+      <p class="feature-desc">Orari e sale aggiornati in tempo reale</p>
+    </div>
+    <div class="feature-item">
+      <i class="bi bi-people feature-icon"></i>
+      <h4 class="feature-title">Pubblici e privati</h4>
+      <p class="feature-desc">Per ogni tipo di evento e occasione</p>
+    </div>
+    <div class="feature-item">
+      <i class="bi bi-check2 feature-icon"></i>
+      <h4 class="feature-title">Prenotazione rapida</h4>
+      <p class="feature-desc">Conferma in pochi clic, gestisci dal profilo</p>
+    </div>
   </div>
 </div>

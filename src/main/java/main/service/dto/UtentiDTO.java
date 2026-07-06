@@ -5,9 +5,6 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * A DTO for the {@link main.domain.Utenti} entity.
- */
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class UtentiDTO implements Serializable {
 
@@ -65,17 +62,10 @@ public class UtentiDTO implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof UtentiDTO)) {
-            return false;
-        }
-
+        if (this == o) return true;
+        if (!(o instanceof UtentiDTO)) return false;
         UtentiDTO utentiDTO = (UtentiDTO) o;
-        if (this.id == null) {
-            return false;
-        }
+        if (this.id == null) return false;
         return Objects.equals(this.id, utentiDTO.id);
     }
 
@@ -84,15 +74,8 @@ public class UtentiDTO implements Serializable {
         return Objects.hash(this.id);
     }
 
-    // prettier-ignore
     @Override
     public String toString() {
-        return "UtentiDTO{" +
-            "id='" + getId() + "'" +
-            ", nome='" + getNome() + "'" +
-            ", nomeAzienda='" + getNomeAzienda() + "'" +
-            ", numeroDiTelefono='" + getNumeroDiTelefono() + "'" +
-            ", user=" + getUser() +
-            "}";
+        return "UtentiDTO{id='" + getId() + "', nome='" + getNome() + "'}";
     }
 }

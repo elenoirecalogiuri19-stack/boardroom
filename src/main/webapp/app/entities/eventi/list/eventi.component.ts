@@ -18,6 +18,7 @@ import { EventiDeleteDialogComponent } from '../delete/eventi-delete-dialog.comp
 @Component({
   selector: 'jhi-eventi',
   templateUrl: './eventi.component.html',
+  styleUrl: './eventi.component.scss',
   imports: [RouterModule, FormsModule, SharedModule, SortDirective, SortByDirective, ItemCountComponent],
 })
 export class EventiComponent implements OnInit {
@@ -52,7 +53,7 @@ export class EventiComponent implements OnInit {
   delete(eventi: IEventi): void {
     const modalRef = this.modalService.open(EventiDeleteDialogComponent, { size: 'lg', backdrop: 'static' });
     modalRef.componentInstance.eventi = eventi;
-    // unsubscribe not needed because closed completes on modal close
+
     modalRef.closed
       .pipe(
         filter(reason => reason === ITEM_DELETED_EVENT),

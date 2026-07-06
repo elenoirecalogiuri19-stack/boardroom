@@ -1,105 +1,85 @@
-<div>
-  <h2 id="page-heading" data-cy="StatiPrenotazioneHeading">
-    <span>StatiPrenotaziones</span>
-
-    <div class="d-flex justify-content-end">
-      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading">
+<div class="stati-list-page">
+  <div class="stati-list-header">
+    <div>
+      <h1 class="stati-list-title">Stati prenotazione</h1>
+      <p class="stati-list-sub">Gestione e visualizzazione di tutti gli stati</p>
+    </div>
+    <div class="stati-list-actions">
+      <button class="btn-refresh" (click)="load()" [disabled]="isLoading">
         <fa-icon icon="sync" [animation]="isLoading ? 'spin' : undefined"></fa-icon>
-        <span>Refresh list</span>
+        Aggiorna
       </button>
-
-      <button
-        id="jh-create-entity"
-        data-cy="entityCreateButton"
-        class="btn btn-primary jh-create-entity create-stati-prenotazione"
-        [routerLink]="['/stati-prenotazione/new']"
-      >
+      <button class="btn-new" [routerLink]="['/stati-prenotazione/new']">
         <fa-icon icon="plus"></fa-icon>
-        <span>Genera un nuovo Stati Prenotazione</span>
+        Nuovo stato
       </button>
     </div>
-  </h2>
+  </div>
 
   <jhi-alert-error />
-
   <jhi-alert />
 
-  @if (statiPrenotaziones().length === 0) {
-    <div class="alert alert-warning" id="no-result">
-      <span>No Stati Prenotaziones found</span>
+  @if (statiPrenotaziones().length === 0 && !isLoading) {
+    <div class="stati-list-empty">
+      <span class="stati-list-empty__icon">📋</span>
+      <p>Nessuno stato prenotazione trovato.</p>
     </div>
   } @else {
-    <div class="table-responsive table-entities" id="entities">
-      <table class="table table-striped" aria-describedby="page-heading">
+    <div class="stati-table-wrap">
+      <table class="stati-table" aria-describedby="page-heading">
         <thead>
           <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
-            <th scope="col" jhiSortBy="id">
-              <div class="d-flex">
-                <span>Id</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="id">
+              <div class="th-inner">Id <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="descrizione">
-              <div class="d-flex">
-                <span>Descrizione</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="descrizione">
+              <div class="th-inner">Descrizione <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="codice">
-              <div class="d-flex">
-                <span>Codice</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="codice">
+              <div class="th-inner">Codice <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col" jhiSortBy="ordineAzione">
-              <div class="d-flex">
-                <span>Ordine Azione</span>
-
-                <fa-icon class="p-1" icon="sort"></fa-icon>
-              </div>
+            <th jhiSortBy="ordineAzione">
+              <div class="th-inner">Ordine <fa-icon class="sort-icon" icon="sort"></fa-icon></div>
             </th>
-            <th scope="col"></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           @for (statiPrenotazione of statiPrenotaziones(); track trackId(statiPrenotazione)) {
-            <tr data-cy="entityTable">
-              <td>
+            <tr>
+              <td class="td-id">
                 <a [routerLink]="['/stati-prenotazione', statiPrenotazione.id, 'view']">{{ statiPrenotazione.id }}</a>
               </td>
-              <td>{{ statiPrenotazione.descrizione }}</td>
+              <td class="td-desc">{{ statiPrenotazione.descrizione || '–' }}</td>
               <td>
-                {{
-                  { null: '', WAITING: 'WAITING', CONFIRMED: 'CONFIRMED', REJECTED: 'REJECTED', CANCELLED: 'CANCELLED' }[
-                    statiPrenotazione.codice ?? 'null'
-                  ]
-                }}
+                @if (statiPrenotazione.codice) {
+                  <span class="codice-badge codice-badge--{{ statiPrenotazione.codice.toLowerCase() }}">
+                    {{ statiPrenotazione.codice }}
+                  </span>
+                } @else {
+                  <span class="td-secondary">–</span>
+                }
               </td>
-              <td>{{ statiPrenotazione.ordineAzione }}</td>
-              <td class="text-end">
-                <div class="btn-group">
+              <td class="td-secondary">{{ statiPrenotazione.ordineAzione ?? '–' }}</td>
+              <td class="td-actions">
+                <div class="action-group">
                   <a
                     [routerLink]="['/stati-prenotazione', statiPrenotazione.id, 'view']"
-                    class="btn btn-info btn-sm"
-                    data-cy="entityDetailsButton"
+                    class="action-btn action-btn--view"
+                    title="Visualizza"
                   >
                     <fa-icon icon="eye"></fa-icon>
                     <span class="d-none d-md-inline">Visualizza</span>
                   </a>
-
                   <a
                     [routerLink]="['/stati-prenotazione', statiPrenotazione.id, 'edit']"
-                    class="btn btn-primary btn-sm"
-                    data-cy="entityEditButton"
+                    class="action-btn action-btn--edit"
+                    title="Modifica"
                   >
                     <fa-icon icon="pencil-alt"></fa-icon>
                     <span class="d-none d-md-inline">Modifica</span>
                   </a>
-
-                  <button type="submit" (click)="delete(statiPrenotazione)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                  <button (click)="delete(statiPrenotazione)" class="action-btn action-btn--delete" title="Elimina">
                     <fa-icon icon="times"></fa-icon>
                     <span class="d-none d-md-inline">Elimina</span>
                   </button>

@@ -37,6 +37,15 @@ public class Sale implements Serializable {
     @Column(name = "descrizione")
     private String descrizione;
 
+    /**
+     * Path relativo dell'immagine della sala sul server.
+     * Esempio: "/uploads/sale/3f2504e0-sala.jpg"
+     * Null = nessuna immagine caricata.
+     */
+    /** Immagine della sala come data URL Base64 (es: "data:image/jpeg;base64,..."). */
+    @Column(name = "image_url", columnDefinition = "LONGTEXT")
+    private String imageUrl;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "sala")
     @JsonIgnoreProperties(value = { "eventis", "stato", "utente", "sala" }, allowSetters = true)
     private Set<Prenotazioni> prenotazionis = new HashSet<>();
@@ -95,6 +104,19 @@ public class Sale implements Serializable {
         this.descrizione = descrizione;
     }
 
+    public String getImageUrl() {
+        return this.imageUrl;
+    }
+
+    public Sale imageUrl(String imageUrl) {
+        this.setImageUrl(imageUrl);
+        return this;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     public Set<Prenotazioni> getPrenotazionis() {
         return this.prenotazionis;
     }
@@ -130,29 +152,34 @@ public class Sale implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Sale)) {
-            return false;
-        }
+        if (this == o) return true;
+        if (!(o instanceof Sale)) return false;
         return getId() != null && getId().equals(((Sale) o).getId());
     }
 
     @Override
     public int hashCode() {
-        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
         return getClass().hashCode();
     }
 
-    // prettier-ignore
     @Override
     public String toString() {
-        return "Sale{" +
-            "id=" + getId() +
-            ", nome='" + getNome() + "'" +
-            ", capienza=" + getCapienza() +
-            ", descrizione='" + getDescrizione() + "'" +
-            "}";
+        return (
+            "Sale{" +
+            "id=" +
+            getId() +
+            ", nome='" +
+            getNome() +
+            "'" +
+            ", capienza=" +
+            getCapienza() +
+            ", descrizione='" +
+            getDescrizione() +
+            "'" +
+            ", imageUrl='" +
+            getImageUrl() +
+            "'" +
+            "}"
+        );
     }
 }

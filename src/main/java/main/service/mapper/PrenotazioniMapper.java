@@ -1,49 +1,30 @@
 package main.service.mapper;
 
 import main.domain.Prenotazioni;
-import main.domain.Sale;
-import main.domain.StatiPrenotazione;
-import main.domain.Utenti;
 import main.service.dto.PrenotazioniDTO;
-import main.service.dto.SaleDTO;
-import main.service.dto.StatiPrenotazioneDTO;
-import main.service.dto.UtentiDTO;
 import org.mapstruct.*;
 
-/**
- * Mapper for the entity {@link Prenotazioni} and its DTO {@link PrenotazioniDTO}.
- */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { UtentiMapper.class, SaleMapper.class, StatiPrenotazioneMapper.class })
 public interface PrenotazioniMapper extends EntityMapper<PrenotazioniDTO, Prenotazioni> {
     @Override
-    @Mapping(target = "stato", source = "stato", qualifiedByName = "statiPrenotazioneCodice")
-    @Mapping(target = "utenteId", source = "utente.id")
-    @Mapping(target = "salaId", source = "sala.id")
-    @Mapping(target = "salaNome", source = "sala.nome")
-    PrenotazioniDTO toDto(Prenotazioni s);
+    @Mapping(target = "data", source = "data")
+    @Mapping(target = "oraInizio", source = "oraInizio")
+    @Mapping(target = "oraFine", source = "oraFine")
+    @Mapping(target = "sala", source = "sala")
+    @Mapping(target = "stato", source = "stato")
+    @Mapping(target = "utente", source = "utente")
+    @Mapping(target = "evento", source = "evento")
+    @Mapping(target = "eventoId", source = "evento.id")
+    @Mapping(target = "numPersone", source = "numPersone")
+    // Espone l'ID della serie ricorrente nel DTO — null se prenotazione singola
+    @Mapping(target = "ricorrenzaId", source = "ricorrenza.id")
+    PrenotazioniDTO toDto(Prenotazioni entity);
 
     @Override
-    @Mapping(target = "utente", ignore = true)
-    @Mapping(target = "sala", ignore = true)
+    @Mapping(target = "utente", source = "utente")
+    @Mapping(target = "sala", source = "sala")
+    @Mapping(target = "evento", ignore = true)
+    @Mapping(target = "numPersone", source = "numPersone")
+    @Mapping(target = "ricorrenza", ignore = true)
     Prenotazioni toEntity(PrenotazioniDTO dto);
-
-    @Named("statiPrenotazioneCodice")
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "codice", source = "codice")
-    @Mapping(target = "descrizione", source = "descrizione")
-    @Mapping(target = "ordineAzione", source = "ordineAzione")
-    StatiPrenotazioneDTO toDtoStatiPrenotazioneCodice(StatiPrenotazione statiPrenotazione);
-
-    @Named("utentiNome")
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "nome", source = "nome")
-    UtentiDTO toDtoUtentiNome(Utenti utenti);
-
-    @Named("saleNome")
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "nome", source = "nome")
-    SaleDTO toDtoSaleNome(Sale sale);
 }

@@ -21,6 +21,9 @@ public class SaleDTO implements Serializable {
 
     private String descrizione;
 
+    /** Path relativo dell'immagine. Null = nessuna immagine. */
+    private String imageUrl;
+
     public UUID getId() {
         return id;
     }
@@ -53,19 +56,20 @@ public class SaleDTO implements Serializable {
         this.descrizione = descrizione;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof SaleDTO)) {
-            return false;
-        }
-
+        if (this == o) return true;
+        if (!(o instanceof SaleDTO)) return false;
         SaleDTO saleDTO = (SaleDTO) o;
-        if (this.id == null) {
-            return false;
-        }
+        if (this.id == null) return false;
         return Objects.equals(this.id, saleDTO.id);
     }
 
@@ -74,14 +78,25 @@ public class SaleDTO implements Serializable {
         return Objects.hash(this.id);
     }
 
-    // prettier-ignore
     @Override
     public String toString() {
-        return "SaleDTO{" +
-            "id='" + getId() + "'" +
-            ", nome='" + getNome() + "'" +
-            ", capienza=" + getCapienza() +
-            ", descrizione='" + getDescrizione() + "'" +
-            "}";
+        return (
+            "SaleDTO{" +
+            "id='" +
+            getId() +
+            "'" +
+            ", nome='" +
+            getNome() +
+            "'" +
+            ", capienza=" +
+            getCapienza() +
+            ", descrizione='" +
+            getDescrizione() +
+            "'" +
+            ", imageUrl='" +
+            getImageUrl() +
+            "'" +
+            "}"
+        );
     }
 }
