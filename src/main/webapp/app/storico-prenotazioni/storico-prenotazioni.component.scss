@@ -1,0 +1,126 @@
+$br-green: #5ca34d;
+$br-green-pale: #f1f8f0;
+$text-main: #2c3e50;
+$text-light: #94a3b8;
+
+.storico-minimal {
+  max-width: 700px;
+  margin: 90px 0 0 8%;
+  font-family: 'Inter', sans-serif;
+}
+
+.header-section {
+  margin-bottom: 50px;
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: $text-main;
+    letter-spacing: -1px;
+  }
+  p {
+    color: $text-light;
+    font-size: 16px;
+    margin-top: 5px;
+    .brand-green {
+      color: $br-green;
+      font-weight: 600;
+    }
+  }
+}
+
+.filter-bar {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 50px;
+  button {
+    background: none;
+    border: none;
+    padding: 0 0 5px 0;
+    font-size: 14px;
+    color: $text-light;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s;
+    &.active {
+      color: $br-green;
+      border-bottom: 2px solid $br-green;
+      font-weight: 600;
+    }
+  }
+}
+
+.entry-row {
+  display: flex;
+  align-items: center;
+  padding: 25px 0;
+  border-bottom: 1px solid #f1f5f9;
+
+  &:hover {
+    .date-side {
+      background: $br-green-pale;
+      transform: scale(1.05);
+    }
+  }
+
+  .date-side {
+    width: 55px;
+    height: 55px;
+    background: #f8fafc;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    .day {
+      font-size: 18px;
+      font-weight: 800;
+      color: $text-main;
+      line-height: 1;
+    }
+    .month {
+      font-size: 9px;
+      font-weight: 700;
+      color: $br-green;
+    }
+  }
+
+  .content-side {
+    flex-grow: 1;
+    padding-left: 30px;
+    h3 {
+      font-size: 17px;
+      font-weight: 600;
+      color: $text-main;
+      margin: 0;
+    }
+    p {
+      font-size: 14px;
+      color: $text-light;
+      margin-top: 4px;
+      .dot {
+        margin: 0 8px;
+        color: $br-green;
+      }
+    }
+  }
+
+  .status-side {
+    .tag-concluso {
+      font-size: 10px;
+      font-weight: 700;
+      color: $br-green;
+      background: $br-green-pale;
+      padding: 4px 12px;
+      border-radius: 50px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+.empty-text {
+  color: $text-light;
+  font-style: italic;
+  padding-top: 40px;
+}

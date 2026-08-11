@@ -1,180 +1,126 @@
-<div>
-  <div class="d-flex justify-content-center">
-    <div class="col-md-8">
-      <h1 data-cy="registerTitle">Registrazione</h1>
+<div class="register-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-md-10 register-card">
+        <h1 data-cy="registerTitle" class="text-center">Crea Account</h1>
+        <p class="text-center text-muted mb-4">Unisciti a BoardRoom per gestire le tue prenotazioni</p>
 
-      @if (success()) {
-        <div class="alert alert-success">
-          <strong>La registrazione account è stata salvata!</strong> Controlla la tua email per confermare.
+        @if (success()) {
+          <div class="alert alert-success"><strong>Registrazione completata!</strong> Controlla la tua email per confermare l'account.</div>
+        }
+        @if (error() || errorUserExists() || errorEmailExists() || doNotMatch()) {
+          <div class="alert alert-danger">
+            @if (error()) {
+              <span>La registrazione è fallita. Riprova.</span>
+            }
+            @if (errorUserExists()) {
+              <span>Username già occupato.</span>
+            }
+            @if (errorEmailExists()) {
+              <span>Email già in uso.</span>
+            }
+            @if (doNotMatch()) {
+              <span>Le password non corrispondono.</span>
+            }
+          </div>
+        }
+
+        @if (!success()) {
+          <form name="form" (ngSubmit)="register()" [formGroup]="registerForm">
+            <div class="mb-3">
+              <label class="form-label" for="login">Username</label>
+              <input
+                #login
+                type="text"
+                class="form-control"
+                id="login"
+                name="login"
+                placeholder="Scegli un username"
+                formControlName="login"
+              />
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="firstName">Nome</label>
+                <input type="text" class="form-control" id="firstName" name="firstName" formControlName="firstName" placeholder="Nome" />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="lastName">Cognome</label>
+                <input type="text" class="form-control" id="lastName" name="lastName" formControlName="lastName" placeholder="Cognome" />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="email">Email</label>
+              <input type="email" class="form-control" id="email" name="email" placeholder="esempio@mail.com" formControlName="email" />
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="numeroDiTelefono">Telefono</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="numeroDiTelefono"
+                  name="numeroDiTelefono"
+                  formControlName="numeroDiTelefono"
+                  placeholder="+39..."
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="nomeAzienda">Azienda (Opzionale)</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nomeAzienda"
+                  name="nomeAzienda"
+                  formControlName="nomeAzienda"
+                  placeholder="Azienda"
+                />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="password">Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                placeholder="Crea password"
+                formControlName="password"
+              />
+              <jhi-password-strength-bar [passwordToCheck]="registerForm.controls.password.value" />
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label" for="confirmPassword">Conferma password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Ripeti password"
+                formControlName="confirmPassword"
+              />
+            </div>
+
+            <button
+              type="submit"
+              [disabled]="registerForm.invalid || isLoading"
+              class="btn btn-primary w-100 py-2"
+              [class.btn-loading]="isLoading"
+            >
+              Crea Account
+            </button>
+          </form>
+        }
+
+        <div class="mt-4 text-center login-footer">
+          <span class="text-muted">Hai già un account? </span>
+          <a routerLink="/login" class="login-link">Accedi qui</a>
         </div>
-      }
-
-      @if (error()) {
-        <div class="alert alert-danger"><strong>La registrazione dell&apos;account è fallita!</strong> Riprova più tardi.</div>
-      }
-
-      @if (errorUserExists()) {
-        <div class="alert alert-danger">
-          <strong>Il nome utente scelto è già registrato!</strong> Si prega di scegliere un altro nome utente.
-        </div>
-      }
-
-      @if (errorEmailExists()) {
-        <div class="alert alert-danger"><strong>L&apos;indirizzo email è già in uso</strong> Si prega di sceglierne un altro.</div>
-      }
-
-      @if (doNotMatch()) {
-        <div class="alert alert-danger">La password e la sua conferma non corrispondono!</div>
-      }
-    </div>
-  </div>
-
-  <div class="d-flex justify-content-center">
-    <div class="col-md-8">
-      @if (!success()) {
-        <form name="form" (ngSubmit)="register()" [formGroup]="registerForm">
-          <div class="mb-3">
-            <label class="form-label" for="login">Utente</label>
-            <input
-              type="text"
-              class="form-control"
-              id="login"
-              name="login"
-              placeholder="Il tuo nome utente"
-              formControlName="login"
-              data-cy="username"
-            />
-
-            @let loginRef = registerForm.get('login')!;
-            @if (loginRef.invalid && (loginRef.dirty || loginRef.touched)) {
-              <div>
-                @if (loginRef?.errors?.required) {
-                  <small class="form-text text-danger">Il nome utente è obbligatorio.</small>
-                }
-
-                @if (loginRef?.errors?.minlength) {
-                  <small class="form-text text-danger">Il nome utente deve essere di almeno 1 carattere</small>
-                }
-
-                @if (loginRef?.errors?.maxlength) {
-                  <small class="form-text text-danger">Il nome utente non può contenere più di 50 caratteri</small>
-                }
-
-                @if (loginRef?.errors?.pattern) {
-                  <small class="form-text text-danger">Your username is invalid.</small>
-                }
-              </div>
-            }
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label" for="email">Email</label>
-            <input
-              type="email"
-              class="form-control"
-              id="email"
-              name="email"
-              placeholder="Il tuo indirizzo email"
-              formControlName="email"
-              data-cy="email"
-            />
-
-            @let emailRef = registerForm.get('email')!;
-            @if (emailRef.invalid && (emailRef.dirty || emailRef.touched)) {
-              <div>
-                @if (emailRef?.errors?.required) {
-                  <small class="form-text text-danger">L&apos;indirizzo email è obbligatorio.</small>
-                }
-
-                @if (emailRef?.errors?.invalid) {
-                  <small class="form-text text-danger">L&apos;indirizzo email non è valido.</small>
-                }
-
-                @if (emailRef?.errors?.minlength) {
-                  <small class="form-text text-danger">L&apos;indirizzo email deve essere di almeno 5 caratteri</small>
-                }
-
-                @if (emailRef?.errors?.maxlength) {
-                  <small class="form-text text-danger">L&apos;indirizzo email non può contenere più di 50 caratteri</small>
-                }
-              </div>
-            }
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label" for="password">Nuova password</label>
-            <input
-              type="password"
-              class="form-control"
-              id="password"
-              name="password"
-              placeholder="Nuova password"
-              formControlName="password"
-              data-cy="firstPassword"
-            />
-
-            @let passwordRef = registerForm.get('password')!;
-            @if (passwordRef.invalid && (passwordRef.dirty || passwordRef.touched)) {
-              <div>
-                @if (passwordRef?.errors?.required) {
-                  <small class="form-text text-danger">La password è obbligatoria.</small>
-                }
-
-                @if (passwordRef?.errors?.minlength) {
-                  <small class="form-text text-danger">La password deve essere di almeno 4 caratteri</small>
-                }
-
-                @if (passwordRef?.errors?.maxlength) {
-                  <small class="form-text text-danger">La password non può contenere più di 50 caratteri</small>
-                }
-              </div>
-            }
-
-            <jhi-password-strength-bar [passwordToCheck]="passwordRef.value" />
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label" for="confirmPassword">Conferma nuova password</label>
-            <input
-              type="password"
-              class="form-control"
-              id="confirmPassword"
-              name="confirmPassword"
-              placeholder="Conferma nuova password"
-              formControlName="confirmPassword"
-              data-cy="secondPassword"
-            />
-
-            @let confirmPasswordRef = registerForm.get('confirmPassword')!;
-            @if (confirmPasswordRef.invalid && (confirmPasswordRef.dirty || confirmPasswordRef.touched)) {
-              <div>
-                @if (confirmPasswordRef?.errors?.required) {
-                  <small class="form-text text-danger">La password di conferma è obbligatoria.</small>
-                }
-
-                @if (confirmPasswordRef?.errors?.minlength) {
-                  <small class="form-text text-danger">La tua password deve essere di almeno 4 caratteri</small>
-                }
-
-                @if (confirmPasswordRef?.errors?.maxlength) {
-                  <small class="form-text text-danger">La tua password non può contenere più di 50 caratteri</small>
-                }
-              </div>
-            }
-          </div>
-
-          <button type="submit" [disabled]="registerForm.invalid" class="btn btn-primary" data-cy="submit">Crea Account</button>
-        </form>
-      }
-
-      <div class="mt-3 alert alert-warning">
-        <span>Se vuoi </span>
-        <a class="alert-link" routerLink="/login">accedere</a
-        ><span
-          >, puoi provare gli account di default: <br />
-          - Amministratore (user = &quot;admin&quot; e la password = &quot;admin&quot;) <br />
-          - utente (user = &quot;user&quot; e la password = &quot;user&quot;)</span
-        >
       </div>
     </div>
   </div>

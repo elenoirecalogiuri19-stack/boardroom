@@ -66,6 +66,13 @@ export class PrenotazioniService {
       .pipe(map(res => this.convertResponseArrayFromServer(res)));
   }
 
+  getStorico(req?: any): Observable<EntityArrayResponseType> {
+    const options = createRequestOption(req);
+    return this.http
+      .get<RestPrenotazioni[]>(`${this.resourceUrl}/storico`, { params: options, observe: 'response' })
+      .pipe(map(res => this.convertResponseArrayFromServer(res)));
+  }
+
   delete(id: string): Observable<HttpResponse<{}>> {
     return this.http.delete(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }

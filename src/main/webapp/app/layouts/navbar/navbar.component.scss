@@ -1,48 +1,132 @@
-@import 'bootstrap/scss/functions';
-@import 'bootswatch/dist/flatly/variables';
-@import 'bootstrap/scss/variables';
+$br-green: #4a8c40;
+$br-dark: #334155;
+$br-soft: #64748b;
+$white: #ffffff;
+$nav-height: 120px;
 
-/* ==========================================================================
-Navbar
-========================================================================== */
-
-.navbar-version {
-  font-size: 0.65em;
-  color: $navbar-dark-color;
+.boardroom-nav {
+  height: $nav-height !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(15px) !important;
+  -webkit-backdrop-filter: blur(15px) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 0 4% !important;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  z-index: 1030;
 }
 
-.profile-image {
-  height: 1.75em;
-  width: 1.75em;
+.navbar-brand.logo {
+  padding: 0 !important;
+  margin-right: 30px;
+  display: flex;
+  align-items: center;
 }
 
-.navbar {
-  padding: 0.2rem 1rem;
-  .dropdown-item.active,
-  .dropdown-item.active:focus,
-  .dropdown-item.active:hover {
-    background-color: $dark;
+.nav-logo {
+  height: 100px !important;
+  max-height: 100px !important;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+}
+
+.navbar-nav {
+  .nav-item {
+    padding: 0 15px;
   }
 
-  a.nav-link {
-    font-weight: 400;
-  }
+  .nav-link {
+    color: $br-dark !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
 
-  .navbar-toggler {
-    &:hover {
-      color: $navbar-dark-hover-color;
+    &:not(.login-link-green):not(.p-0)::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 3px;
+      background-color: $br-green;
+      transition: width 0.3s ease;
+    }
+
+    &:not(.login-link-green):hover,
+    &:not(.login-link-green).active {
+      color: $br-green !important;
+      &::after {
+        width: 100%;
+      }
+    }
+
+    &.login-link-green {
+      color: $br-green !important;
+      transition: all 0.2s ease;
+
+      fa-icon {
+        font-size: 1.1rem;
+      }
+
+      &:hover {
+        opacity: 0.7;
+        transform: translateY(-1px);
+      }
     }
   }
 }
 
-/* ==========================================================================
-Logo styles
-========================================================================== */
-.logo-img {
-  height: 45px;
-  width: 45px;
-  display: inline-block;
-  vertical-align: middle;
-  background: url('/content/images/logo-jhipster.png') no-repeat center center;
-  background-size: contain;
+.avatar-nav-wrapper {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: 2px solid $br-green;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $white;
+  transition: all 0.3s ease;
+  margin-left: 10px;
+
+  &:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 15px rgba($br-green, 0.2);
+  }
+
+  .profile-image-nav {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-placeholder {
+    color: $br-green;
+    font-size: 1.2rem;
+  }
+}
+
+.dropdown-menu {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+  padding: 10px 0;
+}
+
+.navbar-toggler {
+  border: none;
+  &:focus {
+    box-shadow: none;
+  }
 }

@@ -15,14 +15,17 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface EventiMapper extends EntityMapper<EventiDTO, Eventi> {
     @Mapping(target = "prenotazioneId", source = "prenotazione.id")
+    @Mapping(source = "prenotazione.data", target = "data")
+    @Mapping(source = "prenotazione.oraInizio", target = "oraInizio")
+    @Mapping(source = "prenotazione.oraFine", target = "oraFine")
+    @Mapping(source = "prenotazione.sala.nome", target = "salaNome")
+    @Mapping(source = "descrizione", target = "descrizione")
+    @Mapping(source = "prenotazione.numPersone", target = "numPersone")
+    @Mapping(target = "postiOccupati", ignore = true)
+    @Mapping(target = "eventoPieno", ignore = true)
     EventiDTO toDto(Eventi s);
 
     List<EventiDTO> toDto(List<Eventi> eventiList);
-
-    @Named("prenotazioniId")
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    PrenotazioniDTO toDtoPrenotazioniId(Prenotazioni prenotazioni);
 
     default String map(UUID value) {
         return Objects.toString(value, null);

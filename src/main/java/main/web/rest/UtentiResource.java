@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import main.repository.UtentiRepository;
+import main.security.AuthoritiesConstants;
 import main.service.UtentiService;
 import main.service.dto.UtentiDTO;
 import main.web.rest.errors.BadRequestAlertException;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -51,6 +53,7 @@ public class UtentiResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<UtentiDTO> createUtenti(@Valid @RequestBody UtentiDTO utentiDTO) throws URISyntaxException {
         LOG.debug("REST request to save Utenti : {}", utentiDTO);
         if (utentiDTO.getId() != null) {
@@ -73,6 +76,7 @@ public class UtentiResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<UtentiDTO> updateUtenti(
         @PathVariable(value = "id", required = false) final UUID id,
         @Valid @RequestBody UtentiDTO utentiDTO
@@ -107,6 +111,7 @@ public class UtentiResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<UtentiDTO> partialUpdateUtenti(
         @PathVariable(value = "id", required = false) final UUID id,
         @NotNull @RequestBody UtentiDTO utentiDTO
@@ -137,6 +142,7 @@ public class UtentiResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of utentis in body.
      */
     @GetMapping("")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public List<UtentiDTO> getAllUtentis() {
         LOG.debug("REST request to get all Utentis");
         return utentiService.findAll();
@@ -149,6 +155,7 @@ public class UtentiResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the utentiDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<UtentiDTO> getUtenti(@PathVariable("id") UUID id) {
         LOG.debug("REST request to get Utenti : {}", id);
         Optional<UtentiDTO> utentiDTO = utentiService.findOne(id);
@@ -162,6 +169,7 @@ public class UtentiResource {
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<Void> deleteUtenti(@PathVariable("id") UUID id) {
         LOG.debug("REST request to delete Utenti : {}", id);
         utentiService.delete(id);

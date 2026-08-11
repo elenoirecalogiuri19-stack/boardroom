@@ -4,13 +4,8 @@ import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Objects;
 import java.util.UUID;
 
-/**
- * A DTO for the {@link main.domain.Prenotazioni} entity.
- */
-@SuppressWarnings("common-java:DuplicatedBlocks")
 public class PrenotazioniDTO implements Serializable {
 
     private UUID id;
@@ -24,21 +19,18 @@ public class PrenotazioniDTO implements Serializable {
     @NotNull
     private LocalTime oraFine;
 
-    private StatiPrenotazioneDTO stato;
+    private Integer numPersone;
 
-    private UUID utenteId;
+    private StatiPrenotazioneDTO stato;
+    private UtentiDTO utente;
+    private SaleDTO sala;
+    private EventiDTO evento;
 
     private UUID salaId;
 
-    private String salaNome;
+    private UUID eventoId;
 
-    public String getSalaNome() {
-        return salaNome;
-    }
-
-    public void setSalaNome(String salaNome) {
-        this.salaNome = salaNome;
-    }
+    private String codiceQr;
 
     public UUID getId() {
         return id;
@@ -80,12 +72,28 @@ public class PrenotazioniDTO implements Serializable {
         this.stato = stato;
     }
 
-    public UUID getUtenteId() {
-        return utenteId;
+    public UtentiDTO getUtente() {
+        return utente;
     }
 
-    public void setUtenteId(UUID utenteId) {
-        this.utenteId = utenteId;
+    public void setUtente(UtentiDTO utente) {
+        this.utente = utente;
+    }
+
+    public SaleDTO getSala() {
+        return sala;
+    }
+
+    public void setSala(SaleDTO sala) {
+        this.sala = sala;
+    }
+
+    public Integer getNumPersone() {
+        return numPersone;
+    }
+
+    public void setNumPersone(Integer numPersone) {
+        this.numPersone = numPersone;
     }
 
     public UUID getSalaId() {
@@ -96,38 +104,27 @@ public class PrenotazioniDTO implements Serializable {
         this.salaId = salaId;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof PrenotazioniDTO)) {
-            return false;
-        }
-
-        PrenotazioniDTO prenotazioniDTO = (PrenotazioniDTO) o;
-        if (this.id == null) {
-            return false;
-        }
-        return Objects.equals(this.id, prenotazioniDTO.id);
+    public UUID getEventoId() {
+        return eventoId;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.id);
+    public void setEventoId(UUID eventoId) {
+        this.eventoId = eventoId;
     }
 
-    // prettier-ignore
-    @Override
-    public String toString() {
-        return "PrenotazioniDTO{" +
-            "id='" + getId() + "'" +
-            ", data='" + getData() + "'" +
-            ", oraInizio='" + getOraInizio() + "'" +
-            ", oraFine='" + getOraFine() + "'" +
-            ", stato=" + getStato() +
-            ", utente=" + getUtenteId() +
-            ", sala=" + getSalaId() +
-            "}";
+    public EventiDTO getEvento() {
+        return evento;
+    }
+
+    public void setEvento(EventiDTO evento) {
+        this.evento = evento;
+    }
+
+    public String getCodiceQr() {
+        return codiceQr;
+    }
+
+    public void setCodiceQr(String codiceQr) {
+        this.codiceQr = codiceQr;
     }
 }

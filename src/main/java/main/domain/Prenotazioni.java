@@ -2,22 +2,23 @@ package main.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
- * A Prenotazioni.
+ * Entity class for Prenotazioni
  */
 @Entity
 @Table(name = "prenotazioni")
-@SuppressWarnings("common-java:DuplicatedBlocks")
+@EntityListeners(AuditingEntityListener.class)
 public class Prenotazioni implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -40,30 +41,34 @@ public class Prenotazioni implements Serializable {
     @Column(name = "ora_fine", nullable = false)
     private LocalTime oraFine;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "prenotazione")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "prenotazione")
     @JsonIgnoreProperties(value = { "prenotazione" }, allowSetters = true)
-    private Set<Eventi> eventis = new HashSet<>();
+    private Eventi evento;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties(value = { "prenotazionis" }, allowSetters = true)
     private StatiPrenotazione stato;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties(value = { "user" }, allowSetters = true)
+    @JsonIgnoreProperties(value = { "prenotazionis" }, allowSetters = true)
     private Utenti utente;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = { "prenotazionis" }, allowSetters = true)
     private Sale sala;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "codice_qr", unique = true)
+    private String codiceQr;
+
+    @Column(name = "num_persone")
+    private Integer numPersone;
 
     public UUID getId() {
-        return this.id;
-    }
-
-    public Prenotazioni id(UUID id) {
-        this.setId(id);
-        return this;
+        return id;
     }
 
     public void setId(UUID id) {
@@ -71,12 +76,7 @@ public class Prenotazioni implements Serializable {
     }
 
     public LocalDate getData() {
-        return this.data;
-    }
-
-    public Prenotazioni data(LocalDate data) {
-        this.setData(data);
-        return this;
+        return data;
     }
 
     public void setData(LocalDate data) {
@@ -84,12 +84,7 @@ public class Prenotazioni implements Serializable {
     }
 
     public LocalTime getOraInizio() {
-        return this.oraInizio;
-    }
-
-    public Prenotazioni oraInizio(LocalTime oraInizio) {
-        this.setOraInizio(oraInizio);
-        return this;
+        return oraInizio;
     }
 
     public void setOraInizio(LocalTime oraInizio) {
@@ -97,7 +92,58 @@ public class Prenotazioni implements Serializable {
     }
 
     public LocalTime getOraFine() {
-        return this.oraFine;
+        return oraFine;
+    }
+
+    public void setOraFine(LocalTime oraFine) {
+        this.oraFine = oraFine;
+    }
+
+    public Eventi getEvento() {
+        return evento;
+    }
+
+    public void setEvento(Eventi evento) {
+        this.evento = evento;
+    }
+
+    public StatiPrenotazione getStato() {
+        return stato;
+    }
+
+    public void setStato(StatiPrenotazione stato) {
+        this.stato = stato;
+    }
+
+    public Utenti getUtente() {
+        return utente;
+    }
+
+    public void setUtente(Utenti utente) {
+        this.utente = utente;
+    }
+
+    public Sale getSala() {
+        return sala;
+    }
+
+    public void setSala(Sale sala) {
+        this.sala = sala;
+    }
+
+    public Prenotazioni id(UUID id) {
+        this.setId(id);
+        return this;
+    }
+
+    public Prenotazioni data(LocalDate data) {
+        this.setData(data);
+        return this;
+    }
+
+    public Prenotazioni oraInizio(LocalTime oraInizio) {
+        this.setOraInizio(oraInizio);
+        return this;
     }
 
     public Prenotazioni oraFine(LocalTime oraFine) {
@@ -105,107 +151,54 @@ public class Prenotazioni implements Serializable {
         return this;
     }
 
-    public void setOraFine(LocalTime oraFine) {
-        this.oraFine = oraFine;
-    }
-
-    public Set<Eventi> getEventis() {
-        return this.eventis;
-    }
-
-    public void setEventis(Set<Eventi> eventis) {
-        if (this.eventis != null) {
-            this.eventis.forEach(i -> i.setPrenotazione(null));
-        }
-        if (eventis != null) {
-            eventis.forEach(i -> i.setPrenotazione(this));
-        }
-        this.eventis = eventis;
-    }
-
-    public Prenotazioni eventis(Set<Eventi> eventis) {
-        this.setEventis(eventis);
+    public Prenotazioni stato(StatiPrenotazione stato) {
+        this.setStato(stato);
         return this;
     }
 
-    public Prenotazioni addEventi(Eventi eventi) {
-        this.eventis.add(eventi);
-        eventi.setPrenotazione(this);
+    public Prenotazioni utente(Utenti utente) {
+        this.setUtente(utente);
         return this;
     }
 
-    public Prenotazioni removeEventi(Eventi eventi) {
-        this.eventis.remove(eventi);
-        eventi.setPrenotazione(null);
+    public Prenotazioni sala(Sale sala) {
+        this.setSala(sala);
         return this;
     }
 
-    public StatiPrenotazione getStato() {
-        return this.stato;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setStato(StatiPrenotazione statiPrenotazione) {
-        this.stato = statiPrenotazione;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public Prenotazioni stato(StatiPrenotazione statiPrenotazione) {
-        this.setStato(statiPrenotazione);
-        return this;
+    public String getCodiceQr() {
+        return codiceQr;
     }
 
-    public Utenti getUtente() {
-        return this.utente;
+    public void setCodiceQr(String codiceQr) {
+        this.codiceQr = codiceQr;
     }
 
-    public void setUtente(Utenti utenti) {
-        this.utente = utenti;
+    public Integer getNumPersone() {
+        return numPersone;
     }
 
-    public Prenotazioni utente(Utenti utenti) {
-        this.setUtente(utenti);
-        return this;
+    public void setNumPersone(Integer numPersone) {
+        this.numPersone = numPersone;
     }
-
-    public Sale getSala() {
-        return this.sala;
-    }
-
-    public void setSala(Sale sale) {
-        this.sala = sale;
-    }
-
-    public Prenotazioni sala(Sale sale) {
-        this.setSala(sale);
-        return this;
-    }
-
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Prenotazioni)) {
-            return false;
-        }
-        return getId() != null && getId().equals(((Prenotazioni) o).getId());
+        if (this == o) return true;
+        if (!(o instanceof Prenotazioni)) return false;
+        return id != null && id.equals(((Prenotazioni) o).id);
     }
 
     @Override
     public int hashCode() {
-        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
         return getClass().hashCode();
-    }
-
-    // prettier-ignore
-    @Override
-    public String toString() {
-        return "Prenotazioni{" +
-            "id=" + getId() +
-            ", data='" + getData() + "'" +
-            ", oraInizio='" + getOraInizio() + "'" +
-            ", oraFine='" + getOraFine() + "'" +
-            "}";
     }
 }

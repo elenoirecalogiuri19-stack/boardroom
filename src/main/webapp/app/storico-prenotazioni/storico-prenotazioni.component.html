@@ -1,0 +1,43 @@
+<div class="storico-minimal">
+  <header class="header-section">
+    <h1>I tuoi Eventi</h1>
+    <p>Cronologia in <span class="brand-green">Boardroom</span></p>
+  </header>
+
+  <nav class="filter-bar">
+    <button [class.active]="filtroAttivo() === 'tutte'" (click)="applicaFiltro('tutte')">tutte</button>
+    <button [class.active]="filtroAttivo() === '30giorni'" (click)="applicaFiltro('30giorni')">ultimi 30 giorni</button>
+    <button [class.active]="filtroAttivo() === 'annoCorrente'" (click)="applicaFiltro('annoCorrente')">{{ annoCorrente }}</button>
+  </nav>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <span class="main-loader"></span>
+      <p>Caricamento...</p>
+    </div>
+  } @else {
+    <div class="list-wrapper">
+      @for (p of prenotazioniMostrate(); track p.id) {
+        <div class="entry-row">
+          <div class="date-side">
+            <span class="day">{{ convertToDate(p.data) | date: 'dd' }}</span>
+            <span class="month">{{ convertToDate(p.data) | date: 'MMM' | uppercase }}</span>
+          </div>
+
+          <div class="content-side">
+            <h3>{{ $any(p).evento?.titolo || $any(p).titolo || 'Incontro Boardroom' }}</h3>
+            <p>{{ p.sala?.nome || 'Sala non specificata' }} <span class="dot">•</span> {{ p.oraInizio }} - {{ p.oraFine }}</p>
+          </div>
+
+          <div class="status-side">
+            <span class="tag-concluso">Concluso</span>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-text">
+          <p>Nessun evento passato trovato.</p>
+        </div>
+      }
+    </div>
+  }
+</div>

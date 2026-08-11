@@ -2,14 +2,11 @@ import { Component, OnInit, inject } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
-import { finalize, map } from 'rxjs/operators';
+import { finalize } from 'rxjs/operators';
 
 import SharedModule from 'app/shared/shared.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { IPrenotazioni } from 'app/entities/prenotazioni/prenotazioni.model';
-import { PrenotazioniService } from 'app/entities/prenotazioni/service/prenotazioni.service';
-import { TipoEvento } from 'app/entities/enumerations/tipo-evento.model';
 import { EventiService } from '../service/eventi.service';
 import { IEventi } from '../eventi.model';
 import { EventiFormGroup, EventiFormService } from './eventi-form.service';
@@ -22,20 +19,14 @@ import { EventiFormGroup, EventiFormService } from './eventi-form.service';
 export class EventiUpdateComponent implements OnInit {
   isSaving = false;
   eventi: IEventi | null = null;
-  tipoEventoValues = Object.keys(TipoEvento);
 
-  prenotazionisSharedCollection: IPrenotazioni[] = [];
-
+  // 👉 PRIMA dichiariamo i servizi (ESLint è felice)
   protected eventiService = inject(EventiService);
   protected eventiFormService = inject(EventiFormService);
-  protected prenotazioniService = inject(PrenotazioniService);
   protected activatedRoute = inject(ActivatedRoute);
 
-  // eslint-disable-next-line @typescript-eslint/member-ordering
+  // 👉 POI il form (TS è felice perché eventiFormService è già inizializzato)
   editForm: EventiFormGroup = this.eventiFormService.createEventiFormGroup();
-
-  comparePrenotazioni = (o1: IPrenotazioni | null, o2: IPrenotazioni | null): boolean =>
-    this.prenotazioniService.comparePrenotazioni(o1, o2);
 
   ngOnInit(): void {
     this.activatedRoute.data.subscribe(({ eventi }) => {
@@ -43,8 +34,6 @@ export class EventiUpdateComponent implements OnInit {
       if (eventi) {
         this.updateForm(eventi);
       }
-
-      this.loadRelationshipsOptions();
     });
   }
 
@@ -54,12 +43,11 @@ export class EventiUpdateComponent implements OnInit {
 
   save(): void {
     this.isSaving = true;
-    const eventi = this.eventiFormService.getEventi(this.editForm);
-    if (eventi.id !== null) {
-      this.subscribeToSaveResponse(this.eventiService.update(eventi));
-    } else {
-      this.subscribeToSaveResponse(this.eventiService.create(eventi));
-    }
+
+    // Forziamo il tipo a IEventi (in update l'id esiste sempre)
+    const eventi = this.eventiFormService.getEventi(this.editForm) as IEventi;
+
+    this.subscribeToSaveResponse(this.eventiService.update(eventi));
   }
 
   protected subscribeToSaveResponse(result: Observable<HttpResponse<IEventi>>): void {
@@ -74,7 +62,7 @@ export class EventiUpdateComponent implements OnInit {
   }
 
   protected onSaveError(): void {
-    // Api for inheritance.
+    // opzionale
   }
 
   protected onSaveFinalize(): void {
@@ -84,22 +72,5 @@ export class EventiUpdateComponent implements OnInit {
   protected updateForm(eventi: IEventi): void {
     this.eventi = eventi;
     this.eventiFormService.resetForm(this.editForm, eventi);
-
-    this.prenotazionisSharedCollection = this.prenotazioniService.addPrenotazioniToCollectionIfMissing<IPrenotazioni>(
-      this.prenotazionisSharedCollection,
-      eventi.prenotazione,
-    );
-  }
-
-  protected loadRelationshipsOptions(): void {
-    this.prenotazioniService
-      .query()
-      .pipe(map((res: HttpResponse<IPrenotazioni[]>) => res.body ?? []))
-      .pipe(
-        map((prenotazionis: IPrenotazioni[]) =>
-          this.prenotazioniService.addPrenotazioniToCollectionIfMissing<IPrenotazioni>(prenotazionis, this.eventi?.prenotazione),
-        ),
-      )
-      .subscribe((prenotazionis: IPrenotazioni[]) => (this.prenotazionisSharedCollection = prenotazionis));
   }
 }

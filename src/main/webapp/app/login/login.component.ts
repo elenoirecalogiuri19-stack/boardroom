@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnInit, inject, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 
 import SharedModule from 'app/shared/shared.module';
 import { LoginService } from 'app/login/login.service';
@@ -8,13 +8,15 @@ import { AccountService } from 'app/core/auth/account.service';
 
 @Component({
   selector: 'jhi-login',
+  standalone: true,
   imports: [SharedModule, FormsModule, ReactiveFormsModule, RouterModule],
   templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
 })
 export default class LoginComponent implements OnInit, AfterViewInit {
-  username = viewChild.required<ElementRef>('username');
-
+  username = viewChild<ElementRef>('username');
   authenticationError = signal(false);
+  isLoading = false;
 
   loginForm = new FormGroup({
     username: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -25,30 +27,45 @@ export default class LoginComponent implements OnInit, AfterViewInit {
   private readonly accountService = inject(AccountService);
   private readonly loginService = inject(LoginService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   ngOnInit(): void {
-    // if already authenticated then navigate to home page
-    this.accountService.identity().subscribe(() => {
-      if (this.accountService.isAuthenticated()) {
-        this.router.navigate(['']);
-      }
+    this.isLoading = true;
+    this.accountService.identity().subscribe({
+      next: () => {
+        this.isLoading = false;
+        if (this.accountService.isAuthenticated()) {
+          this.eseguiRedirect();
+        }
+      },
+      error: () => (this.isLoading = false),
     });
   }
 
   ngAfterViewInit(): void {
-    this.username().nativeElement.focus();
+    setTimeout(() => {
+      this.username()?.nativeElement.focus();
+    }, 200);
   }
 
   login(): void {
+    this.isLoading = true;
+    this.authenticationError.set(false);
+
     this.loginService.login(this.loginForm.getRawValue()).subscribe({
       next: () => {
-        this.authenticationError.set(false);
-        if (!this.router.getCurrentNavigation()) {
-          // There were no routing during login (eg from navigationToStoredUrl)
-          this.router.navigate(['']);
-        }
+        this.isLoading = false;
+        this.eseguiRedirect();
       },
-      error: () => this.authenticationError.set(true),
+      error: () => {
+        this.isLoading = false;
+        this.authenticationError.set(true);
+      },
     });
+  }
+
+  private eseguiRedirect(): void {
+    const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    this.router.navigateByUrl(returnUrl);
   }
 }
